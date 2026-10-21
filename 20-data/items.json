@@ -1,0 +1,16 @@
+{
+  "_note": "아이템 종류. 형식은 30-systems/effects.md. weight는 무작위로 뽑힐 때의 가중치. 수치는 모두 임시값.",
+  "items": [
+    {
+      "id": "potion_heal",
+      "name": "회복 물약",
+      "kind": "consumable",
+      "weight": 10,
+      "sprite": "potion_heal",
+      "use": {
+        "requires": "hpNotFull",
+        "effects": [ { "type": "heal", "target": "self", "amount": 10 } ]
+      }
+    }
+  ]
+}

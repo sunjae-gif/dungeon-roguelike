@@ -1,0 +1,41 @@
+{
+  "_note": "그림 목록. 코드는 id로만 그림을 찾는다. 이미지가 없으면 fallbackColor로 그린다(F007). path는 프로젝트의 public/ 기준. 규격은 40-tech/art-guide.md.",
+  "tileSize": 32,
+  "sourcePixelSize": 16,
+  "sprites": [
+    { "id": "floor_t1",   "path": "assets/tiles/floor_t1.png",   "fallbackColor": "#3a3a3a" },
+    { "id": "wall_t1",    "path": "assets/tiles/wall_t1.png",    "fallbackColor": "#7a6a55" },
+    { "id": "door_t1",    "path": "assets/tiles/door_t1.png",    "fallbackColor": "#8a5a2a" },
+    { "id": "floor_t2",   "path": "assets/tiles/floor_t2.png",   "fallbackColor": "#2f3a2f" },
+    { "id": "wall_t2",    "path": "assets/tiles/wall_t2.png",    "fallbackColor": "#55705a" },
+    { "id": "door_t2",    "path": "assets/tiles/door_t2.png",    "fallbackColor": "#6a5a2a" },
+    { "id": "floor_t3",   "path": "assets/tiles/floor_t3.png",   "fallbackColor": "#3a2a2a" },
+    { "id": "wall_t3",    "path": "assets/tiles/wall_t3.png",    "fallbackColor": "#804030" },
+    { "id": "door_t3",    "path": "assets/tiles/door_t3.png",    "fallbackColor": "#5a3a1a" },
+    { "id": "floor_boss", "path": "assets/tiles/floor_boss.png", "fallbackColor": "#1a1030" },
+    { "id": "wall_boss",  "path": "assets/tiles/wall_boss.png",  "fallbackColor": "#40306a" },
+    { "id": "door_boss",  "path": "assets/tiles/door_boss.png",  "fallbackColor": "#6a40a0" },
+    { "id": "stairs",     "path": "assets/tiles/stairs.png",     "fallbackColor": "#e0c040" },
+    { "id": "chest",      "path": "assets/objects/chest.png",      "fallbackColor": "#c09030" },
+    { "id": "chest_open", "path": "assets/objects/chest_open.png", "fallbackColor": "#806020" },
+    { "id": "trap_spike", "path": "assets/objects/trap_spike.png", "fallbackColor": "#b0b0b0" },
+    { "id": "player",     "path": "assets/chars/player.png",   "fallbackColor": "#4080ff",
+      "directions": {
+        "up":    "assets/chars/player_up.png",
+        "down":  "assets/chars/player_down.png",
+        "left":  "assets/chars/player_left.png",
+        "right": "assets/chars/player_right.png"
+      }
+    },
+    { "id": "rat",        "path": "assets/chars/rat.png",        "fallbackColor": "#a08070" },
+    { "id": "goblin",     "path": "assets/chars/goblin.png",     "fallbackColor": "#50a050" },
+    { "id": "orc",        "path": "assets/chars/orc.png",        "fallbackColor": "#307030" },
+    { "id": "troll",      "path": "assets/chars/troll.png",      "fallbackColor": "#606090" },
+    { "id": "final_boss", "path": "assets/chars/final_boss.png", "fallbackColor": "#c02030" },
+    { "id": "potion_heal","path": "assets/items/potion_heal.png","fallbackColor": "#ff6080" }
+  ],
+  "illustrations": [
+    { "id": "player_portrait",     "path": "assets/illust/player_portrait.png" },
+    { "id": "final_boss_portrait", "path": "assets/illust/final_boss_portrait.png" }
+  ]
+}

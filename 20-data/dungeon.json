@@ -1,0 +1,15 @@
+{
+  "_note": "던전 전체에 공통인 생성 설정. 층·테마별 값은 themes.json에 있다. 수치는 모두 임시값.",
+  "maxFloor": 10,
+  "rooms": {
+    "minCount": 6,
+    "maxCount": 10,
+    "minSize": 4,
+    "maxSize": 10
+  },
+  "bossRoom": {
+    "minSize": 10,
+    "maxSize": 14
+  },
+  "generationMaxAttempts": 50
+}

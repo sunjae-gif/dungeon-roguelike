@@ -1,0 +1,8 @@
+{
+  "_note": "플레이어 시작 능력치. 수치는 모두 임시값.",
+  "maxHp": 30,
+  "attack": 5,
+  "defense": 2,
+  "sightRadius": 8,
+  "inventorySize": 9
+}

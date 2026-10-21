@@ -1,0 +1,9 @@
+{
+  "_note": "방 종류(F009). weight는 기본 가중치이고 테마의 roomWeights가 있으면 그것을 쓴다. 수치는 모두 임시값.",
+  "roomTypes": [
+    { "id": "normal",   "name": "일반방",     "weight": 70, "minPerFloor": 1, "maxPerFloor": 99 },
+    { "id": "treasure", "name": "보물상자방", "weight": 15, "minPerFloor": 0, "maxPerFloor": 2 },
+    { "id": "secret",   "name": "비밀방",     "weight": 5,  "minPerFloor": 0, "maxPerFloor": 1 },
+    { "id": "puzzle",   "name": "퍼즐방",     "weight": 10, "minPerFloor": 0, "maxPerFloor": 1 }
+  ]
+}

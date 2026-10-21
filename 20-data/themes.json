@@ -1,0 +1,66 @@
+{
+  "_note": "층 테마(F011). 층별로 달라지는 값은 모두 여기에 둔다. 이름과 수치는 모두 임시값.",
+  "themes": [
+    {
+      "id": "theme_1",
+      "name": "테마1 (이름 미정)",
+      "floors": [1, 2, 3],
+      "mapWidth": 50,
+      "mapHeight": 30,
+      "tiles": { "floor": "floor_t1", "wall": "wall_t1", "door": "door_t1" },
+      "monsterTypes": ["rat", "goblin"],
+      "monsterCount": [3, 5],
+      "itemCount": [2, 3],
+      "roomWeights": { "normal": 70, "treasure": 15, "secret": 5, "puzzle": 10 },
+      "doorChance": 0.3,
+      "trapCount": [0, 2],
+      "trapTypes": ["spike"]
+    },
+    {
+      "id": "theme_2",
+      "name": "테마2 (이름 미정)",
+      "floors": [4, 5, 6],
+      "mapWidth": 56,
+      "mapHeight": 32,
+      "tiles": { "floor": "floor_t2", "wall": "wall_t2", "door": "door_t2" },
+      "monsterTypes": ["goblin", "orc"],
+      "monsterCount": [5, 7],
+      "itemCount": [2, 4],
+      "roomWeights": { "normal": 60, "treasure": 15, "secret": 10, "puzzle": 15 },
+      "doorChance": 0.4,
+      "trapCount": [2, 4],
+      "trapTypes": ["spike"]
+    },
+    {
+      "id": "theme_3",
+      "name": "테마3 (이름 미정)",
+      "floors": [7, 8, 9],
+      "mapWidth": 60,
+      "mapHeight": 34,
+      "tiles": { "floor": "floor_t3", "wall": "wall_t3", "door": "door_t3" },
+      "monsterTypes": ["orc", "troll"],
+      "monsterCount": [6, 9],
+      "itemCount": [3, 4],
+      "roomWeights": { "normal": 55, "treasure": 15, "secret": 15, "puzzle": 15 },
+      "doorChance": 0.5,
+      "trapCount": [3, 6],
+      "trapTypes": ["spike"]
+    },
+    {
+      "id": "theme_boss",
+      "name": "최종보스층 (이름 미정)",
+      "floors": [10],
+      "mapWidth": 50,
+      "mapHeight": 30,
+      "tiles": { "floor": "floor_boss", "wall": "wall_boss", "door": "door_boss" },
+      "monsterTypes": ["troll"],
+      "monsterCount": [2, 4],
+      "itemCount": [2, 3],
+      "roomWeights": { "normal": 100, "treasure": 0, "secret": 0, "puzzle": 0 },
+      "doorChance": 0.0,
+      "trapCount": [0, 0],
+      "trapTypes": [],
+      "boss": "final_boss"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "_note": "화면 배치와 조작감 수치(F007, F002). 픽셀 단위. 수치는 조정 가능.",
+  "baseResolution": { "width": 1280, "height": 720 },
+  "viewportTiles": { "width": 25, "height": 17 },
+  "layout": {
+    "padding": 16,
+    "statusPanelWidth": 300,
+    "messageLogLines": 5,
+    "messageLineHeight": 20
+  },
+  "fov": {
+    "exploredBrightness": 0.5,
+    "unexploredColor": "#000000"
+  },
+  "font": {
+    "family": "Galmuri11",
+    "file": "fonts/Galmuri11.woff2",
+    "size": 12,
+    "fallback": "monospace"
+  },
+  "colors": {
+    "background": "#000000",
+    "text": "#e8e8e8",
+    "hpNormal": "#e8e8e8",
+    "hpLow": "#ff4040"
+  },
+  "lowHpRatio": 0.3,
+  "input": {
+    "keyRepeatIntervalMs": 120
+  },
+  "floorIntroMs": 1500
+}

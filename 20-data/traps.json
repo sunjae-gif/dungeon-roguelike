@@ -1,0 +1,6 @@
+{
+  "_note": "함정 종류(F010). 수치는 모두 임시값.",
+  "traps": [
+    { "id": "spike", "name": "가시 함정", "effect": "damage", "amount": 4, "sprite": "trap_spike" }
+  ]
+}
