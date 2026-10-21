@@ -7,7 +7,10 @@ import type { GameData } from './data/types';
 import type { DevMode } from './dev/devMode';
 import { keyToCommand, type Command } from './input/keys';
 import { KeyRepeater, shouldStopRepeat } from './input/repeat';
-import { renderScreen } from './render/screen';
+import { loadFont } from './render/font';
+import { computeLayout } from './render/layout';
+import { renderScreen, type RenderContext } from './render/screen';
+import { browserImageLoader, SpriteBook } from './render/sprites';
 
 // 판 시드를 새로 뽑는 유일한 곳 (30-systems/rng.md 규칙 3)
 function newRunSeed(): number {
@@ -33,15 +36,30 @@ function showDataErrors(errors: string[]): void {
 }
 
 function start(data: GameData): void {
+  // F007 규칙 1: 캔버스는 기준 해상도로 고정
+  const layout = computeLayout(data);
   const canvas = document.createElement('canvas');
+  canvas.width = layout.canvas.width;
+  canvas.height = layout.canvas.height;
   document.body.append(canvas);
-  const ctx = canvas.getContext('2d')!;
 
   let state: RunState = createTitleState(data);
   let dev: DevMode | null = null;
   let introTimer: ReturnType<typeof setTimeout> | undefined;
 
-  const draw = () => renderScreen(ctx, state, data);
+  const baseUrl = import.meta.env.BASE_URL;
+  const rc: RenderContext = {
+    ctx: canvas.getContext('2d')!,
+    data,
+    layout,
+    sprites: new SpriteBook(data.sprites, data.ui.colors.missingSprite, browserImageLoader(baseUrl, () => draw())),
+    extraStatus: [],
+  };
+  const draw = () => {
+    rc.extraStatus = dev?.statusLines(state) ?? [];
+    renderScreen(rc, state);
+  };
+  loadFont(data.ui, baseUrl, () => draw());
 
   const dispatch = (event: FlowEvent) => {
     const next = transition(state, event, data);
@@ -98,19 +116,14 @@ function start(data: GameData): void {
   window.addEventListener('keyup', (e) => repeater.release(e.code));
   window.addEventListener('blur', () => repeater.cancel());
 
-  const resize = () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    draw();
-  };
-  window.addEventListener('resize', resize);
-  resize();
+  draw();
 
   // F012: 개발 서버에서만 켜진다. 배포 빌드에서는 이 블록과 dev/ 코드가 빠진다.
   if (import.meta.env.DEV) {
     void import('./dev/devMode').then(({ installDevMode }) => {
-      dev = installDevMode(() => state);
+      dev = installDevMode(() => state, data.ui.colors.text);
       dev.update(state);
+      draw();
     });
   }
 }

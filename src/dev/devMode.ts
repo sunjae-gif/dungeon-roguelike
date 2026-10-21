@@ -2,6 +2,7 @@
 // M0 범위: 창 열고 닫기, 시드 표시, 상태 내보내기
 import { formatSeed } from '../core/rng';
 import type { RunState } from '../core/state';
+import type { TextLine } from '../render/view';
 
 const TOGGLE_KEY = '`';
 
@@ -9,11 +10,11 @@ export interface DevMode {
   // 개발자 모드가 처리한 키면 true. 그러면 게임 입력으로 넘기지 않는다.
   handleKey(e: KeyboardEvent): boolean;
   update(state: RunState): void;
+  // F012 시드 표시: 상태창 맨 아래에 붙일 줄
+  statusLines(state: RunState): TextLine[];
 }
 
 const STYLE = `
-#dev-seed { position: fixed; top: 8px; right: 8px; font: 12px monospace; color: #9f9;
-  background: rgba(0,0,0,.6); padding: 2px 6px; pointer-events: none; }
 #dev-panel { position: fixed; top: 32px; right: 8px; width: 360px; font: 13px monospace; color: #ddd;
   background: rgba(20,20,30,.95); border: 1px solid #555; padding: 10px; display: none; }
 #dev-panel.open { display: block; }
@@ -22,15 +23,10 @@ const STYLE = `
 #dev-panel textarea { width: 100%; height: 160px; box-sizing: border-box; font: 11px monospace; }
 `;
 
-export function installDevMode(getState: () => RunState): DevMode {
+export function installDevMode(getState: () => RunState, textColor: string): DevMode {
   const style = document.createElement('style');
   style.textContent = STYLE;
   document.head.append(style);
-
-  // F012: 시드 표시. 상태창(F007)이 생기기 전까지는 화면 구석에 항상 띄운다.
-  const seedLabel = document.createElement('div');
-  seedLabel.id = 'dev-seed';
-  document.body.append(seedLabel);
 
   // F012: 개발자 창
   const panel = document.createElement('div');
@@ -68,9 +64,10 @@ export function installDevMode(getState: () => RunState): DevMode {
       return isOpen();
     },
     update(state) {
-      const seed = formatSeed(state.runSeed);
-      seedLabel.textContent = `seed ${seed}`;
-      seedText.textContent = seed;
+      seedText.textContent = formatSeed(state.runSeed);
+    },
+    statusLines(state) {
+      return [{ text: `시드 ${formatSeed(state.runSeed)}`, color: textColor }];
     },
   };
 }

@@ -3,6 +3,8 @@
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
 ## 2026-10-21 (M1)
+- [F007] 1280×720 고정 캔버스, 지도(25×17칸·카메라)·상태창·메시지 로그, 탐색됨 어둡게, 색 사각형 대체, Galmuri11 글꼴(public/fonts, OFL) 구현. 공격·방어·최대 HP는 M2 getStat 전까지 player.json 기본값
+- [F012] 시드 표시를 화면 구석에서 상태창 맨 아래로 옮김 (F007 규칙 21)
 - [F013] 계단에서 >·Enter로 내려가기, 새 층 생성·시야·floorIntro, 계단·층 진입 메시지 구현
 - [F002] 이동·쉬기·마름모 시야·탐색됨·키 누르고 있기 구현 (core/movement.ts, core/turn.ts, input/repeat.ts). 시야 반경은 M2의 getStat 전까지 player.json 기본값
 - [systems] 턴 처리(turn.ts)의 move·rest. 클리어 판정은 F008 확정 전까지 하지 않도록 뺐다 (보스 없는 10층에서 바로 클리어되는 문제)
