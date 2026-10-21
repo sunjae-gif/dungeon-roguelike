@@ -2,7 +2,7 @@
 id: F001
 name: 던전 생성 (기본 지형)
 serves: [P3, P1]
-status: confirmed
+status: implemented
 depends_on: []
 data: [20-data/dungeon.json, 20-data/themes.json]
 ---

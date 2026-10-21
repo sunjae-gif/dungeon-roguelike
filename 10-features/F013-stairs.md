@@ -2,7 +2,7 @@
 id: F013
 name: 계단과 층 이동
 serves: [P1, P3]
-status: confirmed
+status: implemented
 depends_on: [F001, F002]
 data: [20-data/dungeon.json, 20-data/themes.json]
 systems: [game-state, game-flow, turn-order, rng]

@@ -2,7 +2,7 @@
 id: F002
 name: 이동과 시야
 serves: [P2, P4]
-status: confirmed
+status: implemented
 depends_on: [F001]
 data: [20-data/player.json, 20-data/ui.json]
 ---

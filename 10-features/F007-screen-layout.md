@@ -2,7 +2,7 @@
 id: F007
 name: 화면 구성
 serves: [P2, P4]
-status: confirmed
+status: implemented
 depends_on: [F002]
 data: [20-data/ui.json, 20-data/sprites.json, 20-data/themes.json]
 systems: [game-flow]
