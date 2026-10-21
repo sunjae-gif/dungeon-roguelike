@@ -1,6 +1,5 @@
 // phase 전환. 30-systems/game-flow.md
 // phase를 바꾸는 곳은 이 파일의 transition() 하나뿐이다.
-import { themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
 import { createRun, enterFloor } from './run';
 import type { RunState } from './state';
@@ -33,7 +32,7 @@ export function transition(state: RunState, event: FlowEvent, data: GameData): R
       if (event.type === 'descend') {
         return { ...enterFloor(state, data, state.floorNumber + 1), phase: 'floorIntro' };
       }
-      if (event.type === 'turnEnd') return checkRunEnd(state, data);
+      if (event.type === 'turnEnd') return checkRunEnd(state);
       return state;
 
     case 'gameOver':
@@ -45,15 +44,8 @@ export function transition(state: RunState, event: FlowEvent, data: GameData): R
 }
 
 // 턴 끝 판정 (turn-order.md 6단계). 게임 오버가 클리어보다 먼저다.
-function checkRunEnd(state: RunState, data: GameData): RunState {
+// 클리어 판정은 최종보스(F008)가 confirmed가 되면 여기에 더한다. 지금 넣으면 보스가 없는 10층에서 바로 클리어된다.
+function checkRunEnd(state: RunState): RunState {
   if (state.player.hp <= 0) return { ...state, phase: 'gameOver' };
-  if (isBossDefeated(state, data)) return { ...state, phase: 'victory' };
   return state;
-}
-
-// 보스가 있는 테마의 층에서 그 보스가 남아 있지 않으면 클리어
-function isBossDefeated(state: RunState, data: GameData): boolean {
-  const bossId = themeForFloor(data, state.floorNumber).boss;
-  if (!bossId) return false;
-  return !state.floor.actors.some((a) => a.defId === bossId && a.hp > 0);
 }

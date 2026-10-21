@@ -35,18 +35,9 @@ describe('화면 흐름', () => {
     expect(go(state, { type: 'turnEnd' })).toBe(state);
   });
 
-  it('보스가 있는 층에서 보스가 없으면 victory, 게임 오버가 우선', () => {
-    const bossTheme = data.themes.find((t) => t.boss)!;
-    const bossFloor = inPhase('playing', bossTheme.floors[0]);
-    const boss = { ...bossFloor.player, id: 99, defId: bossTheme.boss! };
-    const withBoss = { ...bossFloor, floor: { ...bossFloor.floor, actors: [boss] } };
-
-    expect(go(withBoss, { type: 'turnEnd' }).phase).toBe('playing');
-    expect(go(bossFloor, { type: 'turnEnd' }).phase).toBe('victory');
-    const both = { ...bossFloor, player: { ...bossFloor.player, hp: 0 } };
-    expect(go(both, { type: 'turnEnd' }).phase).toBe('gameOver');
-    // 보스가 없는 테마의 층은 클리어가 아니다
-    expect(go(inPhase('playing', 1), { type: 'turnEnd' }).phase).toBe('playing');
+  it('클리어 판정은 F008 전까지 하지 않는다: 보스가 없는 마지막 층에서도 playing', () => {
+    const last = inPhase('playing', data.dungeon.maxFloor);
+    expect(go(last, { type: 'turnEnd' }).phase).toBe('playing');
   });
 
   it('gameOver에서 R → floorNumber 1, 새 runSeed, floorIntro', () => {

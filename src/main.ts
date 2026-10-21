@@ -1,10 +1,12 @@
 // 진입점. 데이터 검사 → 화면과 입력 연결.
 import { transition, createTitleState, type FlowEvent } from './core/flow';
 import type { RunState } from './core/state';
+import { playTurn, type PlayerInput } from './core/turn';
 import { loadGameData } from './data/load';
 import type { GameData } from './data/types';
 import type { DevMode } from './dev/devMode';
 import { keyToCommand, type Command } from './input/keys';
+import { KeyRepeater, shouldStopRepeat } from './input/repeat';
 import { renderScreen } from './render/screen';
 
 // 판 시드를 새로 뽑는 유일한 곳 (30-systems/rng.md 규칙 3)
@@ -12,7 +14,7 @@ function newRunSeed(): number {
   return Date.now() >>> 0;
 }
 
-function toFlowEvent(command: Command): FlowEvent {
+function toFlowEvent(command: Exclude<Command, { type: 'player' }>): FlowEvent {
   switch (command.type) {
     case 'newGame':
     case 'restart':
@@ -48,6 +50,17 @@ function start(data: GameData): void {
     onStateChange();
   };
 
+  const play = (input: PlayerInput) => {
+    const next = playTurn(state, input, data);
+    if (next !== state) {
+      state = next;
+      onStateChange();
+    }
+  };
+
+  // F002 키를 누르고 있을 때
+  const repeater = new KeyRepeater(data.ui.input.keyRepeatIntervalMs);
+
   const onStateChange = () => {
     draw();
     dev?.update(state);
@@ -62,13 +75,28 @@ function start(data: GameData): void {
   };
 
   window.addEventListener('keydown', (e) => {
-    if (dev?.handleKey(e)) return;
+    // F002: 브라우저의 키 반복은 쓰지 않는다
+    if (e.repeat) return;
+    if (dev?.handleKey(e)) {
+      repeater.cancel();
+      return;
+    }
     const command = keyToCommand(state.phase, e.key);
-    if (command) {
-      e.preventDefault();
+    if (!command) return;
+    e.preventDefault();
+    if (command.type === 'player') {
+      const { input } = command;
+      repeater.press(e.code, () => {
+        const prev = state;
+        play(input);
+        return !shouldStopRepeat(prev, state);
+      });
+    } else {
       dispatch(toFlowEvent(command));
     }
   });
+  window.addEventListener('keyup', (e) => repeater.release(e.code));
+  window.addEventListener('blur', () => repeater.cancel());
 
   const resize = () => {
     canvas.width = window.innerWidth;
