@@ -21,11 +21,14 @@ const DIRECTION_KEYS: Record<string, Direction> = {
   d: 'right',
 };
 const REST_KEY = ' ';
+// F013: 계단에서 내려가기
+const DESCEND_KEYS = ['>', 'Enter'];
 
 function playingCommand(key: string): Command | null {
   const direction = DIRECTION_KEYS[key] ?? DIRECTION_KEYS[key.toLowerCase()];
   if (direction) return { type: 'player', input: { type: 'direction', direction } };
   if (key === REST_KEY) return { type: 'player', input: { type: 'rest' } };
+  if (DESCEND_KEYS.includes(key)) return { type: 'player', input: { type: 'descend' } };
   return null;
 }
 

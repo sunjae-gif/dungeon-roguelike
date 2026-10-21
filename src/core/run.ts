@@ -1,6 +1,7 @@
 // 새 판과 새 층의 상태를 만든다. 30-systems/game-state.md
 import type { GameData } from '../data/types';
 import { generateFloor } from './dungeon';
+import { addMessage, MESSAGES } from './messages';
 import { updateSight } from './movement';
 import { initRunRng } from './rng';
 import { PLAYER_DEF_ID, STATE_VERSION, type Actor, type Phase, type RunState } from './state';
@@ -37,10 +38,11 @@ export function createRun(data: GameData, runSeed: number, phase: Phase): RunSta
     messageLog: [],
     runStats: { kills: 0, floorsReached: firstFloor, itemsFound: 0 },
   };
-  return updateSight(run, data.player.sightRadius);
+  return updateSight(addMessage(run, MESSAGES.enteredFloor(firstFloor)), data.player.sightRadius);
 }
 
-// 다른 층으로 옮긴다. 플레이어의 HP·아이템은 그대로 두고 위치만 새 층의 시작 지점으로.
+// F013: 다른 층으로 옮긴다. 플레이어의 HP·아이템은 그대로 두고 위치만 새 층의 시작 지점으로.
+// 이전 층의 상태는 버린다. 시야는 바로 계산한다.
 export function enterFloor(state: RunState, data: GameData, floorNumber: number): RunState {
   const { floor, start, nextId } = generateFloor(data, state.runSeed, floorNumber, state.nextId);
   const next: RunState = {
@@ -51,5 +53,5 @@ export function enterFloor(state: RunState, data: GameData, floorNumber: number)
     player: { ...state.player, ...start },
     runStats: { ...state.runStats, floorsReached: Math.max(state.runStats.floorsReached, floorNumber) },
   };
-  return updateSight(next, data.player.sightRadius);
+  return updateSight(addMessage(next, MESSAGES.enteredFloor(floorNumber)), data.player.sightRadius);
 }
