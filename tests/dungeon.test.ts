@@ -1,0 +1,110 @@
+// F001 던전 생성 (기본 지형)
+import { describe, expect, it } from 'vitest';
+import { generateFloor, roomsTouch, STAIRS_OBJECT_TYPE, type GeneratedFloor, type Point } from '../src/core/dungeon';
+import { tileIndex, type FloorState } from '../src/core/state';
+import { gameData } from './helpers';
+
+const data = gameData();
+const SEED_COUNT = 1000;
+const { maxFloor } = data.dungeon;
+
+// 시작 지점에서 4방향으로 닿는 바닥 칸
+function reachable(floor: FloorState, start: Point): Set<number> {
+  const seen = new Set([tileIndex(floor, start.x, start.y)]);
+  const queue = [start];
+  while (queue.length > 0) {
+    const p = queue.pop()!;
+    for (const [dx, dy] of [[0, -1], [0, 1], [-1, 0], [1, 0]]) {
+      const x = p.x + dx;
+      const y = p.y + dy;
+      if (x < 0 || y < 0 || x >= floor.width || y >= floor.height) continue;
+      const i = tileIndex(floor, x, y);
+      if (floor.tiles[i] !== 'floor' || seen.has(i)) continue;
+      seen.add(i);
+      queue.push({ x, y });
+    }
+  }
+  return seen;
+}
+
+const roomAt = (floor: FloorState, p: Point) =>
+  floor.rooms.find((r) => p.x >= r.x && p.x < r.x + r.w && p.y >= r.y && p.y < r.y + r.h);
+
+function checkCommon(g: GeneratedFloor): Set<number> {
+  const { floor, start } = g;
+  // 방 개수가 설정 범위 안
+  expect(floor.rooms.length).toBeGreaterThanOrEqual(data.dungeon.rooms.minCount);
+  expect(floor.rooms.length).toBeLessThanOrEqual(data.dungeon.rooms.maxCount + (floor.rooms.some((r) => r.type === 'boss') ? 1 : 0));
+  // 방끼리 겹치거나 맞닿지 않는다
+  for (let i = 0; i < floor.rooms.length; i++) {
+    for (let j = i + 1; j < floor.rooms.length; j++) {
+      expect(roomsTouch(floor.rooms[i], floor.rooms[j])).toBe(false);
+    }
+  }
+  // 모든 바닥 칸이 시작 지점에서 닿는다
+  const reach = reachable(floor, start);
+  const floorCount = floor.tiles.filter((t) => t === 'floor').length;
+  expect(reach.size).toBe(floorCount);
+  // 지도 테두리는 벽
+  for (let x = 0; x < floor.width; x++) {
+    expect(floor.tiles[tileIndex(floor, x, 0)]).toBe('wall');
+    expect(floor.tiles[tileIndex(floor, x, floor.height - 1)]).toBe('wall');
+  }
+  return reach;
+}
+
+describe('F001 던전 생성', () => {
+  it('같은 시드로 두 번 생성한 지도가 칸 단위로 같다', () => {
+    for (let floor = 1; floor <= maxFloor; floor++) {
+      expect(generateFloor(data, 42, floor, 1)).toEqual(generateFloor(data, 42, floor, 1));
+    }
+    expect(generateFloor(data, 42, 1, 1).floor.tiles).not.toEqual(generateFloor(data, 43, 1, 1).floor.tiles);
+  });
+
+  it('지도 크기는 그 층 테마의 mapWidth, mapHeight', () => {
+    for (const theme of data.themes) {
+      const { floor } = generateFloor(data, 1, theme.floors[0], 1);
+      expect([floor.width, floor.height, floor.themeId]).toEqual([theme.mapWidth, theme.mapHeight, theme.id]);
+      expect(floor.tiles.length).toBe(theme.mapWidth * theme.mapHeight);
+    }
+  });
+
+  it(`시드 ${SEED_COUNT}개로 1~${maxFloor - 1}층: 계단 1개, 시작과 다른 방, 4방향 경로, 모든 바닥 연결`, () => {
+    for (let seed = 0; seed < SEED_COUNT; seed++) {
+      for (let floorNumber = 1; floorNumber < maxFloor; floorNumber++) {
+        const g = generateFloor(data, seed, floorNumber, 1);
+        const reach = checkCommon(g);
+        const stairs = g.floor.objects.filter((o) => o.type === STAIRS_OBJECT_TYPE);
+        expect(stairs.length).toBe(1);
+        expect(reach.has(tileIndex(g.floor, stairs[0].x, stairs[0].y))).toBe(true);
+        expect(roomAt(g.floor, stairs[0])).not.toBe(roomAt(g.floor, g.start));
+        expect(g.floor.rooms.some((r) => r.type === 'boss')).toBe(false);
+      }
+    }
+  });
+
+  it(`시드 ${SEED_COUNT}개로 ${maxFloor}층: 계단 없음, 보스방 1개, 시작과 다른 방, 4방향 경로`, () => {
+    for (let seed = 0; seed < SEED_COUNT; seed++) {
+      const g = generateFloor(data, seed, maxFloor, 1);
+      const reach = checkCommon(g);
+      expect(g.floor.objects.some((o) => o.type === STAIRS_OBJECT_TYPE)).toBe(false);
+      const bossRooms = g.floor.rooms.filter((r) => r.type === 'boss');
+      expect(bossRooms.length).toBe(1);
+      const boss = bossRooms[0];
+      expect(boss.w).toBeGreaterThanOrEqual(data.dungeon.bossRoom.minSize);
+      expect(boss.w).toBeLessThanOrEqual(data.dungeon.bossRoom.maxSize);
+      expect(roomAt(g.floor, g.start)).not.toBe(boss);
+      expect(reach.has(tileIndex(g.floor, boss.x, boss.y))).toBe(true);
+    }
+  });
+
+  it('방 목록에 위치·크기·종류가 있고 id는 겹치지 않는다', () => {
+    const g = generateFloor(data, 7, 1, 100);
+    const ids = [...g.floor.rooms.map((r) => r.id), ...g.floor.objects.map((o) => o.id)];
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(Math.min(...ids)).toBe(100);
+    expect(g.nextId).toBe(100 + ids.length);
+    expect(g.floor.rooms.filter((r) => r.type === 'start').length).toBe(1);
+    expect(g.floor.rooms.filter((r) => r.type === 'stairs').length).toBe(1);
+  });
+});

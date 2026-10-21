@@ -38,7 +38,10 @@ describe('게임 상태', () => {
     const run = createRun(data, 1, 'playing');
     const hurt = { ...run, player: { ...run.player, hp: 3, consumables: ['potion_heal'] } };
     const next = enterFloor(hurt, data, 4);
-    expect(next.player).toEqual(hurt.player);
+    const { x, y, ...rest } = next.player;
+    const { x: _x, y: _y, ...before } = hurt.player;
+    expect(rest).toEqual(before);
+    expect(next.floor.tiles[y * next.floor.width + x]).toBe('floor');
     expect(next.runStats.floorsReached).toBe(4);
   });
 });

@@ -3,6 +3,7 @@
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
 ## 2026-10-21 (M1)
+- [F001] 던전 생성 구현 (src/core/dungeon.ts). 방 배치 → 왼쪽부터 ㄱ자 통로 연결 → 시작·계단(또는 보스방). 시드 1000개 × 10층 테스트
 - [data] dungeon.json `roomPlacementTries`(200) 추가: 한 번 생성할 때 방 자리를 뽑아 보는 횟수 (F001)
 - [data] ui.json `colors.missingSprite` 추가: sprites.json에 없는 id를 그릴 때의 색 (F007)
 

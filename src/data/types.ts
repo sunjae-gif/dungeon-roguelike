@@ -6,6 +6,7 @@ export interface DungeonData {
   rooms: { minCount: number; maxCount: number; minSize: number; maxSize: number };
   bossRoom: { minSize: number; maxSize: number };
   generationMaxAttempts: number;
+  roomPlacementTries: number;
 }
 
 export interface PlayerData {
@@ -118,7 +119,7 @@ export interface UiData {
   layout: { padding: number; statusPanelWidth: number; messageLogLines: number; messageLineHeight: number };
   fov: { exploredBrightness: number; unexploredColor: string };
   font: { family: string; file: string; size: number; fallback: string };
-  colors: { background: string; text: string; hpNormal: string; hpLow: string };
+  colors: { background: string; text: string; hpNormal: string; hpLow: string; missingSprite: string };
   lowHpRatio: number;
   input: { keyRepeatIntervalMs: number };
   floorIntroMs: number;
