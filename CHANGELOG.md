@@ -2,6 +2,10 @@
 
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
+## 2026-10-21 (M1)
+- [data] dungeon.json `roomPlacementTries`(200) 추가: 한 번 생성할 때 방 자리를 뽑아 보는 횟수 (F001)
+- [data] ui.json `colors.missingSprite` 추가: sprites.json에 없는 id를 그릴 때의 색 (F007)
+
 ## 2026-10-21 (M0)
 - [M0] 프로젝트 생성: TypeScript + Vite + Vitest. `npm run dev` / `npm run build` / `npm test`
 - [data] 데이터 불러오기와 검사 (src/data/). 필드·형식, id 중복, 파일 간 id 참조, 테마 floors 범위, effects.md 표 검사

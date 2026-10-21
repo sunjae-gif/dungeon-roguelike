@@ -22,7 +22,8 @@
     "background": "#000000",
     "text": "#e8e8e8",
     "hpNormal": "#e8e8e8",
-    "hpLow": "#ff4040"
+    "hpLow": "#ff4040",
+    "missingSprite": "#ff00ff"
   },
   "lowHpRatio": 0.3,
   "input": {

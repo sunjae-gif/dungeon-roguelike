@@ -1,5 +1,5 @@
 {
-  "_note": "던전 전체에 공통인 생성 설정. 층·테마별 값은 themes.json에 있다. 수치는 모두 임시값.",
+  "_note": "던전 전체에 공통인 생성 설정. 층·테마별 값은 themes.json에 있다. 수치는 모두 임시값. generationMaxAttempts는 층 전체를 다시 만드는 횟수, roomPlacementTries는 한 번 만들 때 방 자리를 뽑아 보는 횟수.",
   "maxFloor": 10,
   "rooms": {
     "minCount": 6,
@@ -11,5 +11,6 @@
     "minSize": 10,
     "maxSize": 14
   },
-  "generationMaxAttempts": 50
+  "generationMaxAttempts": 50,
+  "roomPlacementTries": 200
 }
