@@ -98,6 +98,25 @@ describe('F001 던전 생성', () => {
     }
   });
 
+  it(`시드 ${SEED_COUNT}개로 생성했을 때 고리가 있는 지도가 있고, 여러 방향으로 갈라진다`, () => {
+    const [extraMin] = data.dungeon.extraCorridors;
+    let withLoop = 0;
+    let branching = 0;
+    for (let seed = 0; seed < SEED_COUNT; seed++) {
+      const g = generateFloor(data, seed, 1, 1);
+      // 모든 방을 잇는 통로(방 수 - 1) + 고리 통로
+      expect(g.links.length).toBeGreaterThanOrEqual(g.floor.rooms.length - 1);
+      expect(g.links.length).toBeLessThanOrEqual(g.floor.rooms.length - 1 + data.dungeon.extraCorridors[1]);
+      if (g.links.length >= g.floor.rooms.length - 1 + Math.max(extraMin, 1)) withLoop++;
+      // 통로가 3개 이상 붙은 방이 있으면 한 줄이 아니라 갈라진 모양
+      const degree = new Map<number, number>();
+      for (const [a, b] of g.links) for (const r of [a, b]) degree.set(r, (degree.get(r) ?? 0) + 1);
+      if ([...degree.values()].some((d) => d >= 3)) branching++;
+    }
+    expect(withLoop).toBeGreaterThan(0);
+    expect(branching).toBeGreaterThan(SEED_COUNT / 2);
+  });
+
   it('방 목록에 위치·크기·종류가 있고 id는 겹치지 않는다', () => {
     const g = generateFloor(data, 7, 1, 100);
     const ids = [...g.floor.rooms.map((r) => r.id), ...g.floor.objects.map((o) => o.id)];

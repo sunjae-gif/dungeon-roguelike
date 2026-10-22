@@ -20,6 +20,8 @@ export interface GeneratedFloor {
   floor: FloorState;
   start: Point;
   nextId: number;
+  // 통로로 이어진 방 쌍 (floor.rooms의 인덱스). 상태에는 넣지 않는다.
+  links: [number, number][];
 }
 
 // 방 종류(F009)가 붙기 전의 기본값. rooms.json의 id
@@ -29,6 +31,7 @@ export const STAIRS_OBJECT_TYPE = 'stairs';
 interface Layout {
   rects: Rect[];
   corridors: Point[][];
+  links: [number, number][];
   bossIndex: number | null;
   startIndex: number;
   stairsIndex: number | null;
@@ -71,7 +74,7 @@ function randomRect(rng: Rng, size: { width: number; height: number }, minSize: 
 }
 
 function tryLayout(rng: Rng, data: GameData, size: { width: number; height: number }, boss: boolean): Layout | null {
-  const { rooms, bossRoom, roomPlacementTries } = data.dungeon;
+  const { rooms, bossRoom, roomPlacementTries, extraCorridors } = data.dungeon;
   const target = nextInt(rng, rooms.minCount, rooms.maxCount);
   const rects: Rect[] = [];
 
@@ -91,12 +94,8 @@ function tryLayout(rng: Rng, data: GameData, size: { width: number; height: numb
   }
   if (rects.length < rooms.minCount) return null;
 
-  // F001 규칙 5, 6: 방 가운데를 왼쪽부터 차례로 ㄱ자 통로로 이어 모든 방을 연결한다
-  const order = rects.map((_, i) => i).sort((a, b) => centerOf(rects[a]).x - centerOf(rects[b]).x || a - b);
-  const corridors: Point[][] = [];
-  for (let i = 1; i < order.length; i++) {
-    corridors.push(corridorPath(rng, centerOf(rects[order[i - 1]]), centerOf(rects[order[i]])));
-  }
+  const links = connectRooms(rng, rects, nextInt(rng, extraCorridors[0], extraCorridors[1]));
+  const corridors = links.map(([a, b]) => corridorPath(rng, centerOf(rects[a]), centerOf(rects[b])));
 
   // F001 규칙 7, 8: 시작 지점과 계단(또는 보스방)은 서로 다른 방
   const bossIndex = boss ? 0 : null;
@@ -106,12 +105,50 @@ function tryLayout(rng: Rng, data: GameData, size: { width: number; height: numb
   return {
     rects,
     corridors,
+    links,
     bossIndex,
     startIndex,
     stairsIndex,
     start: randomPointIn(rng, rects[startIndex]),
     stairs: stairsIndex === null ? null : randomPointIn(rng, rects[stairsIndex]),
   };
+}
+
+const distance = (a: Rect, b: Rect) => {
+  const ca = centerOf(a);
+  const cb = centerOf(b);
+  return Math.abs(ca.x - cb.x) + Math.abs(ca.y - cb.y);
+};
+
+// 가장 가까운 방. 거리가 같으면 인덱스가 작은 쪽
+function nearest(rects: Rect[], from: number, candidates: number[]): number | null {
+  let best: number | null = null;
+  for (const c of candidates) {
+    if (best === null || distance(rects[from], rects[c]) < distance(rects[from], rects[best])) best = c;
+  }
+  return best;
+}
+
+// F001 규칙 5-1: 이어진 방 무리에 무작위 방을 하나씩, 무리 중 가장 가까운 방과 잇는다.
+// 그래서 한쪽 방향이 아니라 여러 방향으로 갈라진다. 그다음 고리를 만드는 통로를 extra개 더한다.
+function connectRooms(rng: Rng, rects: Rect[], extra: number): [number, number][] {
+  const links: [number, number][] = [];
+  const linked = (a: number, b: number) => links.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
+  const indexes = rects.map((_, i) => i);
+  const connected = [pick(rng, indexes)];
+  let remaining = indexes.filter((i) => i !== connected[0]);
+  while (remaining.length > 0) {
+    const room = pick(rng, remaining);
+    links.push([nearest(rects, room, connected)!, room]);
+    connected.push(room);
+    remaining = remaining.filter((i) => i !== room);
+  }
+  for (let i = 0; i < extra; i++) {
+    const room = pick(rng, indexes);
+    const other = nearest(rects, room, indexes.filter((j) => j !== room && !linked(room, j)));
+    if (other !== null) links.push([room, other]);
+  }
+  return links;
 }
 
 function centerOf(r: Rect): Point {
@@ -122,7 +159,7 @@ function randomPointIn(rng: Rng, r: Rect): Point {
   return { x: nextInt(rng, r.x, r.x + r.w - 1), y: nextInt(rng, r.y, r.y + r.h - 1) };
 }
 
-// 가로 먼저 또는 세로 먼저 한 번 꺾이는 폭 1칸 통로
+// 가로 먼저 또는 세로 먼저 한 번 꺾이는 통로
 function corridorPath(rng: Rng, from: Point, to: Point): Point[] {
   const horizontalFirst = nextInt(rng, 0, 1) === 0;
   const corner = horizontalFirst ? { x: to.x, y: from.y } : { x: from.x, y: to.y };
@@ -176,7 +213,7 @@ function buildFloor(layout: Layout, themeId: string, size: { width: number; heig
     };
     floor.objects.push(stairs);
   }
-  return { floor, start: layout.start, nextId };
+  return { floor, start: layout.start, nextId, links: layout.links };
 }
 
 function roomTypeOf(layout: Layout, index: number): string {

@@ -1,5 +1,6 @@
 // 30-systems/game-state.md
 import { describe, expect, it } from 'vitest';
+import { addMessage } from '../src/core/messages';
 import { createRun, enterFloor } from '../src/core/run';
 import { cloneState } from '../src/core/state';
 import { gameData } from './helpers';
@@ -32,6 +33,15 @@ describe('게임 상태', () => {
     const run = createRun(data, 0xdeadbeef, 'playing');
     expect(cloneState(run)).toEqual(run);
     expect(JSON.parse(JSON.stringify(run))).toStrictEqual(run);
+  });
+
+  it('메시지 로그는 최대 messageLogMaxStored개, 오래된 것부터 버린다', () => {
+    let run = createRun(data, 1, 'playing');
+    const max = data.ui.messageLogMaxStored;
+    for (let i = 0; i < max + 5; i++) run = addMessage(run, `m${i}`, data);
+    expect(run.messageLog.length).toBe(max);
+    expect(run.messageLog.at(-1)?.text).toBe(`m${max + 4}`);
+    expect(run.messageLog[0].text).toBe(`m5`);
   });
 
   it('층을 옮겨도 플레이어 HP·아이템은 유지되고 floorsReached가 갱신된다', () => {

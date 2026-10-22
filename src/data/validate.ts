@@ -49,6 +49,7 @@ function checkDungeon(c: Checker, d: Obj): void {
   c.num(d, 'maxFloor', p, { integer: true, min: 1 });
   c.num(d, 'generationMaxAttempts', p, { integer: true, min: 1 });
   c.num(d, 'roomPlacementTries', p, { integer: true, min: 1 });
+  c.range(d, 'extraCorridors', p);
   for (const key of ['rooms', 'bossRoom']) {
     const o = c.objField(d, key, p);
     if (!o) continue;
@@ -182,6 +183,7 @@ function checkUi(c: Checker, d: Obj): void {
   group('input', ['keyRepeatIntervalMs']);
   c.num(d, 'lowHpRatio', p, { min: 0, max: 1 });
   c.num(d, 'floorIntroMs', p, { min: 0 });
+  c.num(d, 'messageLogMaxStored', p, { integer: true, min: 1 });
 }
 
 interface ThemeRefs {

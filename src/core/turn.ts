@@ -38,7 +38,7 @@ function isOnStairs(state: RunState): boolean {
 export function playTurn(state: RunState, input: PlayerInput, data: GameData): RunState {
   if (state.phase !== 'playing') return state;
   const action = toAction(state, input);
-  // 무효 행동: 턴 수 그대로
+  // 무효 행동: 턴 수 그대로, 메시지 없음
   if (!action) return state;
 
   // 3. onTurnStart 이벤트 (effects.md, M2)
@@ -48,7 +48,7 @@ export function playTurn(state: RunState, input: PlayerInput, data: GameData): R
     const next = transition(state, { type: 'descend' }, data);
     return { ...next, turn: next.turn + 1 };
   }
-  let next = applyPlayerAction(state, action);
+  let next = applyPlayerAction(state, action, data);
   // 5. 몬스터 행동 (F004, M2)
   // 6. 턴 마무리: onTurnEnd(M2) → 시야 → 게임 오버 판정 → 턴 수 증가
   next = updateSight(next, data.player.sightRadius);
@@ -56,7 +56,7 @@ export function playTurn(state: RunState, input: PlayerInput, data: GameData): R
   return { ...next, turn: next.turn + 1 };
 }
 
-function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'descend' }>): RunState {
+function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'descend' }>, data: GameData): RunState {
   switch (action.type) {
     case 'move': {
       // F002 규칙 1, 5: 한 칸 이동하고 그 방향을 바라본다
@@ -64,7 +64,7 @@ function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'des
       const player = { ...state.player, x: state.player.x + d.x, y: state.player.y + d.y, facing: action.direction };
       const moved = { ...state, player };
       // F013 규칙 7: 계단 칸에 올라서면 알려준다
-      return isOnStairs(moved) ? addMessage(moved, MESSAGES.stairsHere()) : moved;
+      return isOnStairs(moved) ? addMessage(moved, MESSAGES.stairsHere(), data) : moved;
     }
     case 'rest':
       // F002 규칙 4

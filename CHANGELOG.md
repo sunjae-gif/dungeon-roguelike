@@ -3,6 +3,8 @@
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
 ## 2026-10-22
+- [F001] 방 연결을 "가장 가까운 이어진 방에 붙이기"로 바꿔 여러 방향으로 갈라지게 하고, extraCorridors만큼 고리 통로 추가 (구현)
+- [systems] messageLog 100개 제한 구현
 - [systems] game-flow.md: 클리어 판정은 F008 확정 전까지 하지 않는다
 - [systems] turn-order.md: 무효 행동은 메시지를 남기지 않는다
 - [systems] game-state.md: messageLog는 최대 ui.json `messageLogMaxStored`(100)개

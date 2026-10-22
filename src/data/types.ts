@@ -7,6 +7,7 @@ export interface DungeonData {
   bossRoom: { minSize: number; maxSize: number };
   generationMaxAttempts: number;
   roomPlacementTries: number;
+  extraCorridors: [number, number];
 }
 
 export interface PlayerData {
@@ -123,6 +124,7 @@ export interface UiData {
   lowHpRatio: number;
   input: { keyRepeatIntervalMs: number };
   floorIntroMs: number;
+  messageLogMaxStored: number;
 }
 
 export interface GameData {

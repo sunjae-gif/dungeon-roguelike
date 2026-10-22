@@ -38,7 +38,7 @@ export function createRun(data: GameData, runSeed: number, phase: Phase): RunSta
     messageLog: [],
     runStats: { kills: 0, floorsReached: firstFloor, itemsFound: 0 },
   };
-  return updateSight(addMessage(run, MESSAGES.enteredFloor(firstFloor)), data.player.sightRadius);
+  return updateSight(addMessage(run, MESSAGES.enteredFloor(firstFloor), data), data.player.sightRadius);
 }
 
 // F013: 다른 층으로 옮긴다. 플레이어의 HP·아이템은 그대로 두고 위치만 새 층의 시작 지점으로.
@@ -53,5 +53,5 @@ export function enterFloor(state: RunState, data: GameData, floorNumber: number)
     player: { ...state.player, ...start },
     runStats: { ...state.runStats, floorsReached: Math.max(state.runStats.floorsReached, floorNumber) },
   };
-  return updateSight(addMessage(next, MESSAGES.enteredFloor(floorNumber)), data.player.sightRadius);
+  return updateSight(addMessage(next, MESSAGES.enteredFloor(floorNumber), data), data.player.sightRadius);
 }
