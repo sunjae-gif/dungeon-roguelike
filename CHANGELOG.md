@@ -3,6 +3,8 @@
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
 ## 2026-10-22 (M2 기획 확정)
+- [F004] 몬스터 시야를 "플레이어 시야 −1"에서 공통 고정값 monsterSightRadius(7)로 변경. 몬스터 위치에서 F002 방식 시야로 계산
+- [data] monsters.json: sightOffsetFromPlayer → monsterSightRadius
 - [F003] 규칙 확정. 기본 전투에 무작위 없음, 능력치 4종 유지, 전투 메시지 문구 추가. 회복은 물약뿐. status → confirmed
 - [F004] 배치(방 안, 구조용 방 제외), 시야(플레이어 시야 −1, 플레이어가 보고 있을 때만), chase 행동(BFS, 위→오른쪽→아래→왼쪽), 속도 차이 없음, 강함 정보 표시 안 함. status → confirmed
 - [F006] 이어하기 없음 확정, 게임 오버 화면에 시드·사인 추가. 클리어 판정은 F008 때. status → confirmed

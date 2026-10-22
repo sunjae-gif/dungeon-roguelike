@@ -33,7 +33,7 @@ M1의 범위 메모:
 M2의 범위 메모:
 - 테마(F011)는 아직 draft지만, M2부터 themes.json의 `monsterTypes`, `monsterCount`도 읽는다(F004 배치).
 - 10층 보스방에는 아직 보스를 놓지 않는다(F008). 클리어 판정도 아직 없다.
-- monsters.json에서 몬스터별 `sightRadius`를 없애고 `sightOffsetFromPlayer`, `behavior`를 추가했다. 데이터 검사 코드와 타입을 먼저 맞춘다.
+- monsters.json에서 몬스터별 `sightRadius`를 없애고 `monsterSightRadius`(공통 고정값), `behavior`를 추가했다. 데이터 검사 코드와 타입을 먼저 맞춘다.
 
 ## M3. 한 판 완주
 **결과:** 1층부터 10층까지 내려가 최종보스를 잡으면 클리어.
