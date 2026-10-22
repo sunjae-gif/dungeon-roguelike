@@ -29,5 +29,6 @@
   "input": {
     "keyRepeatIntervalMs": 120
   },
-  "floorIntroMs": 1500
+  "floorIntroMs": 1500,
+  "messageLogMaxStored": 100
 }

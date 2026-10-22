@@ -25,18 +25,19 @@ status: confirmed
 | `floorIntro` | 키 입력 또는 시간 경과 | `playing` |
 | `playing` | 계단에서 내려가기 | `floorIntro` (다음 층) |
 | `playing` | 턴 끝에 플레이어 HP ≤ 0 | `gameOver` |
-| `playing` | 턴 끝에 최종보스가 없음 (10층) | `victory` |
+| `playing` | 턴 끝에 최종보스가 없음 (10층). **F008이 confirmed가 되기 전에는 판정하지 않는다** | `victory` |
 | `gameOver`, `victory` | R | `floorIntro` (새 시드, 1층) |
 | `gameOver`, `victory` | Esc | `title` |
 
 ## 규칙
 1. phase는 `RunState.phase`에 둔다. 전환은 `core/flow.ts`의 함수 한 곳에서만 한다.
 2. 게임 오버와 클리어 판정은 턴이 끝날 때 한 번만 한다(turn-order.md 6단계). 한 턴에 둘 다 해당하면 게임 오버가 우선한다.
+   클리어 판정은 F008(최종보스)이 확정된 뒤에 넣는다. 그 전에는 보스가 없는 10층에서 바로 클리어되므로 판정하지 않는다.
 3. 개발자 모드 창(F012)은 phase가 아니다. 어느 phase 위에든 겹쳐 열린다.
 4. `floorIntro`의 시간 경과는 렌더 쪽 타이머가 처리하고, 전환 함수를 부르는 것만 한다.
 
 ## 완료 기준
 - [ ] `playing`이 아닌 phase에서 이동 키를 눌러도 상태가 바뀌지 않는다.
 - [ ] HP가 0이 되는 턴이 끝나면 phase가 `gameOver`다.
-- [ ] 최종보스를 쓰러뜨린 턴이 끝나면 phase가 `victory`다.
+- [ ] 최종보스를 쓰러뜨린 턴이 끝나면 phase가 `victory`다. (F008 이후)
 - [ ] `gameOver`에서 R을 누르면 floorNumber 1, 새 runSeed, phase `floorIntro`다.

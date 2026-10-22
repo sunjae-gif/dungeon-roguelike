@@ -40,7 +40,7 @@ interface RunState {
   nextId: number;
   player: Actor;
   floor: FloorState;
-  messageLog: Message[];
+  messageLog: Message[];   // 최대 ui.json `messageLogMaxStored`(100)개. 넘으면 오래된 것부터 버린다
   runStats: { kills: number; floorsReached: number; itemsFound: number };
 }
 

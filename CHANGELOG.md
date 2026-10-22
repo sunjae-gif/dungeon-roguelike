@@ -2,6 +2,14 @@
 
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
+## 2026-10-22
+- [systems] game-flow.md: 클리어 판정은 F008 확정 전까지 하지 않는다
+- [systems] turn-order.md: 무효 행동은 메시지를 남기지 않는다
+- [systems] game-state.md: messageLog는 최대 ui.json `messageLogMaxStored`(100)개
+- [F001] 여러 방향으로 갈라지는 연결, 고리 통로(dungeon.json `extraCorridors`), 통로 폭 1칸 초과 허용
+- [F009] 시작방·계단방·보스방은 구조용 방으로 다른 종류를 겸하지 않음. 몬스터방을 후보에 추가
+- [data] dungeon.json `extraCorridors`, ui.json `messageLogMaxStored` 추가
+
 ## 2026-10-21 (M1)
 - [F001, F002, F007, F013] status → implemented (M1 완료)
 - [F007] 1280×720 고정 캔버스, 지도(25×17칸·카메라)·상태창·메시지 로그, 탐색됨 어둡게, 색 사각형 대체, Galmuri11 글꼴(public/fonts, OFL) 구현. 공격·방어·최대 HP는 M2 getStat 전까지 player.json 기본값
