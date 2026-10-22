@@ -16,9 +16,10 @@ status: confirmed
 | `maxHp` | 최대 HP | player.json / monsters.json |
 | `attack` | 공격 | 〃 |
 | `defense` | 방어 | 〃 |
-| `sightRadius` | 시야 | 〃 |
+| `sightRadius` | 시야 | player.json (플레이어 전용. 몬스터 시야는 F004 규칙 7) |
 
 능력치를 추가할 때는 이 표와 player.json, monsters.json에 함께 추가한다.
+몬스터에게 `getStat(monster, 'sightRadius')`는 쓰지 않는다.
 
 ### 계산 순서
 ```

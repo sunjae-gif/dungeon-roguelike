@@ -19,6 +19,8 @@
 | 난수 흐름 | rngStream | 쓰임새별로 나눈 난수 생성기. map, spawn, combat 등 |
 | 뷰포트 | viewport | 지도 중 화면에 보이는 부분. 25×17칸 |
 | 카메라 | camera | 뷰포트의 왼쪽 위 칸 좌표. 플레이어를 따라가되 지도 밖은 보여주지 않는다 |
+| 행동 방식 | behavior | 몬스터의 AI 종류. 지금은 `chase`(보이면 다가가 공격)뿐 |
+| 마지막 목격 위치 | lastSeenPlayer | 몬스터가 플레이어를 마지막으로 본 칸. 놓치면 그곳까지 간다 |
 | 마일스톤 | milestone | roadmap.md의 구현 단계. M0~M5 |
 | 방 | room | 바닥 칸이 모인 직사각형 영역 |
 | 방 종류 | roomType | start, stairs, boss, normal, treasure, secret, puzzle |

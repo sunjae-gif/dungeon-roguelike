@@ -2,6 +2,15 @@
 
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
+## 2026-10-22 (M2 기획 확정)
+- [F003] 규칙 확정. 기본 전투에 무작위 없음, 능력치 4종 유지, 전투 메시지 문구 추가. 회복은 물약뿐. status → confirmed
+- [F004] 배치(방 안, 구조용 방 제외), 시야(플레이어 시야 −1, 플레이어가 보고 있을 때만), chase 행동(BFS, 위→오른쪽→아래→왼쪽), 속도 차이 없음, 강함 정보 표시 안 함. status → confirmed
+- [F006] 이어하기 없음 확정, 게임 오버 화면에 시드·사인 추가. 클리어 판정은 F008 때. status → confirmed
+- [data] monsters.json: 몬스터별 sightRadius 삭제, sightOffsetFromPlayer(−1)·behavior 추가 → 데이터 검사·타입 수정 필요
+- [systems] effects.md: sightRadius는 플레이어 전용. turn-order.md: 몬스터 속도 미결정 해소
+- [F009] 미결정 사항에 HP 회복 이벤트·환경 추가
+- [docs] roadmap M2 범위 메모, progress.md 결정 목록 정리, glossary에 behavior·lastSeenPlayer
+
 ## 2026-10-22
 - [docs] progress.md 신규: 진행 현황과 결정할 것. CLAUDE.md에 갱신 규칙 추가
 - [systems] effects.md 구현 (M2 중 확정된 부분): getStat, 이벤트·효과 실행(깊이 3 제한), 피해 처리 순서(resolveAttack), 일시 효과 감소. 턴에 onTurnStart·onMove·onTurnEnd·onFloorEnter 연결. 상태창·시야가 getStat 사용
