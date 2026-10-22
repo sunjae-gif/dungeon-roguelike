@@ -47,8 +47,8 @@ export function baseStat(actor: Actor, stat: StatId, data: GameData): number {
   if (actor.defId === PLAYER_DEF_ID) return data.player[stat];
   const def = data.monsters.find((m) => m.id === actor.defId);
   if (!def) throw new Error(`monsters.json에 없는 몬스터 "${actor.defId}"`);
-  // F004 규칙 8: 몬스터는 개별 시야가 없다. 몬스터 시야는 플레이어 시야 + sightOffsetFromPlayer로 계산한다.
-  if (stat === 'sightRadius') throw new Error('몬스터 시야는 getStat이 아니라 F004 규칙 7로 계산한다');
+  // F004 규칙 9: 몬스터는 개별 시야 능력치가 없다. 몬스터 시야는 monsters.json monsterSightRadius 고정값이다.
+  if (stat === 'sightRadius') throw new Error('몬스터 시야는 getStat이 아니라 monsters.json monsterSightRadius를 쓴다 (F004 규칙 7)');
   return def[stat];
 }
 

@@ -62,7 +62,7 @@ function checkStats(c: Checker, o: Obj, p: string, stats: readonly string[] = ST
   for (const stat of stats) c.num(o, stat, p, { integer: true, min: 0 });
 }
 
-// F004 몬스터: 시야는 플레이어 시야 + sightOffsetFromPlayer이므로 몬스터별 sightRadius가 없다.
+// F004 몬스터: 시야는 모든 몬스터 공통 고정값 monsterSightRadius이므로 몬스터별 sightRadius가 없다.
 const MONSTER_STAT_IDS = STAT_IDS.filter((s) => s !== 'sightRadius');
 const MONSTER_BEHAVIORS = ['chase'];
 
@@ -72,7 +72,7 @@ function checkPlayer(c: Checker, d: Obj): void {
 }
 
 function checkMonsters(c: Checker, d: Obj): Obj[] {
-  c.num(d, 'sightOffsetFromPlayer', 'monsters.json', { integer: true });
+  c.num(d, 'monsterSightRadius', 'monsters.json', { integer: true, min: 1 });
   const list = c.idList(d, 'monsters', 'monsters.json');
   list.forEach((m, i) => {
     const p = `monsters.json.monsters[${i}]`;

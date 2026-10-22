@@ -1,6 +1,6 @@
 {
-  "_note": "몬스터 종류(F004). id는 themes.json, sprites.json에서 참조한다. 몬스터 시야는 플레이어 시야 + sightOffsetFromPlayer. 수치는 모두 임시값.",
-  "sightOffsetFromPlayer": -1,
+  "_note": "몬스터 종류(F004). id는 themes.json, sprites.json에서 참조한다. 몬스터 시야는 모든 몬스터 공통 고정값 monsterSightRadius. 수치는 모두 임시값.",
+  "monsterSightRadius": 7,
   "monsters": [
     { "id": "rat",        "name": "쥐",       "maxHp": 4,  "attack": 3,  "defense": 0, "behavior": "chase" },
     { "id": "goblin",     "name": "고블린",    "maxHp": 8,  "attack": 4,  "defense": 1, "behavior": "chase" },
