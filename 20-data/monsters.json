@@ -1,10 +1,11 @@
 {
-  "_note": "몬스터 종류. id는 dungeon.json, sprites.json에서 참조한다. 수치는 모두 임시값.",
+  "_note": "몬스터 종류(F004). id는 themes.json, sprites.json에서 참조한다. 몬스터 시야는 플레이어 시야 + sightOffsetFromPlayer. 수치는 모두 임시값.",
+  "sightOffsetFromPlayer": -1,
   "monsters": [
-    { "id": "rat",        "name": "쥐",       "maxHp": 4,  "attack": 3,  "defense": 0, "sightRadius": 5 },
-    { "id": "goblin",     "name": "고블린",    "maxHp": 8,  "attack": 4,  "defense": 1, "sightRadius": 6 },
-    { "id": "orc",        "name": "오크",      "maxHp": 15, "attack": 6,  "defense": 2, "sightRadius": 6 },
-    { "id": "troll",      "name": "트롤",      "maxHp": 25, "attack": 8,  "defense": 3, "sightRadius": 7 },
-    { "id": "final_boss", "name": "최종보스",   "maxHp": 80, "attack": 10, "defense": 4, "sightRadius": 10, "isBoss": true }
+    { "id": "rat",        "name": "쥐",       "maxHp": 4,  "attack": 3,  "defense": 0, "behavior": "chase" },
+    { "id": "goblin",     "name": "고블린",    "maxHp": 8,  "attack": 4,  "defense": 1, "behavior": "chase" },
+    { "id": "orc",        "name": "오크",      "maxHp": 15, "attack": 6,  "defense": 2, "behavior": "chase" },
+    { "id": "troll",      "name": "트롤",      "maxHp": 25, "attack": 8,  "defense": 3, "behavior": "chase" },
+    { "id": "final_boss", "name": "최종보스",   "maxHp": 80, "attack": 10, "defense": 4, "behavior": "chase", "isBoss": true }
   ]
 }

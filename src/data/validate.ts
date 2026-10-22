@@ -58,9 +58,13 @@ function checkDungeon(c: Checker, d: Obj): void {
   }
 }
 
-function checkStats(c: Checker, o: Obj, p: string): void {
-  for (const stat of STAT_IDS) c.num(o, stat, p, { integer: true, min: 0 });
+function checkStats(c: Checker, o: Obj, p: string, stats: readonly string[] = STAT_IDS): void {
+  for (const stat of stats) c.num(o, stat, p, { integer: true, min: 0 });
 }
+
+// F004 몬스터: 시야는 플레이어 시야 + sightOffsetFromPlayer이므로 몬스터별 sightRadius가 없다.
+const MONSTER_STAT_IDS = STAT_IDS.filter((s) => s !== 'sightRadius');
+const MONSTER_BEHAVIORS = ['chase'];
 
 function checkPlayer(c: Checker, d: Obj): void {
   checkStats(c, d, 'player.json');
@@ -68,11 +72,16 @@ function checkPlayer(c: Checker, d: Obj): void {
 }
 
 function checkMonsters(c: Checker, d: Obj): Obj[] {
+  c.num(d, 'sightOffsetFromPlayer', 'monsters.json', { integer: true });
   const list = c.idList(d, 'monsters', 'monsters.json');
   list.forEach((m, i) => {
     const p = `monsters.json.monsters[${i}]`;
     c.str(m, 'name', p);
-    checkStats(c, m, p);
+    checkStats(c, m, p, MONSTER_STAT_IDS);
+    c.str(m, 'behavior', p);
+    if (typeof m.behavior === 'string' && !MONSTER_BEHAVIORS.includes(m.behavior)) {
+      c.fail(`${p}.behavior`, `알 수 없는 행동 방식 "${m.behavior}" (가능: ${MONSTER_BEHAVIORS.join(', ')})`);
+    }
     c.bool(m, 'isBoss', p, true);
   });
   return list;

@@ -24,7 +24,7 @@ export interface MonsterDef {
   maxHp: number;
   attack: number;
   defense: number;
-  sightRadius: number;
+  behavior: 'chase';
   isBoss?: boolean;
 }
 
