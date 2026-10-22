@@ -2,6 +2,8 @@
 import type { GameData } from '../data/types';
 import { transition } from './flow';
 import { STAIRS_OBJECT_TYPE } from './dungeon';
+import { getStat } from './effects';
+import { fireEvent, fireForAll, tickStatuses } from './events';
 import { addMessage, MESSAGES } from './messages';
 import { DIRECTION_DELTAS, isPassable, objectAt, updateSight } from './movement';
 import type { Direction, RunState } from './state';
@@ -41,17 +43,19 @@ export function playTurn(state: RunState, input: PlayerInput, data: GameData): R
   // 무효 행동: 턴 수 그대로, 메시지 없음
   if (!action) return state;
 
-  // 3. onTurnStart 이벤트 (effects.md, M2)
+  // 3. onTurnStart
+  let next = fireForAll(state, data, 'onTurnStart');
   // 4. 플레이어 행동
   if (action.type === 'descend') {
-    // F013: 새 층을 만들고 floorIntro로. 5~6단계는 건너뛰고 턴 수만 1 늘린다.
-    const next = transition(state, { type: 'descend' }, data);
+    // F013: 새 층을 만들고(onFloorEnter 포함) floorIntro로. 5~6단계는 건너뛰고 턴 수만 1 늘린다.
+    next = transition(next, { type: 'descend' }, data);
     return { ...next, turn: next.turn + 1 };
   }
-  let next = applyPlayerAction(state, action, data);
-  // 5. 몬스터 행동 (F004, M2)
-  // 6. 턴 마무리: onTurnEnd(M2) → 시야 → 게임 오버 판정 → 턴 수 증가
-  next = updateSight(next, data.player.sightRadius);
+  next = applyPlayerAction(next, action, data);
+  // 5. 몬스터 행동 (F004가 확정되면)
+  // 6. 턴 마무리: onTurnEnd, 일시 효과 감소 → 시야 → 게임 오버 판정 → 턴 수 증가
+  next = tickStatuses(fireForAll(next, data, 'onTurnEnd'), data);
+  next = updateSight(next, getStat(next.player, 'sightRadius', data));
   next = transition(next, { type: 'turnEnd' }, data);
   return { ...next, turn: next.turn + 1 };
 }
@@ -62,7 +66,9 @@ function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'des
       // F002 규칙 1, 5: 한 칸 이동하고 그 방향을 바라본다
       const d = DIRECTION_DELTAS[action.direction];
       const player = { ...state.player, x: state.player.x + d.x, y: state.player.y + d.y, facing: action.direction };
-      const moved = { ...state, player };
+      const from = { x: state.player.x, y: state.player.y };
+      const moved = fireEvent({ ...state, player }, data, player.id, 'onMove', { from, to: { x: player.x, y: player.y } }).state;
+      // 도착한 칸 처리: 아이템 줍기(F005), 함정(F010)은 확정되면 여기에
       // F013 규칙 7: 계단 칸에 올라서면 알려준다
       return isOnStairs(moved) ? addMessage(moved, MESSAGES.stairsHere(), data) : moved;
     }

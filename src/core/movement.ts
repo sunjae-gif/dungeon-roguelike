@@ -80,7 +80,7 @@ export function computeVisible(floor: FloorState, origin: Point, radius: number)
 }
 
 // 플레이어 시야로 visible을 다시 계산하고, F002 규칙 8: 본 칸은 탐색됨으로 남긴다.
-// sightRadius는 아직 player.json 기본값. 보정이 생기는 M2에서 effects.md getStat으로 바꾼다.
+// sightRadius는 effects.md getStat으로 계산한 값을 받는다.
 export function updateSight(state: RunState, sightRadius: number): RunState {
   const visible = computeVisible(state.floor, state.player, sightRadius);
   const explored = state.floor.explored.map((seen, i) => seen || visible[i]);

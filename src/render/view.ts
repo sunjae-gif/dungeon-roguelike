@@ -1,5 +1,6 @@
 // F007 무엇을 그릴지 정하는 순수 함수들. 캔버스를 쓰지 않아 테스트할 수 있다.
 import { tileIndex, type Actor, type FloorState, type RunState } from '../core/state';
+import { getStat } from '../core/effects';
 import { themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
 
@@ -27,13 +28,12 @@ export interface TextLine {
 }
 
 // F007 규칙 18~20: 상태창 내용 (위에서부터)
-// 공격·방어·최대 HP는 아직 player.json 기본값. M2에서 effects.md getStat으로 바꾼다.
 export function statusLines(state: RunState, data: GameData): TextLine[] {
   const { colors, lowHpRatio } = data.ui;
   const text = (t: string): TextLine => ({ text: t, color: colors.text });
   const itemName = (id: string) => data.items.find((it) => it.id === id)?.name ?? id;
   const { hp } = state.player;
-  const { maxHp, attack, defense } = data.player;
+  const [maxHp, attack, defense] = (['maxHp', 'attack', 'defense'] as const).map((s) => getStat(state.player, s, data));
   const theme = themeForFloor(data, state.floorNumber);
   const lines: TextLine[] = [
     text(`${state.floorNumber}층  ${theme.name}`),
