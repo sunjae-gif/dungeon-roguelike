@@ -1,6 +1,7 @@
 // F003 전투: 공격 실행과 전투 메시지
 import type { GameData } from '../data/types';
-import { findActor, resolveAttack } from './events';
+import { resolveAttack } from './damage';
+import { findActor } from './events';
 import { addMessage, MESSAGES } from './messages';
 import type { RunState } from './state';
 
@@ -15,6 +16,8 @@ export function attack(state: RunState, data: GameData, attackerId: number, targ
   if (!attacker || !target) return state;
   const result = resolveAttack(state, data, attackerId, targetId);
   let next = result.state;
+  // 회피: 발동 메시지는 trigger가 남겼다 (effects.md 3절 규칙 6)
+  if (result.cancelled) return next;
   const playerId = state.player.id;
   if (attackerId === playerId) {
     const name = monsterName(data, target.defId);

@@ -1,6 +1,7 @@
 // 20-data/ 전체 검사. 40-tech/tech-stack.md "데이터 검사"
-import { EFFECT_FIELDS, EFFECT_TARGETS, EFFECT_TYPES, EVENT_NAMES, MODIFIER_OPS, STAT_IDS } from '../core/effects';
+import { EFFECT_TYPES, STAT_IDS } from '../core/effects';
 import { Checker, idsOf, type Obj } from './check';
+import { checkEffects, checkModifiers, checkTriggers, type EffectRefs } from './validateEffects';
 import type { GameData, RawData } from './types';
 
 export type ValidationResult = { ok: true; data: GameData } | { ok: false; errors: string[] };
@@ -16,11 +17,13 @@ export function validateGameData(raw: RawData): ValidationResult {
   const dungeon = file('dungeon.json');
   checkDungeon(c, dungeon);
   checkPlayer(c, file('player.json'));
-  const monsters = checkMonsters(c, file('monsters.json'));
+  const statuses = checkStatuses(c, file('statuses.json'));
+  const effectRefs: EffectRefs = { statuses: idsOf(statuses) };
+  const monsters = checkMonsters(c, file('monsters.json'), effectRefs);
   const roomTypes = checkRoomTypes(c, file('rooms.json'));
   const { sprites } = checkSprites(c, file('sprites.json'));
   const spriteIds = idsOf(sprites);
-  const items = checkItems(c, file('items.json'), spriteIds);
+  const items = checkItems(c, file('items.json'), spriteIds, effectRefs);
   const traps = checkTraps(c, file('traps.json'), spriteIds);
   checkUi(c, file('ui.json'));
 
@@ -36,6 +39,7 @@ export function validateGameData(raw: RawData): ValidationResult {
     monsters,
     monsterSightRadius: (raw['monsters.json'] as Obj).monsterSightRadius,
     items,
+    statuses,
     roomTypes,
     sprites: raw['sprites.json'],
     themes,
@@ -64,21 +68,40 @@ function checkStats(c: Checker, o: Obj, p: string, stats: readonly string[] = ST
 }
 
 // F004 몬스터: 시야는 모든 몬스터 공통 고정값 monsterSightRadius이므로 몬스터별 sightRadius가 없다.
-const MONSTER_STAT_IDS = STAT_IDS.filter((s) => s !== 'sightRadius');
+// 사거리는 없으면 1이라 따로 검사한다 (effects.md 1절)
+const MONSTER_STAT_IDS = STAT_IDS.filter((s) => s !== 'sightRadius' && s !== 'attackRange');
 const MONSTER_BEHAVIORS = ['chase'];
 
 function checkPlayer(c: Checker, d: Obj): void {
   checkStats(c, d, 'player.json');
+  c.num(d, 'maxAttackRange', 'player.json', { integer: true, min: 1 });
   c.num(d, 'inventorySize', 'player.json', { integer: true, min: 1 });
 }
 
-function checkMonsters(c: Checker, d: Obj): Obj[] {
+// effects.md 5절
+function checkStatuses(c: Checker, d: Obj): Obj[] {
+  const list = c.idList(d, 'statuses', 'statuses.json');
+  const refs = { statuses: idsOf(list) };
+  list.forEach((s, i) => {
+    const p = `statuses.json.statuses[${i}]`;
+    c.str(s, 'name', p);
+    checkModifiers(c, s, p);
+    checkTriggers(c, s, p, refs, true);
+  });
+  return list;
+}
+
+function checkMonsters(c: Checker, d: Obj, refs: EffectRefs): Obj[] {
   c.num(d, 'monsterSightRadius', 'monsters.json', { integer: true, min: 1 });
   const list = c.idList(d, 'monsters', 'monsters.json');
   list.forEach((m, i) => {
     const p = `monsters.json.monsters[${i}]`;
     c.str(m, 'name', p);
     checkStats(c, m, p, MONSTER_STAT_IDS);
+    c.num(m, 'attackRange', p, { integer: true, min: 1, optional: true });
+    // effects.md 2절: 몬스터 특성. 3절 규칙 7: 확률 없음
+    checkModifiers(c, m, p);
+    checkTriggers(c, m, p, refs, true);
     c.str(m, 'behavior', p);
     if (typeof m.behavior === 'string' && !MONSTER_BEHAVIORS.includes(m.behavior)) {
       c.fail(`${p}.behavior`, `알 수 없는 행동 방식 "${m.behavior}" (가능: ${MONSTER_BEHAVIORS.join(', ')})`);
@@ -115,50 +138,24 @@ function checkSprites(c: Checker, d: Obj): { sprites: Obj[] } {
   return { sprites };
 }
 
-function checkEffects(c: Checker, list: unknown[] | null, p: string): void {
-  list?.forEach((e, i) => {
-    const ep = `${p}[${i}]`;
-    if (!c.obj(e, ep)) return;
-    c.oneOf(e, 'type', ep, EFFECT_TYPES);
-    const fields: readonly string[] = EFFECT_FIELDS[e.type as keyof typeof EFFECT_FIELDS] ?? [];
-    for (const f of fields) {
-      if (f === 'target') c.oneOf(e, f, ep, EFFECT_TARGETS);
-      else if (f === 'op') c.oneOf(e, f, ep, MODIFIER_OPS);
-      else if (f === 'text') c.str(e, f, ep);
-      else c.num(e, f, ep);
-    }
-  });
-}
-
-function checkItems(c: Checker, d: Obj, spriteIds: Set<string>): Obj[] {
+function checkItems(c: Checker, d: Obj, spriteIds: Set<string>, refs: EffectRefs): Obj[] {
   const list = c.idList(d, 'items', 'items.json');
   list.forEach((item, i) => {
     const p = `items.json.items[${i}]`;
     c.str(item, 'name', p);
     c.oneOf(item, 'kind', p, ITEM_KINDS);
-    c.num(item, 'weight', p, { min: 0 });
+    // 드롭 가중치는 F005에서 정한다
+    c.num(item, 'weight', p, { min: 0, optional: true });
     c.str(item, 'sprite', p);
     c.ref(item.sprite, spriteIds, `${p}.sprite`, 'sprites.json');
 
     const use = c.objField(item, 'use', p, item.kind !== 'consumable');
     if (use) {
       c.str(use, 'requires', `${p}.use`, true);
-      checkEffects(c, c.arr(use, 'effects', `${p}.use`), `${p}.use.effects`);
+      checkEffects(c, c.arr(use, 'effects', `${p}.use`), `${p}.use.effects`, refs);
     }
-    c.arr(item, 'modifiers', p, true)?.forEach((m, j) => {
-      const mp = `${p}.modifiers[${j}]`;
-      if (!c.obj(m, mp)) return;
-      c.oneOf(m, 'stat', mp, STAT_IDS);
-      c.oneOf(m, 'op', mp, MODIFIER_OPS);
-      c.num(m, 'value', mp);
-    });
-    c.arr(item, 'triggers', p, true)?.forEach((t, j) => {
-      const tp = `${p}.triggers[${j}]`;
-      if (!c.obj(t, tp)) return;
-      c.oneOf(t, 'event', tp, EVENT_NAMES);
-      c.num(t, 'chance', tp, { min: 0, max: 1 });
-      checkEffects(c, c.arr(t, 'effects', tp), `${tp}.effects`);
-    });
+    checkModifiers(c, item, p);
+    checkTriggers(c, item, p, refs, false);
   });
   return list;
 }

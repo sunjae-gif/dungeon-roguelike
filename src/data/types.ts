@@ -15,6 +15,8 @@ export interface PlayerData {
   attack: number;
   defense: number;
   sightRadius: number;
+  attackRange: number;
+  maxAttackRange: number;
   inventorySize: number;
 }
 
@@ -24,9 +26,21 @@ export interface MonsterDef {
   maxHp: number;
   attack: number;
   defense: number;
-  behavior: 'chase';
+  behavior: MonsterBehavior;
+  attackRange?: number;
   isBoss?: boolean;
+  // effects.md 2절: 몬스터 특성. 아이템과 같은 형식
+  modifiers?: Modifier[];
+  triggers?: Trigger[];
+  // F014 행동 방식별 필드
+  piercing?: boolean;
+  attackVerb?: string;
+  fleeHpRatio?: number;
+  vanishWhenUnseen?: number;
+  placement?: 'room' | 'chokepoint';
 }
+
+export type MonsterBehavior = 'chase' | 'ranged' | 'flee' | 'ambush';
 
 export interface Modifier {
   stat: string;
@@ -41,11 +55,16 @@ export interface EffectDef {
   op?: 'add' | 'mul';
   value?: number;
   text?: string;
+  status?: string;
+  turns?: number;
+  distance?: number;
+  collisionDamage?: number;
 }
 
 export interface Trigger {
   event: string;
   chance: number;
+  message?: string;
   effects: EffectDef[];
 }
 
@@ -53,9 +72,17 @@ export interface ItemDef {
   id: string;
   name: string;
   kind: 'consumable' | 'build';
-  weight: number;
+  weight?: number;
   sprite: string;
   use?: { requires?: string; effects: EffectDef[] };
+  modifiers?: Modifier[];
+  triggers?: Trigger[];
+}
+
+// effects.md 5절
+export interface StatusDef {
+  id: string;
+  name: string;
   modifiers?: Modifier[];
   triggers?: Trigger[];
 }
@@ -134,6 +161,7 @@ export interface GameData {
   // F004 규칙 7: 모든 몬스터 공통 시야
   monsterSightRadius: number;
   items: ItemDef[];
+  statuses: StatusDef[];
   roomTypes: RoomTypeDef[];
   sprites: SpritesData;
   themes: ThemeDef[];
@@ -152,4 +180,5 @@ export type DataFileName =
   | 'sprites.json'
   | 'themes.json'
   | 'traps.json'
+  | 'statuses.json'
   | 'ui.json';

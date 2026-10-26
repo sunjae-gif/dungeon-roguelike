@@ -5,7 +5,7 @@ import { tileIndex, type Direction, type RunState } from '../src/core/state';
 import { playTurn } from '../src/core/turn';
 import { keyToCommand } from '../src/input/keys';
 import { KeyRepeater, shouldStopRepeat } from '../src/input/repeat';
-import { gameData } from './helpers';
+import { gameData, withItems } from './helpers';
 import { stateFromMap } from './parseMap';
 
 const data = gameData();
@@ -189,5 +189,48 @@ describe('F002 키를 누르고 있을 때', () => {
     const hurt = { ...s, turn: s.turn + 1, player: { ...s.player, hp: s.player.hp - 1 } };
     expect(shouldStopRepeat(s, hurt)).toBe(true);
     expect(shouldStopRepeat(s, { ...s, turn: s.turn + 1 })).toBe(false);
+  });
+});
+
+describe('turn-order.md 사거리 공격 판정', () => {
+  const reach = withItems({ id: 't_spear', modifiers: [{ stat: 'attackRange', op: 'add', value: 1 }] });
+  const armed = (s: RunState): RunState => ({ ...s, player: { ...s.player, buildItems: ['t_spear'] } });
+
+  it('attackRange 2인 플레이어가 오른쪽을 누르고 2칸 오른쪽에 몬스터가 있으면 위치는 그대로이고 그 몬스터가 공격받는다', () => {
+    const s = armed(stateFromMap(`
+      ######
+      #@.o.#
+      ######`, reach));
+    const after = playTurn(s, { type: 'direction', direction: 'right' }, reach);
+    expect([after.player.x, after.player.y]).toEqual([s.player.x, s.player.y]);
+    expect(after.floor.actors[0].hp).toBeLessThan(s.floor.actors[0].hp);
+  });
+
+  it('사거리 1이면 2칸 앞 몬스터를 공격하지 않고 이동한다', () => {
+    const s = stateFromMap(`
+      ######
+      #@.o.#
+      ######`, reach);
+    const after = playTurn(s, { type: 'direction', direction: 'right' }, reach);
+    expect(after.player.x).toBe(s.player.x + 1);
+  });
+
+  it('사이 칸에 벽이 있으면 2칸 앞 몬스터를 공격하지 않고 무효가 된다', () => {
+    const s = armed(stateFromMap(`
+      ######
+      #@#o.#
+      ######`, reach));
+    expect(playTurn(s, { type: 'direction', direction: 'right' }, reach)).toBe(s);
+  });
+
+  it('중독으로 턴 마무리에 HP가 0이 된 플레이어는 같은 턴에 게임 오버가 된다', () => {
+    const s = stateFromMap(`
+      #####
+      #@..#
+      #####`, data);
+    const dying = { ...s, player: { ...s.player, hp: 1, statuses: [{ id: 'poison', turnsLeft: 2, appliedTurn: s.turn - 1 }] } };
+    const after = playTurn(dying, { type: 'rest' }, data);
+    expect(after.phase).toBe('gameOver');
+    expect(after.runStats.killedBy).toBe('poison');
   });
 });

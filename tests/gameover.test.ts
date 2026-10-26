@@ -54,4 +54,10 @@ describe('F006 게임 종료와 재시작', () => {
     expect(next.runSeed).toBe(999);
     expect(next.runStats).toEqual({ kills: 0, floorsReached: 1, itemsFound: 0 });
   });
+
+  it('일시 효과로 쓰러지면 "{원인}(으)로 쓰러졌다"', () => {
+    const s = stateFromMap(VS_ORC, data);
+    const over = { ...s, phase: 'gameOver' as const, runStats: { ...s.runStats, killedBy: 'poison' } };
+    expect(gameOverLines(over, data).join('\n')).toContain('중독(으)로 쓰러졌다');
+  });
 });

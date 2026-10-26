@@ -65,12 +65,24 @@ export interface Actor {
   buildItems: string[];
   consumables: string[];
   statuses: Status[];
-  ai?: { lastSeenPlayer?: { x: number; y: number } };
+  carried?: string[];
+  ai?: MonsterAi;
+}
+
+// 몬스터만. F004, F014
+export interface MonsterAi {
+  lastSeenPlayer?: { x: number; y: number };
+  noticed?: boolean;
+  awake?: boolean;
+  retreatedLastTurn?: boolean;
+  fleeing?: boolean;
+  unseenTurns?: number;
 }
 
 export interface Status {
   id: string;
   turnsLeft: number;
+  appliedTurn: number; // 걸린 턴. 그 턴의 마무리에서는 줄지 않는다
 }
 
 export interface FloorItem {

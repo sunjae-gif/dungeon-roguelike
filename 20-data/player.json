@@ -4,5 +4,7 @@
   "attack": 5,
   "defense": 2,
   "sightRadius": 8,
+  "attackRange": 1,
+  "maxAttackRange": 2,
   "inventorySize": 9
 }

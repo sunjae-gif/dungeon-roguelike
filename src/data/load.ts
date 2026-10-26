@@ -5,6 +5,7 @@ import monsters from '../../20-data/monsters.json';
 import player from '../../20-data/player.json';
 import rooms from '../../20-data/rooms.json';
 import sprites from '../../20-data/sprites.json';
+import statuses from '../../20-data/statuses.json';
 import themes from '../../20-data/themes.json';
 import traps from '../../20-data/traps.json';
 import ui from '../../20-data/ui.json';
@@ -20,6 +21,7 @@ export const RAW_DATA: RawData = {
   'sprites.json': sprites,
   'themes.json': themes,
   'traps.json': traps,
+  'statuses.json': statuses,
   'ui.json': ui,
 };
 

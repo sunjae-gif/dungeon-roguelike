@@ -1,6 +1,6 @@
 // F007 무엇을 그릴지 정하는 순수 함수들. 캔버스를 쓰지 않아 테스트할 수 있다.
 import { tileIndex, type Actor, type FloorState, type RunState } from '../core/state';
-import { monsterName } from '../core/combat';
+import { causeName } from '../core/events';
 import { getStat } from '../core/effects';
 import { formatSeed } from '../core/rng';
 import { themeForFloor } from '../data/query';
@@ -65,7 +65,10 @@ export function gameOverLines(state: RunState, data: GameData): string[] {
   const { killedBy } = state.runStats;
   return [
     '게임 오버',
-    ...(killedBy ? [`${monsterName(data, killedBy)}에게 쓰러졌다`] : []),
+    // effects.md 4절: 몬스터면 "{몬스터}에게", 일시 효과면 "{원인}(으)로"
+    ...(killedBy
+      ? [data.monsters.some((m) => m.id === killedBy) ? `${causeName(data, killedBy)}에게 쓰러졌다` : `${causeName(data, killedBy)}(으)로 쓰러졌다`]
+      : []),
     '',
     `도달한 층  ${state.runStats.floorsReached}층`,
     `쓰러뜨린 몬스터  ${state.runStats.kills}`,

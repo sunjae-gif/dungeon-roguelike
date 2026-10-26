@@ -1,6 +1,6 @@
 // F003 전투
 import { describe, expect, it } from 'vitest';
-import { resolveAttack } from '../src/core/events';
+import { resolveAttack } from '../src/core/damage';
 import { getStat } from '../src/core/effects';
 import { MESSAGES } from '../src/core/messages';
 import type { RunState } from '../src/core/state';

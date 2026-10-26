@@ -3,6 +3,9 @@
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
 ## 2026-10-26 (M2+)
+- [systems] effects.md 확장 구현: 효과 출처 3종(개체 정의·빌드 아이템·일시 효과), onBeforeDamaged, 두 단계 피해 계산, ignoreDefense·cancelAttack·applyStatus·knockback·steal, 일시 효과(겹치지 않음, 걸린 턴 제외), attackRange(플레이어 최대 2), 확률 trigger 메시지·검사
+- [systems] turn-order.md 확장 구현: 사거리 안 같은 줄 공격 판정, 턴 마무리 순서(onTurnEnd → 일시 효과 감소 → 죽은 몬스터 제거 → 시야 → 판정)
+- [data] statuses.json 신규(weak, poison), player.json attackRange·maxAttackRange. items.json weight는 F005 확정 전까지 선택 항목
 - [F012] 개발자 모드: 시드로 시작, 층 이동, 지도 공개, 아이템 생성, 상태 불러오기 추가 (무적은 아직)
 
 ## 2026-10-26

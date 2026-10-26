@@ -11,6 +11,10 @@ export const MESSAGES = {
   monsterHit: (monster: string, damage: number) => `${monster}에게 ${damage} 피해를 받았다.`,
   monsterKilled: (monster: string) => `${monster}을(를) 쓰러뜨렸다.`,
   playerKilled: (monster: string) => `${monster}에게 쓰러졌다.`,
+  // effects.md 4절: 공격이 아닌 피해(일시 효과 등)로 쓰러짐
+  playerKilledBy: (cause: string) => `${cause}(으)로 쓰러졌다.`,
+  // effects.md 6절 steal
+  stole: (monster: string, item: string) => `${monster}이(가) ${item}을(를) 훔쳤다!`,
 };
 
 // game-state.md: 최대 messageLogMaxStored개. 넘으면 오래된 것부터 버린다

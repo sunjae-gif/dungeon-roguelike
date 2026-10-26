@@ -4,10 +4,12 @@ import { transition } from './flow';
 import { attack } from './combat';
 import { STAIRS_OBJECT_TYPE } from './dungeon';
 import { getStat } from './effects';
+import { sweepDeadMonsters } from './damage';
 import { fireEvent, fireForAll, tickStatuses } from './events';
 import { addMessage, MESSAGES } from './messages';
 import { actMonsters } from './monsters';
-import { DIRECTION_DELTAS, isPassable, monsterAt, objectAt, updateSight } from './movement';
+import { DIRECTION_DELTAS, inBounds, isPassable, monsterAt, objectAt, updateSight } from './movement';
+import { tileIndex } from './state';
 import type { Direction, RunState } from './state';
 
 // 플레이어 입력 (input/이 키를 이것으로 바꾼다)
@@ -21,18 +23,22 @@ export type Action =
   | { type: 'descend' };
 
 // 2단계: 입력을 행동으로. 무효면 null.
-// 방향 입력은 attack → interact → move → 무효 순서로 판정한다. interact(F010)는 아직 없다.
-export function toAction(state: RunState, input: PlayerInput): Action | null {
+// 방향 입력 판정 (turn-order.md 1~5). interact(F010)는 아직 없다.
+export function toAction(state: RunState, input: PlayerInput, data: GameData): Action | null {
   switch (input.type) {
     case 'direction': {
-      const d = DIRECTION_DELTAS[input.direction];
+      const { direction } = input;
+      const d = DIRECTION_DELTAS[direction];
       const x = state.player.x + d.x;
       const y = state.player.y + d.y;
-      // F003 규칙 1: 몬스터 방향으로 이동하면 공격
+      // 1. 바로 앞 몬스터를 공격 (F003 규칙 1)
       const monster = monsterAt(state.floor, x, y);
-      if (monster) return { type: 'attack', direction: input.direction, targetId: monster.id };
-      // F002 규칙 2: 벽으로는 이동할 수 없다
-      return isPassable(state, x, y) ? { type: 'move', direction: input.direction } : null;
+      if (monster) return { type: 'attack', direction, targetId: monster.id };
+      // 3. 사거리 안 같은 줄의 몬스터 (F015 창)
+      const ranged = monsterInRange(state, direction, getStat(state.player, 'attackRange', data));
+      if (ranged) return { type: 'attack', direction, targetId: ranged.id };
+      // 4. 이동, 5. 무효 (F002 규칙 2: 벽으로는 이동할 수 없다)
+      return isPassable(state, x, y) ? { type: 'move', direction } : null;
     }
     case 'rest':
       return input;
@@ -42,18 +48,34 @@ export function toAction(state: RunState, input: PlayerInput): Action | null {
   }
 }
 
+// turn-order.md 3: 그 방향 2~range칸 안의 가장 가까운 몬스터. 사이 칸은 모두 비어 있어야 한다
+function monsterInRange(state: RunState, direction: Direction, range: number) {
+  const { floor, player } = state;
+  const d = DIRECTION_DELTAS[direction];
+  for (let k = 1; k <= range; k++) {
+    const x = player.x + d.x * k;
+    const y = player.y + d.y * k;
+    if (!inBounds(floor, x, y)) return undefined;
+    const monster = monsterAt(floor, x, y);
+    if (monster) return k >= 2 ? monster : undefined;
+    // 벽·막힌 물체가 사이에 있으면 닿지 않는다
+    if (floor.tiles[tileIndex(floor, x, y)] !== 'floor' || objectAt(floor, x, y)?.blocksMove) return undefined;
+  }
+  return undefined;
+}
+
 function isOnStairs(state: RunState): boolean {
   return objectAt(state.floor, state.player.x, state.player.y)?.type === STAIRS_OBJECT_TYPE;
 }
 
 export function playTurn(state: RunState, input: PlayerInput, data: GameData): RunState {
   if (state.phase !== 'playing') return state;
-  const action = toAction(state, input);
+  const action = toAction(state, input, data);
   // 무효 행동: 턴 수 그대로, 메시지 없음
   if (!action) return state;
 
-  // 3. onTurnStart
-  let next = fireForAll(state, data, 'onTurnStart');
+  // 3. onTurnStart (플레이어, effects.md 3절)
+  let next = fireEvent(state, data, state.player.id, 'onTurnStart').state;
   // 4. 플레이어 행동
   if (action.type === 'descend') {
     // F013: 새 층을 만들고(onFloorEnter 포함) floorIntro로. 5~6단계는 건너뛰고 턴 수만 1 늘린다.
@@ -63,11 +85,14 @@ export function playTurn(state: RunState, input: PlayerInput, data: GameData): R
   next = applyPlayerAction(next, action, data);
   // 5. 몬스터 행동 (F004)
   next = actMonsters(next, data);
-  // 6. 턴 마무리: onTurnEnd, 일시 효과 감소 → 시야 → 게임 오버 판정 → 턴 수 증가
-  next = tickStatuses(fireForAll(next, data, 'onTurnEnd'), data);
-  next = updateSight(next, getStat(next.player, 'sightRadius', data));
-  next = transition(next, { type: 'turnEnd' }, data);
-  return { ...next, turn: next.turn + 1 };
+  // 6. 턴 마무리
+  next = fireForAll(next, data, 'onTurnEnd'); // 6-1 재생·중독
+  next = tickStatuses(next, data); // 6-2
+  next = sweepDeadMonsters(next); // 6-3
+  next = updateSight(next, getStat(next.player, 'sightRadius', data)); // 6-4 (발견 메시지는 F014)
+  // 6-5 도망 몬스터 사라짐 (F014)
+  next = transition(next, { type: 'turnEnd' }, data); // 6-6
+  return { ...next, turn: next.turn + 1 }; // 6-7
 }
 
 function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'descend' }>, data: GameData): RunState {
