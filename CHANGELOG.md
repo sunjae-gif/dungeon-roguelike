@@ -3,6 +3,7 @@
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
 ## 2026-10-26 (M2+)
+- [F015] 전투 규칙 아이템 9종 데이터(items.json)와 그림 항목(sprites.json 대체 색) 추가, 완료 기준 테스트. 얻는 방법은 개발자 모드 아이템 생성 (드롭은 F005)
 - [F014] 몬스터 다양화 구현: ranged(사격선·물러나기 두 턴에 한 번·사격 위치), flee(도망·도둑 사라짐), ambush(깨어나기), 몬스터 특성(슬라임·주술사 약화, 도둑 steal, 트롤 재생), 출현 가중치, chokepoint 배치, 처음 발견 메시지, 상태창 일시 효과. 새 몬스터 6종 데이터·색
 - [systems] effects.md 확장 구현: 효과 출처 3종(개체 정의·빌드 아이템·일시 효과), onBeforeDamaged, 두 단계 피해 계산, ignoreDefense·cancelAttack·applyStatus·knockback·steal, 일시 효과(겹치지 않음, 걸린 턴 제외), attackRange(플레이어 최대 2), 확률 trigger 메시지·검사
 - [systems] turn-order.md 확장 구현: 사거리 안 같은 줄 공격 판정, 턴 마무리 순서(onTurnEnd → 일시 효과 감소 → 죽은 몬스터 제거 → 시야 → 판정)

@@ -38,7 +38,16 @@
     { "id": "orc_shaman",      "path": "assets/chars/orc_shaman.png",      "fallbackColor": "#9050b0" },
     { "id": "gargoyle",        "path": "assets/chars/gargoyle.png",        "fallbackColor": "#8a8a80" },
     { "id": "skeleton_archer", "path": "assets/chars/skeleton_archer.png", "fallbackColor": "#e0e0c8" },
-    { "id": "potion_heal","path": "assets/items/potion_heal.png","fallbackColor": "#ff6080" }
+    { "id": "potion_heal","path": "assets/items/potion_heal.png","fallbackColor": "#ff6080" },
+    { "id": "sharp_dagger", "path": "assets/items/sharp_dagger.png", "fallbackColor": "#d0d0e0" },
+    { "id": "vampire_ring", "path": "assets/items/vampire_ring.png", "fallbackColor": "#b02040" },
+    { "id": "thorn_armor", "path": "assets/items/thorn_armor.png", "fallbackColor": "#607030" },
+    { "id": "warrior_crest", "path": "assets/items/warrior_crest.png", "fallbackColor": "#d0a020" },
+    { "id": "shadow_cloak", "path": "assets/items/shadow_cloak.png", "fallbackColor": "#303050" },
+    { "id": "spear", "path": "assets/items/spear.png", "fallbackColor": "#a08060" },
+    { "id": "war_hammer", "path": "assets/items/war_hammer.png", "fallbackColor": "#808890" },
+    { "id": "poison_blade", "path": "assets/items/poison_blade.png", "fallbackColor": "#60c040" },
+    { "id": "piercing_tip", "path": "assets/items/piercing_tip.png", "fallbackColor": "#c06030" }
   ],
   "illustrations": [
     { "id": "player_portrait",     "path": "assets/illust/player_portrait.png" },
