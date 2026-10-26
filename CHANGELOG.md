@@ -19,6 +19,15 @@
 - [F004] 몬스터 구현: spawn 흐름으로 방 안 배치(구조용 방 제외), 공통 시야 monsterSightRadius, chase(BFS 첫 걸음, 위→오른쪽→아래→왼쪽), lastSeenPlayer
 - [systems] game-state.md: runStats.killedBy 추가 (F006 게임 오버 화면의 "{몬스터}에게 쓰러졌다")
 
+## 2026-10-26 (M3 기획 확정)
+- [F005] 누적형 + 후보 고르기(상자 3, 비밀방 2 희귀, 퍼즐 3), 등급 2단계, 빌드 아이템 20종(신규 11), 상자·보물상자방 최소 1개(1~9층), 바닥 소모품, 몬스터 드롭 8%, 후보 소진 시 물약 2개, 최대 HP 증가 시 현재 HP도 증가. status → confirmed
+- [F008] 심연의 왕: 1칸, 보스방 안에서만 깨어남, 입장 경고·봉인, 힘 모으기→강타(십자 2칸 ×2), 2단계(50%, 공격 +2, 2턴마다), 면역(밀쳐내기·약화·훔치기), 클리어·게임 오버 화면에 빌드 목록. status → confirmed
+- [F011] 테마 이름·진입 문구·팔레트, 테마별 rooms·bossRoom 덮어쓰기(10층 구조). status → confirmed
+- [systems] effects.md 7절 면역, 보스 2단계 보정은 개체 정의 출처. game-state.md: pendingChoice, ItemChoice, bossKilled, 보스 ai 필드, sealedGate. game-flow.md: itemChoice phase, 클리어 판정 활성화. turn-order.md: 상자 interact, 보스방 경고 메시지 예외
+- [F001] 테마의 방 설정 덮어쓰기 허용. [F009] 보물상자 규칙을 F005로 넘김. [vision] 세계관 한 줄
+- [docs] roadmap M3 순서, glossary, progress
+- [data] 데이터 파일 변경은 M3 구현 때 (문서에 형식 명시)
+
 ## 2026-10-26 (M2+ 기획 확정)
 - [F014] 몬스터 다양화 확정: 원거리(사격 위치로 이동, 물러나기 두 턴에 한 번, 관통), 겁쟁이(steal로도 도망, vanishWhenUnseen), 매복(chokepoint 배치), 출현 가중치, 처음 발견 메시지, 특성 확률 금지, 몬스터 6종. status → confirmed
 - [F015] 전투 규칙 아이템 신규 (F005 설계안에서 분리). 9종 확정, 명중 제외. status → confirmed

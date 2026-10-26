@@ -38,7 +38,7 @@ status: confirmed
 
 | 출처 | 어디에 적는가 | 누구에게 |
 |---|---|---|
-| 개체 정의 (몬스터 특성) | monsters.json 항목의 `modifiers`, `triggers` | 그 몬스터 (F014) |
+| 개체 정의 (몬스터 특성) | monsters.json 항목의 `modifiers`, `triggers`. 보스가 2단계면 `boss.enrage.modifiers`도 여기에 더한다 (F008) | 그 몬스터 (F014, F008) |
 | 빌드 아이템 | items.json `kind: "build"` 항목 | 그 아이템을 가진 개체 (F005, F015) |
 | 일시 효과 | statuses.json 항목 | 그 일시 효과가 걸린 개체 |
 
@@ -156,7 +156,24 @@ status: confirmed
 4. 메시지: "{몬스터}이(가) {아이템}을(를) 훔쳤다!"
 5. `carried`가 있는 몬스터가 죽으면 그 아이템들을 그 칸(이미 아이템이 있으면 가장 가까운 빈 바닥 칸)에 떨어뜨린다.
 
-## 완료 기준
+## 7. 면역 (`immunities`)
+
+개체 정의(monsters.json)와 빌드 아이템(items.json)에 `immunities` 목록을 둘 수 있다. 개체는 자기 정의와 가진 빌드 아이템의 면역을 모두 갖는다.
+
+```json
+"immunities": ["knockback", "steal", "status:weak"]
+```
+
+| 값 | 막는 것 |
+|---|---|
+| `knockback` | 밀쳐내기. 위치도 그대로, 충돌 피해도 없음 |
+| `steal` | 훔치기 |
+| `status:{id}` | 그 일시 효과가 걸리지 않음 (`applyStatus`) |
+
+1. 면역인 효과가 그 개체를 대상으로 실행되면 아무 일도 일어나지 않고 "{대상}에게는 통하지 않는다."를 남긴다.
+2. 이미 걸린 일시 효과에 대한 면역을 나중에 얻으면, 그 일시 효과는 즉시 풀린다.
+3. 데이터 검사: `status:` 뒤의 id는 statuses.json에 있어야 한다.
+
 - [ ] attack 기본값 5에 add +2, mul +0.5 보정이 있으면 최종 attack은 10이다.
 - [ ] 보정 때문에 defense가 음수가 되면 0으로 계산된다.
 - [ ] attackRange +3 보정이 있어도 플레이어 attackRange는 2다.
@@ -172,6 +189,8 @@ status: confirmed
 - [ ] 몬스터 특성에 chance 0.5인 trigger가 있으면 데이터 검사에서 오류가 난다.
 - [ ] chance가 1이 아닌 trigger에 message가 없으면 데이터 검사에서 오류가 난다.
 - [ ] 전투·이동 코드에 특정 아이템·몬스터·일시 효과 id가 나오지 않는다.
+- [ ] `immunities: ["status:weak"]`인 개체에게 약화를 걸면 걸리지 않고 "통하지 않는다" 메시지가 남는다.
+- [ ] 밀쳐내기 면역인 개체를 전투 망치로 쳐도 위치가 그대로이고 충돌 피해가 없다.
 
 ## 미결정 사항
 없음.

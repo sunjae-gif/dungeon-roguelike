@@ -41,7 +41,8 @@ interface RunState {
   player: Actor;
   floor: FloorState;
   messageLog: Message[];   // 최대 ui.json `messageLogMaxStored`(100)개. 넘으면 오래된 것부터 버린다
-  runStats: { kills: number; floorsReached: number; itemsFound: number; killedBy?: string }; // killedBy: 플레이어를 쓰러뜨린 원인. 몬스터 defId 또는 일시 효과 id (F006, effects.md 4절)
+  pendingChoice?: ItemChoice; // 빌드 아이템 고르기 대기 중 (F005). 있으면 턴 끝에 phase가 itemChoice가 된다
+  runStats: { kills: number; floorsReached: number; itemsFound: number; killedBy?: string; bossKilled?: boolean }; // killedBy: 플레이어를 쓰러뜨린 원인. 몬스터 defId 또는 일시 효과 id (F006, effects.md 4절)
 }
 
 interface FloorState {
@@ -61,12 +62,12 @@ interface Room {
   id: number;
   x: number; y: number; w: number; h: number;
   type: string;             // rooms.json의 id 또는 start/stairs/boss
-  state: Record<string, unknown>; // 퍼즐 진행도 등 방 종류별 값
+  state: Record<string, unknown>; // 방 종류별 값. 보스방: { warned: boolean, sealed: boolean } (F008)
 }
 
 interface MapObject {
   id: number;
-  type: string;             // 'door' | 'hiddenWall' | 'trap' | 'chest' | 'stairs' | 퍼즐 장치 ...
+  type: string;             // 'door' | 'hiddenWall' | 'trap' | 'chest' | 'stairs' | 'sealedGate' | 퍼즐 장치 ...
   defId?: string;           // traps.json 등의 id
   x: number; y: number;
   blocksMove: boolean;
@@ -94,6 +95,14 @@ interface MonsterAi {       // 몬스터만. F004, F014
   retreatedLastTurn?: boolean; // ranged: 지난 턴에 물러났는가
   fleeing?: boolean;        // flee: 도망 중인가 (HP 조건 또는 steal 성공)
   unseenTurns?: number;     // 도망 중 플레이어 시야 밖에 있던 연속 턴 수
+  turnsUntilCharge?: number; // boss: 다음 힘 모으기까지 남은 자기 턴 수 (F008)
+  charging?: { x: number; y: number }[]; // boss: 힘을 모은 상태. 다음 자기 턴에 강타할 칸들 (화면에 표시)
+  enraged?: boolean;        // boss: 2단계에 들어갔는가
+}
+
+interface ItemChoice {      // F005
+  source: 'chest' | 'secret' | 'puzzle';
+  options: string[];        // items.json id. 서로 다르고, 플레이어가 이미 가진 빌드 아이템은 없다
 }
 
 interface Status { id: string; turnsLeft: number; appliedTurn: number; } // appliedTurn: 걸린 턴. 그 턴의 마무리에서는 줄지 않는다
