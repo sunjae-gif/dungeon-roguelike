@@ -7,23 +7,10 @@ import { fireEvent, MAX_EVENT_DEPTH, resolveAttack, tickStatuses } from '../src/
 import { createRun } from '../src/core/run';
 import type { RunState } from '../src/core/state';
 import { playTurn } from '../src/core/turn';
-import type { GameData, ItemDef } from '../src/data/types';
-import { validateGameData } from '../src/data/validate';
-import { RAW_DATA } from '../src/data/load';
-import { gameData } from './helpers';
+import { gameData, withItems } from './helpers';
 import { stateFromMap } from './parseMap';
 
 const base = gameData();
-
-// 테스트 전용 빌드 아이템을 더한 데이터. 형식 검사도 통과해야 한다.
-function withItems(...items: Omit<ItemDef, 'name' | 'kind' | 'weight' | 'sprite'>[]): GameData {
-  const full = items.map((it) => ({ name: it.id, kind: 'build' as const, weight: 0, sprite: 'potion_heal', ...it }));
-  const raw = structuredClone(RAW_DATA) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
-  raw['items.json'].items.push(...full);
-  const result = validateGameData(raw as typeof RAW_DATA);
-  if (!result.ok) throw new Error(result.errors.join('\n'));
-  return result.data;
-}
 
 const give = (s: RunState, ...ids: string[]): RunState => ({ ...s, player: { ...s.player, buildItems: ids } });
 
@@ -88,10 +75,10 @@ describe('effects.md 2~3. 이벤트와 피해 처리', () => {
     const s = stateFromMap(DUEL, base);
     const goblin = s.floor.actors[0];
     const goblinDef = base.monsters.find((m) => m.id === 'goblin')!;
-    const after = resolveAttack(s, base, s.player.id, goblin.id);
+    const after = resolveAttack(s, base, s.player.id, goblin.id).state;
     expect(after.floor.actors[0].hp).toBe(goblin.hp - (base.player.attack - goblinDef.defense));
     // 반대 방향: 고블린 공격 4 − 플레이어 방어 2
-    const back = resolveAttack(s, base, goblin.id, s.player.id);
+    const back = resolveAttack(s, base, goblin.id, s.player.id).state;
     expect(back.player.hp).toBe(s.player.hp - Math.max(1, goblinDef.attack - base.player.defense));
   });
 
@@ -102,9 +89,9 @@ describe('effects.md 2~3. 이벤트와 피해 처리', () => {
     });
     const s = give(stateFromMap(DUEL, data), 't_vamp');
     const hurt = { ...s, player: { ...s.player, hp: 10 } };
-    expect(resolveAttack(hurt, data, s.player.id, s.floor.actors[0].id).player.hp).toBe(12);
+    expect(resolveAttack(hurt, data, s.player.id, s.floor.actors[0].id).state.player.hp).toBe(12);
     // 최대 HP를 넘지 않는다
-    expect(resolveAttack(s, data, s.player.id, s.floor.actors[0].id).player.hp).toBe(base.player.maxHp);
+    expect(resolveAttack(s, data, s.player.id, s.floor.actors[0].id).state.player.hp).toBe(base.player.maxHp);
   });
 
   it('onBeforeAttack에 피해 ×2 아이템과 +1 아이템이 순서대로 있으면, 기본 피해 3은 7이 된다', () => {
@@ -129,7 +116,7 @@ describe('effects.md 2~3. 이벤트와 피해 처리', () => {
     const s = give(stateFromMap(DUEL, data), 't_loop');
     const goblin = s.floor.actors[0];
     const attackDamage = Math.max(1, getStat(goblin, 'attack', data) - getStat(s.player, 'defense', data));
-    const after = resolveAttack(s, data, goblin.id, s.player.id);
+    const after = resolveAttack(s, data, goblin.id, s.player.id).state;
     expect(after.player.hp).toBe(s.player.hp - attackDamage - MAX_EVENT_DEPTH);
     expect(warn).toHaveBeenCalled();
   });
@@ -141,7 +128,7 @@ describe('effects.md 2~3. 이벤트와 피해 처리', () => {
     });
     const s = give(stateFromMap(DUEL, data), 't_cry');
     const weak = { ...s, floor: { ...s.floor, actors: [{ ...s.floor.actors[0], hp: 1 }] } };
-    const after = resolveAttack(weak, data, s.player.id, s.floor.actors[0].id);
+    const after = resolveAttack(weak, data, s.player.id, s.floor.actors[0].id).state;
     expect(after.floor.actors).toEqual([]);
     expect(after.runStats.kills).toBe(1);
     expect(after.messageLog.at(-1)?.text).toBe('처치!');

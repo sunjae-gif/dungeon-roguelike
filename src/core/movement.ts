@@ -22,6 +22,10 @@ export function objectAt(floor: FloorState, x: number, y: number) {
   return floor.objects.find((o) => o.x === x && o.y === y);
 }
 
+export function monsterAt(floor: FloorState, x: number, y: number) {
+  return floor.actors.find((a) => a.x === x && a.y === y);
+}
+
 export function actorAt(state: RunState, x: number, y: number) {
   if (state.player.x === x && state.player.y === y) return state.player;
   return state.floor.actors.find((a) => a.x === x && a.y === y);
@@ -66,6 +70,11 @@ function lineIsClear(floor: FloorState, from: Point, to: Point): boolean {
   }
 }
 
+// from에서 to가 보이는가: 4방향 거리가 radius 이하이고 직선이 가리지 않는다 (computeVisible과 같은 판단)
+export function canSee(floor: FloorState, from: Point, to: Point, radius: number): boolean {
+  return manhattanDistance(from, to) <= radius && lineIsClear(floor, from, to);
+}
+
 // F002 규칙 6, 7: 마름모 시야
 export function computeVisible(floor: FloorState, origin: Point, radius: number): boolean[] {
   const visible: boolean[] = new Array(floor.width * floor.height).fill(false);
@@ -73,7 +82,7 @@ export function computeVisible(floor: FloorState, origin: Point, radius: number)
     const span = radius - Math.abs(dy);
     for (let dx = -span; dx <= span; dx++) {
       const p = { x: origin.x + dx, y: origin.y + dy };
-      if (inBounds(floor, p.x, p.y) && lineIsClear(floor, origin, p)) visible[tileIndex(floor, p.x, p.y)] = true;
+      if (inBounds(floor, p.x, p.y) && canSee(floor, origin, p, radius)) visible[tileIndex(floor, p.x, p.y)] = true;
     }
   }
   return visible;

@@ -113,18 +113,30 @@ export function applyDamage(
 
 function handleDeath(state: RunState, data: GameData, killerId: number, targetId: number, depth: number): RunState {
   const target = findActor(state, targetId);
-  if (!target || target.hp > 0 || targetId === state.player.id) return state;
+  if (!target || target.hp > 0) return state;
+  if (targetId === state.player.id) {
+    // F006: 누구에게 쓰러졌는지 남긴다. 제거와 게임 오버는 턴 끝 판정에서
+    if (state.runStats.killedBy !== undefined) return state;
+    const killer = findActor(state, killerId);
+    return killer ? { ...state, runStats: { ...state.runStats, killedBy: killer.defId } } : state;
+  }
   let next = fireEvent(state, data, killerId, 'onKill', { other: targetId }, depth).state;
   next = { ...next, floor: { ...next.floor, actors: next.floor.actors.filter((a) => a.id !== targetId) } };
   if (killerId === next.player.id) next = { ...next, runStats: { ...next.runStats, kills: next.runStats.kills + 1 } };
   return next;
 }
 
+export interface AttackResult {
+  state: RunState;
+  damage: number;
+  killed: boolean;
+}
+
 // effects.md 3. 피해 처리 순서 (F003이 따른다)
-export function resolveAttack(state: RunState, data: GameData, attackerId: number, targetId: number): RunState {
+export function resolveAttack(state: RunState, data: GameData, attackerId: number, targetId: number): AttackResult {
   const attacker = findActor(state, attackerId);
   const target = findActor(state, targetId);
-  if (!attacker || !target) return state;
+  if (!attacker || !target) return { state, damage: 0, killed: false };
   // 1. onBeforeAttack. 피해 기본값 = 공격자 attack − 대상 defense
   const base = getStat(attacker, 'attack', data) - getStat(target, 'defense', data);
   const before = fireEvent(state, data, attackerId, 'onBeforeAttack', { other: targetId, damage: base });
@@ -132,13 +144,15 @@ export function resolveAttack(state: RunState, data: GameData, attackerId: numbe
   const damage = Math.max(1, before.ctx.damage ?? base);
   // 3. 대상 HP 감소
   const hit = findActor(before.state, targetId);
-  if (!hit) return before.state;
+  if (!hit) return { state: before.state, damage: 0, killed: false };
   let next = updateActor(before.state, { ...hit, hp: hit.hp - damage });
   // 4. onHit (공격자), onDamaged (대상)
   next = fireEvent(next, data, attackerId, 'onHit', { other: targetId, damage }).state;
   next = fireEvent(next, data, targetId, 'onDamaged', { other: attackerId, damage }).state;
   // 5. HP가 0 이하면 onKill, 대상 제거 (플레이어면 턴 끝에 게임 오버)
-  return handleDeath(next, data, attackerId, targetId, 1);
+  next = handleDeath(next, data, attackerId, targetId, 1);
+  const after = findActor(next, targetId);
+  return { state: next, damage, killed: !after || after.hp <= 0 };
 }
 
 // 모든 개체에 같은 이벤트 (onTurnStart, onTurnEnd 등). 플레이어 먼저, 몬스터는 id 순서

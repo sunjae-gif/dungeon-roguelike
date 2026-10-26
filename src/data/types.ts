@@ -131,6 +131,8 @@ export interface GameData {
   dungeon: DungeonData;
   player: PlayerData;
   monsters: MonsterDef[];
+  // F004 규칙 7: 모든 몬스터 공통 시야
+  monsterSightRadius: number;
   items: ItemDef[];
   roomTypes: RoomTypeDef[];
   sprites: SpritesData;

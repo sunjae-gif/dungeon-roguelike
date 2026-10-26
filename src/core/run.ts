@@ -4,6 +4,7 @@ import { generateFloor } from './dungeon';
 import { getStat } from './effects';
 import { fireEvent } from './events';
 import { addMessage, MESSAGES } from './messages';
+import { spawnMonsters } from './monsters';
 import { updateSight } from './movement';
 import { initRunRng } from './rng';
 import { PLAYER_DEF_ID, STATE_VERSION, type Actor, type Phase, type RunState } from './state';
@@ -26,7 +27,7 @@ export function createRun(data: GameData, runSeed: number, phase: Phase): RunSta
   const seed = runSeed >>> 0;
   const firstFloor = 1;
   const playerId = 1;
-  const { floor, start, nextId } = generateFloor(data, seed, firstFloor, playerId + 1);
+  const { floor, start, nextId } = buildFloor(data, seed, firstFloor, playerId + 1);
   const run: RunState = {
     version: STATE_VERSION,
     runSeed: seed,
@@ -46,7 +47,7 @@ export function createRun(data: GameData, runSeed: number, phase: Phase): RunSta
 // F013: 다른 층으로 옮긴다. 플레이어의 HP·아이템은 그대로 두고 위치만 새 층의 시작 지점으로.
 // 이전 층의 상태는 버린다. 시야는 바로 계산한다.
 export function enterFloor(state: RunState, data: GameData, floorNumber: number): RunState {
-  const { floor, start, nextId } = generateFloor(data, state.runSeed, floorNumber, state.nextId);
+  const { floor, start, nextId } = buildFloor(data, state.runSeed, floorNumber, state.nextId);
   const next: RunState = {
     ...state,
     floorNumber,
@@ -56,6 +57,13 @@ export function enterFloor(state: RunState, data: GameData, floorNumber: number)
     runStats: { ...state.runStats, floorsReached: Math.max(state.runStats.floorsReached, floorNumber) },
   };
   return arrive(next, data);
+}
+
+// F001 지형 → F004 몬스터 배치
+function buildFloor(data: GameData, runSeed: number, floorNumber: number, firstId: number) {
+  const generated = generateFloor(data, runSeed, floorNumber, firstId);
+  const spawned = spawnMonsters(generated.floor, data, runSeed, floorNumber, generated.nextId);
+  return { floor: spawned.floor, start: generated.start, nextId: spawned.nextId };
 }
 
 // 새 층에 들어온 직후: 메시지, onFloorEnter, 시야

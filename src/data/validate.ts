@@ -34,6 +34,7 @@ export function validateGameData(raw: RawData): ValidationResult {
     dungeon,
     player: raw['player.json'],
     monsters,
+    monsterSightRadius: (raw['monsters.json'] as Obj).monsterSightRadius,
     items,
     roomTypes,
     sprites: raw['sprites.json'],

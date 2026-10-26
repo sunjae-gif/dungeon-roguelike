@@ -18,7 +18,7 @@ export interface RunState {
   player: Actor;
   floor: FloorState;
   messageLog: Message[];
-  runStats: { kills: number; floorsReached: number; itemsFound: number };
+  runStats: { kills: number; floorsReached: number; itemsFound: number; killedBy?: string };
 }
 
 export interface FloorState {

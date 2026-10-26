@@ -1,29 +1,38 @@
 // 한 턴 처리. 30-systems/turn-order.md
 import type { GameData } from '../data/types';
 import { transition } from './flow';
+import { attack } from './combat';
 import { STAIRS_OBJECT_TYPE } from './dungeon';
 import { getStat } from './effects';
 import { fireEvent, fireForAll, tickStatuses } from './events';
 import { addMessage, MESSAGES } from './messages';
-import { DIRECTION_DELTAS, isPassable, objectAt, updateSight } from './movement';
+import { actMonsters } from './monsters';
+import { DIRECTION_DELTAS, isPassable, monsterAt, objectAt, updateSight } from './movement';
 import type { Direction, RunState } from './state';
 
 // 플레이어 입력 (input/이 키를 이것으로 바꾼다)
 export type PlayerInput = { type: 'direction'; direction: Direction } | { type: 'rest' } | { type: 'descend' };
 
 // 게임 규칙이 이해하는 행동 (turn-order.md "플레이어 행동 종류")
-export type Action = { type: 'move'; direction: Direction } | { type: 'rest' } | { type: 'descend' };
+export type Action =
+  | { type: 'move'; direction: Direction }
+  | { type: 'attack'; direction: Direction; targetId: number }
+  | { type: 'rest' }
+  | { type: 'descend' };
 
 // 2단계: 입력을 행동으로. 무효면 null.
-// 방향 입력은 attack → interact → move → 무효 순서로 판정한다. attack(F003)과 interact(F010)는 아직 없다.
+// 방향 입력은 attack → interact → move → 무효 순서로 판정한다. interact(F010)는 아직 없다.
 export function toAction(state: RunState, input: PlayerInput): Action | null {
   switch (input.type) {
     case 'direction': {
       const d = DIRECTION_DELTAS[input.direction];
+      const x = state.player.x + d.x;
+      const y = state.player.y + d.y;
+      // F003 규칙 1: 몬스터 방향으로 이동하면 공격
+      const monster = monsterAt(state.floor, x, y);
+      if (monster) return { type: 'attack', direction: input.direction, targetId: monster.id };
       // F002 규칙 2: 벽으로는 이동할 수 없다
-      return isPassable(state, state.player.x + d.x, state.player.y + d.y)
-        ? { type: 'move', direction: input.direction }
-        : null;
+      return isPassable(state, x, y) ? { type: 'move', direction: input.direction } : null;
     }
     case 'rest':
       return input;
@@ -52,7 +61,8 @@ export function playTurn(state: RunState, input: PlayerInput, data: GameData): R
     return { ...next, turn: next.turn + 1 };
   }
   next = applyPlayerAction(next, action, data);
-  // 5. 몬스터 행동 (F004가 확정되면)
+  // 5. 몬스터 행동 (F004)
+  next = actMonsters(next, data);
   // 6. 턴 마무리: onTurnEnd, 일시 효과 감소 → 시야 → 게임 오버 판정 → 턴 수 증가
   next = tickStatuses(fireForAll(next, data, 'onTurnEnd'), data);
   next = updateSight(next, getStat(next.player, 'sightRadius', data));
@@ -71,6 +81,11 @@ function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'des
       // 도착한 칸 처리: 아이템 줍기(F005), 함정(F010)은 확정되면 여기에
       // F013 규칙 7: 계단 칸에 올라서면 알려준다
       return isOnStairs(moved) ? addMessage(moved, MESSAGES.stairsHere(), data) : moved;
+    }
+    case 'attack': {
+      // F002 규칙 5: 공격한 방향을 바라본다. F003 규칙 4: 공격도 한 턴
+      const facing = { ...state, player: { ...state.player, facing: action.direction } };
+      return attack(facing, data, state.player.id, action.targetId);
     }
     case 'rest':
       // F002 규칙 4
