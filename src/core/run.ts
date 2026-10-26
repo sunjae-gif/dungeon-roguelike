@@ -5,11 +5,13 @@ import { generateFloor } from './dungeon';
 import { getStat } from './effects';
 import { fireEvent } from './events';
 import { placeBoss } from './boss';
+import { placeDoors } from './doors';
+import { floorRng, initRunRng } from './rng';
+import { placeTraps } from './traps';
 import { placeFloorItems, placeTreasureChest } from './items';
 import { addMessage, MESSAGES } from './messages';
 import { noticeMonsters, spawnMonsters } from './monsters';
 import { updateSight } from './movement';
-import { initRunRng } from './rng';
 import { PLAYER_DEF_ID, STATE_VERSION, type Actor, type Phase, type RunState } from './state';
 
 export function createPlayer(data: GameData, id: number): Actor {
@@ -64,11 +66,15 @@ export function enterFloor(state: RunState, data: GameData, floorNumber: number)
   return arrive(next, data);
 }
 
-// F001 지형 → F005 보물상자 → F004 몬스터 → F008 보스 → F005 바닥 소모품
+// F001 지형 → F005 보물상자 → F010 문·함정 → F004 몬스터 → F008 보스 → F005 바닥 소모품
 function buildFloor(data: GameData, runSeed: number, floorNumber: number, firstId: number) {
   const generated = generateFloor(data, runSeed, floorNumber, firstId);
   const withChest = placeTreasureChest(generated.floor, data, runSeed, floorNumber, generated.nextId);
-  const spawned = spawnMonsters(withChest.floor, data, runSeed, floorNumber, withChest.nextId);
+  // F010: 문 → 함정 (objects 흐름)
+  const objectsRng = floorRng(runSeed, floorNumber, 'objects');
+  const doors = placeDoors(withChest.floor, data, floorNumber, objectsRng, withChest.nextId);
+  const traps = placeTraps(doors.floor, data, floorNumber, objectsRng, doors.nextId);
+  const spawned = spawnMonsters(traps.floor, data, runSeed, floorNumber, traps.nextId);
   const boss = placeBoss(spawned.floor, data, floorNumber, spawned.nextId); // F008
   const items = placeFloorItems(boss.floor, data, runSeed, floorNumber, boss.nextId, generated.start);
   return { floor: items.floor, start: generated.start, nextId: items.nextId, lootState: items.lootState };

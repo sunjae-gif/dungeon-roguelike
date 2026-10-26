@@ -1,5 +1,7 @@
 // 문자로 그린 고정 지도를 상태로 바꾸는 테스트 도우미 (40-tech/tech-stack.md "테스트 규칙")
+import { DOOR_OBJECT_TYPE } from '../src/core/doors';
 import { STAIRS_OBJECT_TYPE } from '../src/core/dungeon';
+import { TRAP_OBJECT_TYPE } from '../src/core/traps';
 import { createRun } from '../src/core/run';
 import type { Actor, FloorState, RunState, TileType } from '../src/core/state';
 import type { GameData } from '../src/data/types';
@@ -36,6 +38,11 @@ export function parseMap(text: string, data: GameData, themeId = data.themes[0].
       if (ch === '@') player = { x, y };
       else if (ch === '>') {
         floor.objects.push({ id: nextId++, type: STAIRS_OBJECT_TYPE, x, y, blocksMove: false, blocksSight: false, state: {} });
+      } else if (ch === '+' || ch === "'") {
+        const open = ch === "'";
+        floor.objects.push({ id: nextId++, type: DOOR_OBJECT_TYPE, x, y, blocksMove: !open, blocksSight: !open, state: { open } });
+      } else if (ch === '^') {
+        floor.objects.push({ id: nextId++, type: TRAP_OBJECT_TYPE, defId: 'spike', x, y, blocksMove: false, blocksSight: false, state: { spent: false } });
       } else if (MONSTER_LETTERS[ch]) {
         const defId = MONSTER_LETTERS[ch];
         const def = data.monsters.find((m) => m.id === defId)!;

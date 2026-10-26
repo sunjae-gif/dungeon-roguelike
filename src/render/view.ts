@@ -3,7 +3,9 @@ import { tileIndex, type Actor, type FloorState, type MapObject, type RunState }
 import { causeName } from '../core/events';
 import { MESSAGES } from '../core/messages';
 import { statusDef } from '../core/effects';
+import { DOOR_OBJECT_TYPE } from '../core/doors';
 import { getStat } from '../core/effects';
+import { TRAP_OBJECT_TYPE } from '../core/traps';
 import { formatSeed } from '../core/rng';
 import { isThemeStart, themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
@@ -127,7 +129,13 @@ export function floorIntroLines(state: RunState, data: GameData): string[] {
 }
 
 // 물체 그림 id. 열린 물체(상자 등)는 "{id}_open" 그림이 있으면 그것을 쓴다
-export function objectSprite(obj: MapObject, data: GameData): string {
+// F010: 문은 테마의 door·doorOpen 그림, 함정은 traps.json의 sprite
+export function objectSprite(obj: MapObject, data: GameData, floorNumber: number): string {
+  if (obj.type === DOOR_OBJECT_TYPE) {
+    const { tiles } = themeForFloor(data, floorNumber);
+    return obj.state.open ? tiles.doorOpen : tiles.door;
+  }
+  if (obj.type === TRAP_OBJECT_TYPE) return data.traps.find((t) => t.id === obj.defId)?.sprite ?? obj.type;
   const base = obj.defId ?? obj.type;
   const open = `${base}_open`;
   return obj.state.opened && data.sprites.sprites.some((s) => s.id === open) ? open : base;

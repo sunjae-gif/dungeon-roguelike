@@ -282,7 +282,7 @@ function checkThemes(c: Checker, d: Obj, refs: ThemeRefs): Obj[] {
 
     const tiles = c.objField(t, 'tiles', p);
     if (tiles) {
-      for (const k of ['floor', 'wall', 'door']) {
+      for (const k of ['floor', 'wall', 'door', 'doorOpen']) {
         c.str(tiles, k, `${p}.tiles`);
         c.ref(tiles[k], refs.sprites, `${p}.tiles.${k}`, 'sprites.json');
       }

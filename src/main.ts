@@ -6,7 +6,7 @@ import { loadGameData } from './data/load';
 import type { GameData } from './data/types';
 import type { DevMode } from './dev/devMode';
 import { keyToCommand, type Command } from './input/keys';
-import { KeyRepeater, shouldStopRepeat } from './input/repeat';
+import { blocksRepeatedStep, KeyRepeater, shouldStopRepeat } from './input/repeat';
 import { loadFont } from './render/font';
 import { computeLayout } from './render/layout';
 import { renderScreen, type RenderContext } from './render/screen';
@@ -107,7 +107,8 @@ function start(data: GameData): void {
       play(command.input);
     } else if (command.type === 'player') {
       const { input } = command;
-      repeater.press(e.code, () => {
+      repeater.press(e.code, (repeated) => {
+        if (repeated && blocksRepeatedStep(state, input)) return false;
         const prev = state;
         play(input);
         return !shouldStopRepeat(prev, state);

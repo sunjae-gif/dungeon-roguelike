@@ -3,6 +3,8 @@ import type { GameData } from '../data/types';
 import { transition } from './flow';
 import { bossRoomNeedingWarning, sealBossRooms, warnBossRoom } from './boss';
 import { attack } from './combat';
+import { DOOR_OBJECT_TYPE, isClosedDoor, openDoor } from './doors';
+import { triggerTrap } from './traps';
 import { canUseConsumable, CHEST_OBJECT_TYPE, openChest, pickUp, useConsumable } from './items';
 import { STAIRS_OBJECT_TYPE } from './dungeon';
 import { getStat } from './effects';
@@ -67,7 +69,7 @@ export function toAction(state: RunState, input: PlayerInput, data: GameData): A
 }
 
 function isInteractable(object: MapObject): boolean {
-  return object.type === CHEST_OBJECT_TYPE && !object.state.opened;
+  return isClosedDoor(object) || (object.type === CHEST_OBJECT_TYPE && !object.state.opened);
 }
 
 // turn-order.md 3: 그 방향 2~range칸 안의 가장 가까운 몬스터. 사이 칸은 모두 비어 있어야 한다
@@ -128,8 +130,8 @@ function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'des
       const player = { ...state.player, x: state.player.x + d.x, y: state.player.y + d.y, facing: action.direction };
       const from = { x: state.player.x, y: state.player.y };
       let moved = fireEvent({ ...state, player }, data, player.id, 'onMove', { from, to: { x: player.x, y: player.y } }).state;
-      // 도착한 칸 처리: 아이템 자동 줍기(F005) → 함정(F010, M4)
-      moved = pickUp(moved, data);
+      // 도착한 칸 처리: 아이템 자동 줍기(F005) → 함정 발동(F010)
+      moved = triggerTrap(pickUp(moved, data), data, player.id);
       // F013 규칙 7: 계단 칸에 올라서면 알려준다
       return isOnStairs(moved) ? addMessage(moved, MESSAGES.stairsHere(), data) : moved;
     }
@@ -139,8 +141,11 @@ function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'des
       return attack(facing, data, state.player.id, action.targetId);
     }
     case 'interact': {
-      // F005 규칙 8: 상자 열기 (한 턴). 고르기 화면은 턴이 끝난 뒤 (game-flow.md)
       const facing = { ...state, player: { ...state.player, facing: action.direction } };
+      const object = state.floor.objects.find((o) => o.id === action.objectId);
+      // F010 규칙 2: 문 열기 (제자리, 한 턴)
+      if (object?.type === DOOR_OBJECT_TYPE) return openDoor(facing, data, state.player.id, action.objectId);
+      // F005 규칙 8: 상자 열기 (한 턴). 고르기 화면은 턴이 끝난 뒤 (game-flow.md)
       return openChest(facing, data, action.objectId);
     }
     case 'useItem':

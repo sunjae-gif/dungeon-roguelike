@@ -202,6 +202,9 @@ export function tickStatuses(state: RunState, data: GameData): RunState {
   return { ...state, player: tick(state.player), floor: { ...state.floor, actors: state.floor.actors.map(tick) } };
 }
 
+// 피해 원인 이름: 몬스터, 일시 효과, 함정(F010)
 export function causeName(data: GameData, cause: string): string {
-  return data.monsters.find((m) => m.id === cause)?.name ?? statusDef(data, cause)?.name ?? cause;
+  return (
+    data.monsters.find((m) => m.id === cause)?.name ?? statusDef(data, cause)?.name ?? data.traps.find((t) => t.id === cause)?.name ?? cause
+  );
 }

@@ -9,6 +9,7 @@ import { findActor } from './events';
 import { addMessage, MESSAGES } from './messages';
 import { monsterAt, objectAt } from './movement';
 import { floorRng, nextInt, pickWeighted } from './rng';
+import { AROUND, inRoom, pointKey, roomEntrances } from './rooms';
 import { tileIndex, type Actor, type FloorState, type MonsterAi, type Room, type RunState } from './state';
 
 export { firstStep } from './ai';
@@ -16,31 +17,14 @@ export { firstStep } from './ai';
 // F004 규칙 3: 몬스터를 놓지 않는 방 (비밀방은 F009에서 생긴다)
 const NO_MONSTER_ROOMS = ['start', 'stairs', 'boss', 'secret'];
 
-const key = (p: Point) => `${p.x},${p.y}`;
-const inRoom = (r: Room, x: number, y: number) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
-
-// F014 배치 2: 방 입구(방 바깥 바닥과 맞닿은 방 안 칸) 옆의 방 안 칸. 입구 칸 자체는 막지 않는다
+// F014 배치 2: 방 입구 옆의 방 안 칸. 입구 칸 자체는 막지 않는다
 function chokepointSpots(floor: FloorState, rooms: Room[]): Set<string> {
-  const isFloor = (x: number, y: number) => floor.tiles[tileIndex(floor, x, y)] === 'floor';
-  const around = (p: Point): Point[] => [
-    { x: p.x, y: p.y - 1 },
-    { x: p.x + 1, y: p.y },
-    { x: p.x, y: p.y + 1 },
-    { x: p.x - 1, y: p.y },
-  ];
   const spots = new Set<string>();
   for (const room of rooms) {
-    const entrances: Point[] = [];
-    for (let y = room.y; y < room.y + room.h; y++) {
-      for (let x = room.x; x < room.x + room.w; x++) {
-        if (around({ x, y }).some((n) => !inRoom(room, n.x, n.y) && isFloor(n.x, n.y))) entrances.push({ x, y });
-      }
-    }
-    const entranceKeys = new Set(entrances.map(key));
+    const entrances = roomEntrances(floor, room);
+    const entranceKeys = new Set(entrances.map(pointKey));
     for (const e of entrances) {
-      for (const n of around(e)) {
-        if (inRoom(room, n.x, n.y) && !entranceKeys.has(key(n))) spots.add(key(n));
-      }
+      for (const n of AROUND(e)) if (inRoom(room, n) && !entranceKeys.has(pointKey(n))) spots.add(pointKey(n));
     }
   }
   return spots;
@@ -79,7 +63,7 @@ export function spawnMonsters(
   for (let i = 0; i < count && free.length > 0 && weights.length > 0; i++) {
     const defId = pickWeighted(rng, weights);
     const def = data.monsters.find((m) => m.id === defId);
-    const preferred = def?.placement === 'chokepoint' ? free.filter((p) => chokepoints.has(key(p))) : [];
+    const preferred = def?.placement === 'chokepoint' ? free.filter((p) => chokepoints.has(pointKey(p))) : [];
     const pool = preferred.length > 0 ? preferred : free;
     const spot = pool[nextInt(rng, 0, pool.length - 1)];
     free = free.filter((p) => p !== spot);

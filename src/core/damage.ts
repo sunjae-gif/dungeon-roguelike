@@ -4,6 +4,7 @@ import { getStat } from './effects';
 import { causeName, fireEvent, findActor, updateActor, type AttackInfo } from './events';
 import { addMessage, MESSAGES } from './messages';
 import { dropItem } from './floorItems';
+import { triggerTrap } from './traps';
 import { monsterDrop } from './items';
 import { isPassable } from './movement';
 import type { Actor, RunState } from './state';
@@ -155,7 +156,9 @@ export function knockback(
       return applyDamage(next, data, { actorId: ownerId, cause: owner.defId }, targetId, collisionDamage, depth + 1);
     }
     next = updateActor(next, { ...cur, ...to });
-    // 밀려난 칸의 함정은 F010에서
+    // F010 규칙 11, 17: 밀려 들어간 칸에 함정이 있으면 발동
+    next = triggerTrap(next, data, targetId);
+    if (!findActor(next, targetId)) return next;
   }
   return next;
 }

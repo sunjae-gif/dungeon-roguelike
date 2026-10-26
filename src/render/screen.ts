@@ -115,7 +115,7 @@ function drawMap(rc: RenderContext, state: RunState): void {
       drawSprite(theme.tiles[floor.tiles[y * floor.width + x]], x, y);
       // 물체는 탐색됨 칸에서도 그린다 (마지막으로 본 모습)
       const obj = floor.objects.find((o) => o.x === x && o.y === y);
-      if (obj) drawSprite(objectSprite(obj, data), x, y);
+      if (obj) drawSprite(objectSprite(obj, data, state.floorNumber), x, y);
       if (shade === 'explored') {
         // F007 규칙 7: 탐색됨 칸은 exploredBrightness 밝기로
         const p = toScreen(x, y);

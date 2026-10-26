@@ -38,6 +38,10 @@ export const MESSAGES = {
   healAmountKey: '{회복량}',
   // F010
   alarm: () => '경보가 울렸다! 발소리가 다가온다.',
+  doorOpened: () => '문을 열었다.',
+  monsterOpenedDoor: (monsterWithJosa: string) => `${monsterWithJosa} 문을 열었다.`,
+  steppedOnTrap: (trapWithJosa: string) => `${trapWithJosa} 밟았다!`,
+  monsterSteppedOnTrap: (monsterWithJosa: string, trapWithJosa: string) => `${monsterWithJosa} ${trapWithJosa} 밟았다!`,
   // F008 최종보스
   bossWarning: (boss: string) => `이 너머는 ${boss}의 방이다. 들어가면 돌아올 수 없다.`,
   sealed: () => '뒤에서 문이 닫혔다.',

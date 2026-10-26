@@ -3,22 +3,34 @@ import type { GameData, MonsterDef } from '../data/types';
 import { attack, type AttackOptions } from './combat';
 import type { Point } from './dungeon';
 import { getStat } from './effects';
+import { isClosedDoor, openDoor } from './doors';
 import { fireEvent, updateActor } from './events';
 import { canSee, DIRECTION_DELTAS, inBounds, isPassable, manhattanDistance, monsterAt, objectAt } from './movement';
 import { tileIndex, type Actor, type Direction, type FloorState, type MonsterAi, type RunState } from './state';
+import { trapAt, triggerTrap } from './traps';
 
 // F004 규칙 14: 최단 경로가 여러 개면 위 → 오른쪽 → 아래 → 왼쪽
 const STEP_ORDER: Direction[] = ['up', 'right', 'down', 'left'];
 
 export const stepFrom = (p: Point, dir: Direction): Point => ({ x: p.x + DIRECTION_DELTAS[dir].x, y: p.y + DIRECTION_DELTAS[dir].y });
 
-// F004 규칙 13: 경로 계산에서 벽과 막힌 물체만 장애물. 다른 몬스터와 플레이어는 장애물이 아니다.
+// 바닥이고 막힌 물체가 없는 칸. 사격선·강타 범위가 쓴다 (닫힌 문은 막는다)
 export function walkable(floor: FloorState, x: number, y: number): boolean {
   return inBounds(floor, x, y) && floor.tiles[tileIndex(floor, x, y)] === 'floor' && !objectAt(floor, x, y)?.blocksMove;
 }
 
+// F004 규칙 13, F010 규칙 15: 경로에 넣을 수 있는 칸. 다른 개체는 장애물이 아니다.
+// 닫힌 문은 열고 지나가므로 넣는다. avoidTraps면 함정 칸을 뺀다
+function pathable(floor: FloorState, x: number, y: number, avoidTraps: boolean): boolean {
+  if (!inBounds(floor, x, y) || floor.tiles[tileIndex(floor, x, y)] !== 'floor') return false;
+  const object = objectAt(floor, x, y);
+  if (!object || isClosedDoor(object)) return true;
+  if (avoidTraps && trapAt(floor, x, y)) return false;
+  return !object.blocksMove;
+}
+
 // 목표 칸들에서 거꾸로 BFS해 각 칸의 거리를 구한다. 갈 수 없는 칸은 -1
-function distancesFrom(floor: FloorState, goals: Point[]): number[] {
+function distancesFrom(floor: FloorState, goals: Point[], avoidTraps: boolean): number[] {
   const dist: number[] = new Array(floor.width * floor.height).fill(-1);
   const queue: Point[] = [];
   for (const g of goals) {
@@ -32,7 +44,7 @@ function distancesFrom(floor: FloorState, goals: Point[]): number[] {
     const d = dist[tileIndex(floor, p.x, p.y)];
     for (const dir of STEP_ORDER) {
       const n = stepFrom(p, dir);
-      if (!walkable(floor, n.x, n.y) || dist[tileIndex(floor, n.x, n.y)] !== -1) continue;
+      if (!pathable(floor, n.x, n.y, avoidTraps) || dist[tileIndex(floor, n.x, n.y)] !== -1) continue;
       dist[tileIndex(floor, n.x, n.y)] = d + 1;
       queue.push(n);
     }
@@ -41,9 +53,11 @@ function distancesFrom(floor: FloorState, goals: Point[]): number[] {
 }
 
 // 가장 가까운 목표로 가는 최단 경로의 첫 걸음. 경로가 없거나 이미 목표 위면 null (F004 규칙 13~16)
+// F010 규칙 15: 함정을 지나지 않는 경로가 없을 때만 함정을 지나는 경로를 쓴다
 export function firstStepTo(floor: FloorState, from: Point, goals: Point[]): Direction | null {
   if (goals.length === 0) return null;
-  const dist = distancesFrom(floor, goals);
+  let dist = distancesFrom(floor, goals, true);
+  if (dist[tileIndex(floor, from.x, from.y)] < 0) dist = distancesFrom(floor, goals, false);
   const here = dist[tileIndex(floor, from.x, from.y)];
   if (here <= 0) return null;
   for (const dir of STEP_ORDER) {
@@ -87,7 +101,8 @@ function retreatStep(state: RunState, monster: Actor): Direction | null {
   for (const dir of STEP_ORDER) {
     const n = stepFrom(monster, dir);
     const d = manhattanDistance(n, state.player);
-    if (d > bestDistance && isPassable(state, n.x, n.y)) {
+    // F010 규칙 16: 함정 칸은 후보에서 뺀다
+    if (d > bestDistance && isPassable(state, n.x, n.y) && !trapAt(state.floor, n.x, n.y)) {
       best = dir;
       bestDistance = d;
     }
@@ -101,8 +116,13 @@ export function moveOrWait(state: RunState, data: GameData, monster: Actor, dir:
   if (monsterAt(state.floor, to.x, to.y) || (to.x === state.player.x && to.y === state.player.y)) {
     return updateActor(state, { ...monster, ai, facing: dir });
   }
+  // F010 규칙 4: 닫힌 문이면 여는 것이 이번 행동
+  const door = objectAt(state.floor, to.x, to.y);
+  if (isClosedDoor(door)) return openDoor(updateActor(state, { ...monster, ai, facing: dir }), data, monster.id, door!.id);
   const moved = updateActor(state, { ...monster, ...to, facing: dir, ai });
-  return fireEvent(moved, data, monster.id, 'onMove', { from: { x: monster.x, y: monster.y }, to }).state;
+  const fired = fireEvent(moved, data, monster.id, 'onMove', { from: { x: monster.x, y: monster.y }, to }).state;
+  // F010 규칙 11: 함정 칸에 들어가면 발동
+  return triggerTrap(fired, data, monster.id);
 }
 
 export function strike(state: RunState, data: GameData, monster: Actor, ai: MonsterAi, options: AttackOptions = {}): RunState {
@@ -158,7 +178,8 @@ export function actRanged(state: RunState, data: GameData, monster: Actor, def: 
   const spots: Point[] = [];
   for (const dir of STEP_ORDER) {
     for (let k = 2, p = stepFrom(stepFrom(state.player, dir), dir); k <= range; k++, p = stepFrom(p, dir)) {
-      if (walkable(state.floor, p.x, p.y) && lineOfFire(state, p, state.player, range, piercing, monster.id)) spots.push(p);
+      // F010 규칙 16: 함정 칸은 사격 위치에서 뺀다
+      if (walkable(state.floor, p.x, p.y) && !trapAt(state.floor, p.x, p.y) && lineOfFire(state, p, state.player, range, piercing, monster.id)) spots.push(p);
     }
   }
   const dir = firstStepTo(state.floor, monster, spots) ?? firstStep(state.floor, monster, state.player);
