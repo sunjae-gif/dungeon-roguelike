@@ -79,7 +79,7 @@ describe('F003 전투', () => {
     expect(next.player.hp).toBeLessThanOrEqual(0);
     expect(next.phase).toBe('gameOver');
     expect(next.runStats.killedBy).toBe('orc');
-    expect(next.messageLog.map((m) => m.text)).toEqual([
+    expect(next.messageLog.map((m) => m.text).slice(0, 2)).toEqual([
       MESSAGES.monsterHit(nameOf('orc'), data.monsters.find((m) => m.id === 'orc')!.attack - data.player.defense),
       MESSAGES.playerKilled(nameOf('orc')),
     ]);

@@ -33,7 +33,7 @@ describe('F004 배치', () => {
         expect(floor.actors.length).toBeGreaterThanOrEqual(theme.monsterCount[0]);
         expect(floor.actors.length).toBeLessThanOrEqual(theme.monsterCount[1]);
         for (const m of floor.actors) {
-          expect(theme.monsterTypes).toContain(m.defId);
+          expect(Object.keys(theme.monsterTypes)).toContain(m.defId);
           const room = floor.rooms.find((r) => inRoom(r, m));
           expect(room, '통로에 놓임').toBeDefined();
           expect(['start', 'stairs', 'boss']).not.toContain(room!.type);

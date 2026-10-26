@@ -1,6 +1,7 @@
 // F007 무엇을 그릴지 정하는 순수 함수들. 캔버스를 쓰지 않아 테스트할 수 있다.
 import { tileIndex, type Actor, type FloorState, type RunState } from '../core/state';
 import { causeName } from '../core/events';
+import { statusDef } from '../core/effects';
 import { getStat } from '../core/effects';
 import { formatSeed } from '../core/rng';
 import { themeForFloor } from '../data/query';
@@ -46,6 +47,9 @@ export function statusLines(state: RunState, data: GameData): TextLine[] {
     text('소모품'),
     ...state.player.consumables.map((id, i) => text(`${i + 1}. ${itemName(id)}`)),
     text(''),
+    // F014 화면: 걸린 일시 효과 (빌드 아이템 목록 위)
+    ...state.player.statuses.map((s) => text(`${statusDef(data, s.id)?.name ?? s.id} (${s.turnsLeft}턴)`)),
+    ...(state.player.statuses.length > 0 ? [text('')] : []),
     text('빌드 아이템'),
     ...state.player.buildItems.map((id) => text(`- ${itemName(id)}`)),
   ];

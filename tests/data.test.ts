@@ -40,7 +40,8 @@ describe('데이터 검사', () => {
   });
 
   it('다른 파일을 가리키는 id가 없으면 실패', () => {
-    expectError((r) => r['themes.json'].themes[0].monsterTypes.push('dragon'), /monsterTypes\[2\]: monsters\.json에 없는 id "dragon"/);
+    expectError((r) => (r['themes.json'].themes[0].monsterTypes.dragon = 1), /monsterTypes\.dragon: monsters\.json에 없는 id "dragon"/);
+    expectError((r) => (r['themes.json'].themes[0].monsterTypes.rat = 0), /monsterTypes\.rat: 1 이상/);
     expectError((r) => (r['themes.json'].themes[0].trapTypes = ['pit']), /traps\.json에 없는 id "pit"/);
     expectError((r) => (r['themes.json'].themes[0].tiles.wall = 'nope'), /tiles\.wall: sprites\.json에 없는/);
     expectError((r) => (r['themes.json'].themes[0].roomWeights.arena = 5), /roomWeights\.arena: rooms\.json에 없는/);
@@ -79,7 +80,7 @@ describe('데이터 검사', () => {
   it('여러 곳이 틀리면 모두 알려준다', () => {
     const errors = errorsAfter((r) => {
       delete r['player.json'].attack;
-      r['themes.json'].themes[0].monsterTypes = ['dragon'];
+      r['themes.json'].themes[0].monsterTypes = { dragon: 1 };
     });
     expect(errors.length).toBe(2);
   });

@@ -123,7 +123,7 @@ export interface ThemeDef {
   mapWidth: number;
   mapHeight: number;
   tiles: { floor: string; wall: string; door: string };
-  monsterTypes: string[];
+  monsterTypes: Record<string, number>; // F014: 몬스터 id → 출현 가중치
   monsterCount: Range;
   itemCount: Range;
   roomWeights: Record<string, number>;

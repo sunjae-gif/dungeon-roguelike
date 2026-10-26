@@ -64,6 +64,17 @@ export function pick<T>(rng: Rng, list: readonly T[]): T {
   return list[nextInt(rng, 0, list.length - 1)];
 }
 
+// 가중치 비율로 하나 고른다. entries 순서가 같으면 결과도 같다
+export function pickWeighted<T>(rng: Rng, entries: readonly (readonly [T, number])[]): T {
+  const total = entries.reduce((sum, [, w]) => sum + w, 0);
+  let roll = nextFloat(rng) * total;
+  for (const [value, weight] of entries) {
+    if (roll < weight) return value;
+    roll -= weight;
+  }
+  return entries[entries.length - 1][0];
+}
+
 // "층마다 새로" 흐름: 층을 만들 때마다 시작값에서 다시 출발한다.
 export function floorRng(runSeed: number, floorNumber: number, stream: FloorStream): Rng {
   return createRng(hashSeed(runSeed, floorNumber, stream));

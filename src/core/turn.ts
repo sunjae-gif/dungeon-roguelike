@@ -7,7 +7,7 @@ import { getStat } from './effects';
 import { sweepDeadMonsters } from './damage';
 import { fireEvent, fireForAll, tickStatuses } from './events';
 import { addMessage, MESSAGES } from './messages';
-import { actMonsters } from './monsters';
+import { actMonsters, noticeMonsters, vanishFleeing } from './monsters';
 import { DIRECTION_DELTAS, inBounds, isPassable, monsterAt, objectAt, updateSight } from './movement';
 import { tileIndex } from './state';
 import type { Direction, RunState } from './state';
@@ -89,8 +89,8 @@ export function playTurn(state: RunState, input: PlayerInput, data: GameData): R
   next = fireForAll(next, data, 'onTurnEnd'); // 6-1 재생·중독
   next = tickStatuses(next, data); // 6-2
   next = sweepDeadMonsters(next); // 6-3
-  next = updateSight(next, getStat(next.player, 'sightRadius', data)); // 6-4 (발견 메시지는 F014)
-  // 6-5 도망 몬스터 사라짐 (F014)
+  next = noticeMonsters(updateSight(next, getStat(next.player, 'sightRadius', data)), data); // 6-4
+  next = vanishFleeing(next, data); // 6-5
   next = transition(next, { type: 'turnEnd' }, data); // 6-6
   return { ...next, turn: next.turn + 1 }; // 6-7
 }

@@ -70,7 +70,9 @@ function checkStats(c: Checker, o: Obj, p: string, stats: readonly string[] = ST
 // F004 몬스터: 시야는 모든 몬스터 공통 고정값 monsterSightRadius이므로 몬스터별 sightRadius가 없다.
 // 사거리는 없으면 1이라 따로 검사한다 (effects.md 1절)
 const MONSTER_STAT_IDS = STAT_IDS.filter((s) => s !== 'sightRadius' && s !== 'attackRange');
-const MONSTER_BEHAVIORS = ['chase'];
+// F014 행동 방식, 배치
+const MONSTER_BEHAVIORS = ['chase', 'ranged', 'flee', 'ambush'];
+const MONSTER_PLACEMENTS = ['room', 'chokepoint'];
 
 function checkPlayer(c: Checker, d: Obj): void {
   checkStats(c, d, 'player.json');
@@ -107,6 +109,15 @@ function checkMonsters(c: Checker, d: Obj, refs: EffectRefs): Obj[] {
       c.fail(`${p}.behavior`, `알 수 없는 행동 방식 "${m.behavior}" (가능: ${MONSTER_BEHAVIORS.join(', ')})`);
     }
     c.bool(m, 'isBoss', p, true);
+    // F014 "데이터 검사에 추가할 것"
+    if (m.behavior === 'ranged' && !(typeof m.attackRange === 'number' && m.attackRange >= 2)) {
+      c.fail(`${p}.attackRange`, 'ranged는 attackRange 2 이상이 필요함');
+    }
+    c.num(m, 'fleeHpRatio', p, { min: 0, max: 1, optional: m.behavior !== 'flee' });
+    c.num(m, 'vanishWhenUnseen', p, { integer: true, min: 1, optional: true });
+    c.oneOf(m, 'placement', p, MONSTER_PLACEMENTS, true);
+    c.bool(m, 'piercing', p, true);
+    c.str(m, 'attackVerb', p, true);
   });
   return list;
 }
@@ -220,10 +231,14 @@ function checkThemes(c: Checker, d: Obj, refs: ThemeRefs): Obj[] {
         c.ref(tiles[k], refs.sprites, `${p}.tiles.${k}`, 'sprites.json');
       }
     }
-    c.strList(t, 'monsterTypes', p);
-    (t.monsterTypes as unknown[] | undefined)?.forEach((id, j) =>
-      c.ref(id, refs.monsters, `${p}.monsterTypes[${j}]`, 'monsters.json'),
-    );
+    // F014 배치 1: { monsters.json id: 양의 정수 가중치 }
+    const types = c.objField(t, 'monsterTypes', p);
+    if (types) {
+      for (const id of Object.keys(types)) {
+        c.ref(id, refs.monsters, `${p}.monsterTypes.${id}`, 'monsters.json');
+        c.num(types, id, `${p}.monsterTypes`, { integer: true, min: 1 });
+      }
+    }
     c.strList(t, 'trapTypes', p);
     (t.trapTypes as unknown[] | undefined)?.forEach((id, j) =>
       c.ref(id, refs.traps, `${p}.trapTypes[${j}]`, 'traps.json'),

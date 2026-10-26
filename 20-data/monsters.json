@@ -1,11 +1,28 @@
 {
-  "_note": "몬스터 종류(F004). id는 themes.json, sprites.json에서 참조한다. 몬스터 시야는 모든 몬스터 공통 고정값 monsterSightRadius. 수치는 모두 임시값.",
+  "_note": "몬스터 종류(F004, F014). id는 themes.json, sprites.json에서 참조한다. 몬스터 시야는 모든 몬스터 공통 고정값 monsterSightRadius. 특성(modifiers, triggers)은 아이템과 같은 형식이고 chance는 1만. 수치는 모두 임시값.",
   "monsterSightRadius": 7,
   "monsters": [
-    { "id": "rat",        "name": "쥐",       "maxHp": 4,  "attack": 3,  "defense": 0, "behavior": "chase" },
-    { "id": "goblin",     "name": "고블린",    "maxHp": 8,  "attack": 4,  "defense": 1, "behavior": "chase" },
-    { "id": "orc",        "name": "오크",      "maxHp": 15, "attack": 6,  "defense": 2, "behavior": "chase" },
-    { "id": "troll",      "name": "트롤",      "maxHp": 25, "attack": 8,  "defense": 3, "behavior": "chase" },
-    { "id": "final_boss", "name": "최종보스",   "maxHp": 80, "attack": 10, "defense": 4, "behavior": "chase", "isBoss": true }
+    { "id": "rat",    "name": "쥐",     "maxHp": 4,  "attack": 3, "defense": 0, "behavior": "chase" },
+    { "id": "goblin", "name": "고블린", "maxHp": 8,  "attack": 4, "defense": 1, "behavior": "chase" },
+    { "id": "goblin_archer", "name": "고블린 궁수", "maxHp": 6, "attack": 3, "defense": 0,
+      "behavior": "ranged", "attackRange": 3, "attackVerb": "화살" },
+    { "id": "slime", "name": "슬라임", "maxHp": 12, "attack": 2, "defense": 0, "behavior": "chase",
+      "triggers": [ { "event": "onHit", "chance": 1,
+        "effects": [ { "type": "applyStatus", "target": "other", "status": "weak", "turns": 3 } ] } ] },
+    { "id": "goblin_thief", "name": "고블린 도둑", "maxHp": 7, "attack": 2, "defense": 1,
+      "behavior": "flee", "fleeHpRatio": 0.5, "vanishWhenUnseen": 5,
+      "triggers": [ { "event": "onHit", "chance": 1, "effects": [ { "type": "steal", "target": "other" } ] } ] },
+    { "id": "orc",    "name": "오크",   "maxHp": 15, "attack": 6, "defense": 2, "behavior": "chase" },
+    { "id": "orc_shaman", "name": "오크 주술사", "maxHp": 10, "attack": 4, "defense": 1,
+      "behavior": "ranged", "attackRange": 4, "attackVerb": "저주",
+      "triggers": [ { "event": "onHit", "chance": 1,
+        "effects": [ { "type": "applyStatus", "target": "other", "status": "weak", "turns": 2 } ] } ] },
+    { "id": "gargoyle", "name": "가고일", "maxHp": 20, "attack": 7, "defense": 5,
+      "behavior": "ambush", "placement": "chokepoint" },
+    { "id": "troll",  "name": "트롤",   "maxHp": 25, "attack": 8, "defense": 3, "behavior": "chase",
+      "triggers": [ { "event": "onTurnEnd", "chance": 1, "effects": [ { "type": "heal", "target": "self", "amount": 1 } ] } ] },
+    { "id": "skeleton_archer", "name": "해골 궁수", "maxHp": 9, "attack": 5, "defense": 1,
+      "behavior": "ranged", "attackRange": 5, "piercing": true, "attackVerb": "화살" },
+    { "id": "final_boss", "name": "최종보스", "maxHp": 80, "attack": 10, "defense": 4, "behavior": "chase", "isBoss": true }
   ]
 }

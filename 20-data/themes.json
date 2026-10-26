@@ -1,5 +1,5 @@
 {
-  "_note": "층 테마(F011). 층별로 달라지는 값은 모두 여기에 둔다. 이름과 수치는 모두 임시값.",
+  "_note": "층 테마(F011). 층별로 달라지는 값은 모두 여기에 둔다. monsterTypes는 { 몬스터 id: 출현 가중치 } (F014). 이름과 수치는 모두 임시값.",
   "themes": [
     {
       "id": "theme_1",
@@ -8,7 +8,7 @@
       "mapWidth": 50,
       "mapHeight": 30,
       "tiles": { "floor": "floor_t1", "wall": "wall_t1", "door": "door_t1" },
-      "monsterTypes": ["rat", "goblin"],
+      "monsterTypes": { "rat": 5, "goblin": 4, "slime": 2, "goblin_archer": 1 },
       "monsterCount": [3, 5],
       "itemCount": [2, 3],
       "roomWeights": { "normal": 70, "treasure": 15, "secret": 5, "puzzle": 10 },
@@ -23,7 +23,7 @@
       "mapWidth": 56,
       "mapHeight": 32,
       "tiles": { "floor": "floor_t2", "wall": "wall_t2", "door": "door_t2" },
-      "monsterTypes": ["goblin", "orc"],
+      "monsterTypes": { "goblin": 4, "orc": 3, "goblin_archer": 2, "goblin_thief": 2, "orc_shaman": 1 },
       "monsterCount": [5, 7],
       "itemCount": [2, 4],
       "roomWeights": { "normal": 60, "treasure": 15, "secret": 10, "puzzle": 15 },
@@ -38,7 +38,7 @@
       "mapWidth": 60,
       "mapHeight": 34,
       "tiles": { "floor": "floor_t3", "wall": "wall_t3", "door": "door_t3" },
-      "monsterTypes": ["orc", "troll"],
+      "monsterTypes": { "orc": 3, "troll": 2, "orc_shaman": 2, "gargoyle": 2, "skeleton_archer": 2 },
       "monsterCount": [6, 9],
       "itemCount": [3, 4],
       "roomWeights": { "normal": 55, "treasure": 15, "secret": 15, "puzzle": 15 },
@@ -53,7 +53,7 @@
       "mapWidth": 50,
       "mapHeight": 30,
       "tiles": { "floor": "floor_boss", "wall": "wall_boss", "door": "door_boss" },
-      "monsterTypes": ["troll"],
+      "monsterTypes": { "troll": 1 },
       "monsterCount": [2, 4],
       "itemCount": [2, 3],
       "roomWeights": { "normal": 100, "treasure": 0, "secret": 0, "puzzle": 0 },

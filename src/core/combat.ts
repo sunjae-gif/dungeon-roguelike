@@ -10,7 +10,8 @@ export function monsterName(data: GameData, defId: string): string {
 }
 
 // F003 규칙 2~5: 피해 처리(effects.md)를 하고 결과를 메시지 로그에 남긴다
-export function attack(state: RunState, data: GameData, attackerId: number, targetId: number): RunState {
+// ranged: 원거리 공격 메시지를 쓴다 (F014)
+export function attack(state: RunState, data: GameData, attackerId: number, targetId: number, ranged = false): RunState {
   const attacker = findActor(state, attackerId);
   const target = findActor(state, targetId);
   if (!attacker || !target) return state;
@@ -24,8 +25,12 @@ export function attack(state: RunState, data: GameData, attackerId: number, targ
     next = addMessage(next, MESSAGES.playerHit(name, result.damage), data);
     if (result.killed) next = addMessage(next, MESSAGES.monsterKilled(name), data);
   } else if (targetId === playerId) {
+    const def = data.monsters.find((m) => m.id === attacker.defId);
     const name = monsterName(data, attacker.defId);
-    next = addMessage(next, MESSAGES.monsterHit(name, result.damage), data);
+    const text = ranged
+      ? MESSAGES.monsterShot(name, def?.attackVerb ?? MESSAGES.defaultAttackVerb, result.damage)
+      : MESSAGES.monsterHit(name, result.damage);
+    next = addMessage(next, text, data);
     if (result.killed) next = addMessage(next, MESSAGES.playerKilled(name), data);
   }
   return next;

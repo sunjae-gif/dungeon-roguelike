@@ -4,7 +4,10 @@ import { createRun } from '../src/core/run';
 import type { Actor, FloorState, RunState, TileType } from '../src/core/state';
 import type { GameData } from '../src/data/types';
 
-const MONSTER_LETTERS: Record<string, string> = { r: 'rat', g: 'goblin', o: 'orc', t: 'troll', B: 'final_boss' };
+const MONSTER_LETTERS: Record<string, string> = {
+  r: 'rat', g: 'goblin', o: 'orc', t: 'troll', B: 'final_boss',
+  a: 'goblin_archer', s: 'slime', h: 'goblin_thief', m: 'orc_shaman', G: 'gargoyle', k: 'skeleton_archer',
+};
 
 export interface ParsedMap {
   floor: FloorState;

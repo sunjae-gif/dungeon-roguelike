@@ -4,7 +4,7 @@ import { generateFloor } from './dungeon';
 import { getStat } from './effects';
 import { fireEvent } from './events';
 import { addMessage, MESSAGES } from './messages';
-import { spawnMonsters } from './monsters';
+import { noticeMonsters, spawnMonsters } from './monsters';
 import { updateSight } from './movement';
 import { initRunRng } from './rng';
 import { PLAYER_DEF_ID, STATE_VERSION, type Actor, type Phase, type RunState } from './state';
@@ -70,5 +70,5 @@ function buildFloor(data: GameData, runSeed: number, floorNumber: number, firstI
 function arrive(state: RunState, data: GameData): RunState {
   let next = addMessage(state, MESSAGES.enteredFloor(state.floorNumber), data);
   next = fireEvent(next, data, next.player.id, 'onFloorEnter', { floorNumber: next.floorNumber }).state;
-  return updateSight(next, getStat(next.player, 'sightRadius', data));
+  return noticeMonsters(updateSight(next, getStat(next.player, 'sightRadius', data)), data);
 }

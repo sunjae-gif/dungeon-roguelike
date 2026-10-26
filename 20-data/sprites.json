@@ -32,6 +32,12 @@
     { "id": "orc",        "path": "assets/chars/orc.png",        "fallbackColor": "#307030" },
     { "id": "troll",      "path": "assets/chars/troll.png",      "fallbackColor": "#606090" },
     { "id": "final_boss", "path": "assets/chars/final_boss.png", "fallbackColor": "#c02030" },
+    { "id": "goblin_archer",   "path": "assets/chars/goblin_archer.png",   "fallbackColor": "#a0c040" },
+    { "id": "slime",           "path": "assets/chars/slime.png",           "fallbackColor": "#40c0a0" },
+    { "id": "goblin_thief",    "path": "assets/chars/goblin_thief.png",    "fallbackColor": "#c0a040" },
+    { "id": "orc_shaman",      "path": "assets/chars/orc_shaman.png",      "fallbackColor": "#9050b0" },
+    { "id": "gargoyle",        "path": "assets/chars/gargoyle.png",        "fallbackColor": "#8a8a80" },
+    { "id": "skeleton_archer", "path": "assets/chars/skeleton_archer.png", "fallbackColor": "#e0e0c8" },
     { "id": "potion_heal","path": "assets/items/potion_heal.png","fallbackColor": "#ff6080" }
   ],
   "illustrations": [
