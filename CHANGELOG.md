@@ -10,6 +10,16 @@
 - [F004] 몬스터 구현: spawn 흐름으로 방 안 배치(구조용 방 제외), 공통 시야 monsterSightRadius, chase(BFS 첫 걸음, 위→오른쪽→아래→왼쪽), lastSeenPlayer
 - [systems] game-state.md: runStats.killedBy 추가 (F006 게임 오버 화면의 "{몬스터}에게 쓰러졌다")
 
+## 2026-10-26 (M2+ 기획 확정)
+- [F014] 몬스터 다양화 확정: 원거리(사격 위치로 이동, 물러나기 두 턴에 한 번, 관통), 겁쟁이(steal로도 도망, vanishWhenUnseen), 매복(chokepoint 배치), 출현 가중치, 처음 발견 메시지, 특성 확률 금지, 몬스터 6종. status → confirmed
+- [F015] 전투 규칙 아이템 신규 (F005 설계안에서 분리). 9종 확정, 명중 제외. status → confirmed
+- [F005] 전투 아이템 절을 F015로 이동. 같은 빌드 아이템 한 판에 한 번만 나옴 확정
+- [systems] effects.md: 능력치 attackRange(플레이어 상한 maxAttackRange), 효과 출처 3종과 실행 순서, onBeforeDamaged, 두 단계 피해 계산, 효과 ignoreDefense·cancelAttack·applyStatus·knockback·steal, 확률 trigger 메시지 필수, 몬스터·일시 효과 확률 금지, 일시 효과 규칙(겹치지 않음, 걸린 턴 제외), 공격이 아닌 피해의 처치 처리
+- [systems] game-state.md: MonsterAi(noticed, awake, retreatedLastTurn, fleeing, unseenTurns), Actor.carried, Status.appliedTurn, killedBy에 일시 효과 id
+- [systems] turn-order.md: 방향 입력 판정에 사거리 공격 추가, 턴 마무리 순서 세분화
+- [docs] roadmap M2+ 추가 (F012 아이템 생성 먼저), glossary, progress
+- [data] 데이터 파일 변경은 M2+ 구현 때 (문서에 형식 명시)
+
 ## 2026-10-22 (M2 기획 확정)
 - [F004] 몬스터 시야를 "플레이어 시야 −1"에서 공통 고정값 monsterSightRadius(7)로 변경. 몬스터 위치에서 F002 방식 시야로 계산
 - [data] monsters.json: sightOffsetFromPlayer → monsterSightRadius

@@ -19,7 +19,18 @@
 | 난수 흐름 | rngStream | 쓰임새별로 나눈 난수 생성기. map, spawn, combat 등 |
 | 뷰포트 | viewport | 지도 중 화면에 보이는 부분. 25×17칸 |
 | 카메라 | camera | 뷰포트의 왼쪽 위 칸 좌표. 플레이어를 따라가되 지도 밖은 보여주지 않는다 |
-| 행동 방식 | behavior | 몬스터의 AI 종류. 지금은 `chase`(보이면 다가가 공격)뿐 |
+| 행동 방식 | behavior | 몬스터의 AI 종류. chase(추적), ranged(원거리), flee(겁쟁이), ambush(매복) |
+| 사격선 | lineOfFire | 같은 가로·세로줄, 사거리 안, 사이가 막히지 않은 상태 (F014) |
+| 사거리 | attackRange | 공격이 닿는 4방향 거리. 기본 1. 능력치 |
+| 관통 | piercing | 원거리 공격이 다른 개체 너머로 날아감 (F014 해골 궁수) |
+| 특성 | trait | 몬스터 정의에 적힌 modifiers·triggers. 몬스터 능력 |
+| 매복 배치 | chokepoint | 방 입구 옆 칸에 놓는 배치 방식 (F014) |
+| 훔친 물건 | carried | 몬스터가 steal로 가져간 아이템. 죽으면 떨어뜨린다 |
+| 약화 | weak | 일시 효과. 공격 −2 |
+| 중독 | poison | 일시 효과. 턴 끝마다 1 피해 |
+| 회피 | cancelAttack | 공격을 무효로 만드는 효과. 아이템 전용 |
+| 방어 관통 | ignoreDefense | 이번 공격은 대상 방어를 무시하는 효과 |
+| 밀쳐내기 | knockback | 대상을 공격 방향으로 미는 효과. 막히면 충돌 피해 |
 | 마지막 목격 위치 | lastSeenPlayer | 몬스터가 플레이어를 마지막으로 본 칸. 놓치면 그곳까지 간다 |
 | 마일스톤 | milestone | roadmap.md의 구현 단계. M0~M5 |
 | 방 | room | 바닥 칸이 모인 직사각형 영역 |

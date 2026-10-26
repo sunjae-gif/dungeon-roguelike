@@ -41,7 +41,7 @@ interface RunState {
   player: Actor;
   floor: FloorState;
   messageLog: Message[];   // 최대 ui.json `messageLogMaxStored`(100)개. 넘으면 오래된 것부터 버린다
-  runStats: { kills: number; floorsReached: number; itemsFound: number; killedBy?: string }; // killedBy: 플레이어를 쓰러뜨린 몬스터의 defId (F006)
+  runStats: { kills: number; floorsReached: number; itemsFound: number; killedBy?: string }; // killedBy: 플레이어를 쓰러뜨린 원인. 몬스터 defId 또는 일시 효과 id (F006, effects.md 4절)
 }
 
 interface FloorState {
@@ -82,11 +82,21 @@ interface Actor {
   hp: number;
   buildItems: string[];     // 얻은 순서대로. items.json id (30-systems/effects.md)
   consumables: string[];    // 인벤토리. 플레이어만 사용
-  statuses: Status[];       // 일시 효과. 지금은 비어 있음
-  ai?: { lastSeenPlayer?: { x: number; y: number } };
+  statuses: Status[];       // 일시 효과 (effects.md 5절)
+  carried?: string[];       // 몬스터가 훔친 아이템 id (effects.md steal). 죽으면 떨어뜨린다
+  ai?: MonsterAi;
 }
 
-interface Status { id: string; turnsLeft: number; }
+interface MonsterAi {       // 몬스터만. F004, F014
+  lastSeenPlayer?: { x: number; y: number };
+  noticed?: boolean;        // 플레이어가 이 몬스터를 한 번이라도 봤는가 (첫 발견 메시지, F014)
+  awake?: boolean;          // ambush: 깨어났는가
+  retreatedLastTurn?: boolean; // ranged: 지난 턴에 물러났는가
+  fleeing?: boolean;        // flee: 도망 중인가 (HP 조건 또는 steal 성공)
+  unseenTurns?: number;     // 도망 중 플레이어 시야 밖에 있던 연속 턴 수
+}
+
+interface Status { id: string; turnsLeft: number; appliedTurn: number; } // appliedTurn: 걸린 턴. 그 턴의 마무리에서는 줄지 않는다
 interface FloorItem { id: number; defId: string; x: number; y: number; }
 interface Message { turn: number; text: string; }
 ```

@@ -35,6 +35,19 @@ M2의 범위 메모:
 - 10층 보스방에는 아직 보스를 놓지 않는다(F008). 클리어 판정도 아직 없다.
 - monsters.json에서 몬스터별 `sightRadius`를 없애고 `monsterSightRadius`(공통 고정값), `behavior`를 추가했다. 데이터 검사 코드와 타입을 먼저 맞춘다.
 
+## M2+. 몬스터와 전투 확장
+**결과:** 원거리·겁쟁이·매복 몬스터가 나오고, 약화·중독이 걸리고, 전투 규칙 아이템 9종을 개발자 모드로 얻어 시험할 수 있다.
+1. F012 개발자 모드 중 **아이템 생성** (먼저. 아이템 드롭(F005)이 없어서 이것 없이는 F015를 시험할 수 없다). 여유가 되면 층 이동도
+2. 30-systems/effects.md 확장분: 효과 출처 3종, `onBeforeDamaged`, 두 단계 피해 계산, 효과 `ignoreDefense`·`cancelAttack`·`applyStatus`·`knockback`·`steal`, 일시 효과, `attackRange`
+3. 30-systems/turn-order.md 확장분: 사거리 공격 판정, 턴 마무리 순서
+4. F014 몬스터 다양화 (문서의 "구현 순서"대로)
+5. F015 전투 규칙 아이템
+
+M2+의 범위 메모:
+- **데이터 파일(statuses.json 신규, monsters.json·themes.json·items.json·player.json 변경)은 기획 문서에 적힌 대로 구현할 때 만든다.** 데이터 검사 코드와 함께 바꿔야 테스트가 깨지지 않기 때문이다.
+- themes.json `monsterTypes`는 F014 형식(가중치 객체)으로 바꾼다. F011은 아직 draft지만 이 항목만은 F014가 정한다.
+- 아이템을 바닥·상자에서 얻는 것은 M3(F005).
+
 ## M3. 한 판 완주
 **결과:** 1층부터 10층까지 내려가 최종보스를 잡으면 클리어.
 - F005 아이템 (소모품 먼저, 그다음 빌드 아이템)
@@ -58,6 +71,7 @@ M2의 범위 메모:
 | M0 | 없음 |
 | M1 | 없음 (F001, F002, F007, F013 모두 confirmed) |
 | M2 | 없음 (F003, F004, F006 모두 confirmed) |
+| M2+ | 없음 (F012, F014, F015 모두 confirmed) |
 | M3 | F005, F008, F011 |
 | M4 | F009, F010 |
 | M5 | art-guide.md |
