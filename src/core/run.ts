@@ -1,4 +1,5 @@
 // 새 판과 새 층의 상태를 만든다. 30-systems/game-state.md
+import { isThemeStart, themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
 import { generateFloor } from './dungeon';
 import { getStat } from './effects';
@@ -68,7 +69,10 @@ function buildFloor(data: GameData, runSeed: number, floorNumber: number, firstI
 
 // 새 층에 들어온 직후: 메시지, onFloorEnter, 시야
 function arrive(state: RunState, data: GameData): RunState {
-  let next = addMessage(state, MESSAGES.enteredFloor(state.floorNumber), data);
+  let next = state;
+  // F011 규칙 5: 테마가 바뀌는 층에 처음 들어가면
+  if (isThemeStart(data, state.floorNumber)) next = addMessage(next, MESSAGES.themeEntered(themeForFloor(data, state.floorNumber).name), data);
+  next = addMessage(next, MESSAGES.enteredFloor(state.floorNumber), data);
   next = fireEvent(next, data, next.player.id, 'onFloorEnter', { floorNumber: next.floorNumber }).state;
   return noticeMonsters(updateSight(next, getStat(next.player, 'sightRadius', data)), data);
 }

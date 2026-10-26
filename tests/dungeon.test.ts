@@ -30,11 +30,18 @@ function reachable(floor: FloorState, start: Point): Set<number> {
 const roomAt = (floor: FloorState, p: Point) =>
   floor.rooms.find((r) => p.x >= r.x && p.x < r.x + r.w && p.y >= r.y && p.y < r.y + r.h);
 
+// F011 규칙 6: 테마에 방 설정이 있으면 그것을 쓴다
+const settingsFor = (themeId: string) => {
+  const theme = data.themes.find((t) => t.id === themeId)!;
+  return { rooms: theme.rooms ?? data.dungeon.rooms, bossRoom: theme.bossRoom ?? data.dungeon.bossRoom };
+};
+
 function checkCommon(g: GeneratedFloor): Set<number> {
   const { floor, start } = g;
-  // 방 개수가 설정 범위 안
-  expect(floor.rooms.length).toBeGreaterThanOrEqual(data.dungeon.rooms.minCount);
-  expect(floor.rooms.length).toBeLessThanOrEqual(data.dungeon.rooms.maxCount + (floor.rooms.some((r) => r.type === 'boss') ? 1 : 0));
+  // 방 개수가 설정 범위 안 (보스방 포함)
+  const { rooms } = settingsFor(floor.themeId);
+  expect(floor.rooms.length).toBeGreaterThanOrEqual(rooms.minCount);
+  expect(floor.rooms.length).toBeLessThanOrEqual(rooms.maxCount);
   // 방끼리 겹치거나 맞닿지 않는다
   for (let i = 0; i < floor.rooms.length; i++) {
     for (let j = i + 1; j < floor.rooms.length; j++) {
@@ -91,8 +98,9 @@ describe('F001 던전 생성', () => {
       const bossRooms = g.floor.rooms.filter((r) => r.type === 'boss');
       expect(bossRooms.length).toBe(1);
       const boss = bossRooms[0];
-      expect(boss.w).toBeGreaterThanOrEqual(data.dungeon.bossRoom.minSize);
-      expect(boss.w).toBeLessThanOrEqual(data.dungeon.bossRoom.maxSize);
+      const { bossRoom } = settingsFor(g.floor.themeId);
+      expect(boss.w).toBeGreaterThanOrEqual(bossRoom.minSize);
+      expect(boss.w).toBeLessThanOrEqual(bossRoom.maxSize);
       expect(roomAt(g.floor, g.start)).not.toBe(boss);
       expect(reach.has(tileIndex(g.floor, boss.x, boss.y))).toBe(true);
     }

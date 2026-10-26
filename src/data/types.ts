@@ -137,6 +137,12 @@ export type Range = [number, number];
 export interface ThemeDef {
   id: string;
   name: string;
+  intro: string; // F011 진입 문구
+  rareChance: number; // F005 보물상자 후보가 희귀일 확률
+  // F011 규칙 6: 있으면 dungeon.json 대신
+  rooms?: DungeonData['rooms'];
+  bossRoom?: DungeonData['bossRoom'];
+  extraCorridors?: [number, number];
   floors: number[];
   mapWidth: number;
   mapHeight: number;

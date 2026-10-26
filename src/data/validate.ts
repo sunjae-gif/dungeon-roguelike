@@ -218,6 +218,14 @@ function checkThemes(c: Checker, d: Obj, refs: ThemeRefs): Obj[] {
   list.forEach((t, i) => {
     const p = `themes.json.themes[${i}]`;
     c.str(t, 'name', p);
+    c.str(t, 'intro', p);
+    c.num(t, 'rareChance', p, { min: 0, max: 1 });
+    // F011 규칙 6: 테마별 방 설정 (선택)
+    const rooms = c.objField(t, 'rooms', p, true);
+    if (rooms) for (const k of ['minCount', 'maxCount', 'minSize', 'maxSize']) c.num(rooms, k, `${p}.rooms`, { integer: true, min: 1 });
+    const bossRoom = c.objField(t, 'bossRoom', p, true);
+    if (bossRoom) for (const k of ['minSize', 'maxSize']) c.num(bossRoom, k, `${p}.bossRoom`, { integer: true, min: 1 });
+    if (t.extraCorridors !== undefined) c.range(t, 'extraCorridors', p);
     c.arr(t, 'floors', p)?.forEach((f, j) => {
       if (!Number.isInteger(f)) c.fail(`${p}.floors[${j}]`, '정수여야 함');
     });

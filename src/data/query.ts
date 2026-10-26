@@ -6,3 +6,8 @@ export function themeForFloor(data: GameData, floorNumber: number): ThemeDef {
   if (!theme) throw new Error(`${floorNumber}층의 테마가 없음`);
   return theme;
 }
+
+// F011 규칙 4, 5: 그 테마가 시작되는 층인가 (1, 4, 7, 10층)
+export function isThemeStart(data: GameData, floorNumber: number): boolean {
+  return floorNumber === Math.min(...themeForFloor(data, floorNumber).floors);
+}

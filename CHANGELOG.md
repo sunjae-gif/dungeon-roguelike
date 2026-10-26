@@ -3,6 +3,7 @@
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
 ## 2026-10-26 (M3)
+- [F011] 층 테마 구현: 테마 이름·진입 문구(테마 첫 층에만), "— 테마 —" 메시지, 팔레트 대체색, 테마별 방 설정 덮어쓰기(10층: 대기방 3~4개 + 큰 보스방). themes.json에 intro·rareChance 추가
 - [systems] M3 시스템 확장 구현: effects.md 7절 면역(개체 정의·빌드 아이템, 통하지 않는다 메시지, 나중에 얻은 면역은 일시 효과 해제), 보스 2단계 보정 출처, game-state.md pendingChoice·bossKilled·보스 ai 필드, game-flow.md itemChoice phase와 클리어 판정(게임 오버 → 클리어 → 고르기)
 - [systems] rng.md: loot 흐름은 층을 만든 뒤 그 층에 있는 동안 RunState.rng.loot에 이어 쓴다 (상자 후보, 몬스터 드롭)
 - [tech] art-guide.md: 테마별 팔레트 기준색 (F011)

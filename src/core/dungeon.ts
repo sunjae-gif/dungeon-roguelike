@@ -1,6 +1,6 @@
 // F001 던전 생성 (기본 지형): 방과 통로, 시작 지점, 계단 또는 보스방
 import { themeForFloor } from '../data/query';
-import type { GameData } from '../data/types';
+import type { GameData, ThemeDef } from '../data/types';
 import { floorRng, nextInt, pick, type Rng } from './rng';
 import { tileIndex, type FloorState, type MapObject, type Room } from './state';
 
@@ -52,7 +52,7 @@ export function generateFloor(data: GameData, runSeed: number, floorNumber: numb
   for (let seed = runSeed >>> 0; ; seed = (seed + 1) >>> 0) {
     const rng = floorRng(seed, floorNumber, 'map');
     for (let attempt = 0; attempt < data.dungeon.generationMaxAttempts; attempt++) {
-      const layout = tryLayout(rng, data, size, boss);
+      const layout = tryLayout(rng, data, theme, size, boss);
       if (layout) return buildFloor(layout, theme.id, size, nextId);
     }
   }
@@ -73,8 +73,12 @@ function randomRect(rng: Rng, size: { width: number; height: number }, minSize: 
   return { x: nextInt(rng, 1, maxX), y: nextInt(rng, 1, maxY), w, h };
 }
 
-function tryLayout(rng: Rng, data: GameData, size: { width: number; height: number }, boss: boolean): Layout | null {
-  const { rooms, bossRoom, roomPlacementTries, extraCorridors } = data.dungeon;
+function tryLayout(rng: Rng, data: GameData, theme: ThemeDef, size: { width: number; height: number }, boss: boolean): Layout | null {
+  const { roomPlacementTries } = data.dungeon;
+  // F011 규칙 6: 테마에 방 설정이 있으면 dungeon.json 대신 쓴다
+  const rooms = theme.rooms ?? data.dungeon.rooms;
+  const bossRoom = theme.bossRoom ?? data.dungeon.bossRoom;
+  const extraCorridors = theme.extraCorridors ?? data.dungeon.extraCorridors;
   const target = nextInt(rng, rooms.minCount, rooms.maxCount);
   const rects: Rect[] = [];
 

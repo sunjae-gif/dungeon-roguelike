@@ -6,7 +6,7 @@ import { cameraFor } from './camera';
 import { fontCss } from './font';
 import type { Box, Layout } from './layout';
 import type { SpriteBook } from './sprites';
-import { drawableItems, drawableMonsters, gameOverLines, messageLines, statusLines, tileShade, type TextLine } from './view';
+import { floorIntroLines, drawableItems, drawableMonsters, gameOverLines, messageLines, statusLines, tileShade, type TextLine } from './view';
 
 export interface RenderContext {
   ctx: CanvasRenderingContext2D;
@@ -22,7 +22,7 @@ function centerLines(state: RunState, data: GameData): string[] | null {
     case 'title':
       return ['타이틀', 'Enter: 새 게임'];
     case 'floorIntro':
-      return [`${state.floorNumber}층`, themeForFloor(data, state.floorNumber).name];
+      return floorIntroLines(state, data);
     case 'playing':
     case 'itemChoice':
       return null;

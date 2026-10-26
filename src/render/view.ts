@@ -4,7 +4,7 @@ import { causeName } from '../core/events';
 import { statusDef } from '../core/effects';
 import { getStat } from '../core/effects';
 import { formatSeed } from '../core/rng';
-import { themeForFloor } from '../data/query';
+import { isThemeStart, themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
 
 export type TileShade = 'visible' | 'explored' | 'unexplored';
@@ -81,4 +81,10 @@ export function gameOverLines(state: RunState, data: GameData): string[] {
     '',
     'R: 새 판   Esc: 타이틀',
   ];
+}
+
+// F013 규칙 5, F011 규칙 4: 층 번호, 테마 이름, 테마 첫 층이면 진입 문구
+export function floorIntroLines(state: RunState, data: GameData): string[] {
+  const theme = themeForFloor(data, state.floorNumber);
+  return [`${state.floorNumber}층`, theme.name, ...(isThemeStart(data, state.floorNumber) ? ['', theme.intro] : [])];
 }

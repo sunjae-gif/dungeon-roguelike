@@ -6,6 +6,8 @@ export const MESSAGES = {
   // F013 규칙 7, 8
   stairsHere: () => '계단이 있다. >를 눌러 내려간다.',
   enteredFloor: (floorNumber: number) => `${floorNumber}층에 들어섰다.`,
+  // F011 규칙 5
+  themeEntered: (theme: string) => `— ${theme} —`,
   // F003 규칙 5
   playerHit: (monster: string, damage: number) => `${monster}에게 ${damage} 피해를 입혔다.`,
   monsterHit: (monster: string, damage: number) => `${monster}에게 ${damage} 피해를 받았다.`,
