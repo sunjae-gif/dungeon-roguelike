@@ -138,8 +138,10 @@ status: confirmed
 | `applyStatus` | 일시 효과 걸기 | target, status, turns | 모두 |
 | `knockback` | 대상을 공격 방향으로 밀어냄 (아래) | target, distance, collisionDamage | onHit |
 | `steal` | 대상의 소모품 하나를 훔침 (아래) | target | onHit |
+| `alarm` | 반경 안 몬스터의 `lastSeenPlayer`를 이 칸으로 (매복은 깨우지 않음, F010) | radius | 함정 |
 | `message` | 메시지 로그에 문구 추가 | text | 모두 |
 
+- 함정(traps.json)의 `effects`도 이 표의 효과를 쓴다. 이때 `self`는 함정을 밟은 개체다(F010).
 - `target`: `self`(효과의 주인) 또는 `other`(이벤트의 상대: 공격 대상, 공격자, 피해 원인)
 - 소모품도 같은 효과 종류를 쓴다: `{ "kind": "consumable", "use": { "effects": [...] } }`
 - 데이터 검사: `ignoreDefense`, `cancelAttack`, `modifyDamage`, `knockback`, `steal`을 쓸 수 없는 이벤트에 적으면 오류.

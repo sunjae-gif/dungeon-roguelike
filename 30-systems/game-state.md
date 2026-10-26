@@ -42,7 +42,7 @@ interface RunState {
   floor: FloorState;
   messageLog: Message[];   // 최대 ui.json `messageLogMaxStored`(100)개. 넘으면 오래된 것부터 버린다
   pendingChoice?: ItemChoice; // 빌드 아이템 고르기 대기 중 (F005). 있으면 턴 끝에 phase가 itemChoice가 된다
-  runStats: { kills: number; floorsReached: number; itemsFound: number; killedBy?: string; bossKilled?: boolean }; // killedBy: 플레이어를 쓰러뜨린 원인. 몬스터 defId 또는 일시 효과 id (F006, effects.md 4절)
+  runStats: { kills: number; floorsReached: number; itemsFound: number; killedBy?: string; bossKilled?: boolean }; // killedBy: 플레이어를 쓰러뜨린 원인. 몬스터 defId, 일시 효과 id 또는 함정 id (F006, effects.md 4절)
 }
 
 interface FloorState {
@@ -67,12 +67,12 @@ interface Room {
 
 interface MapObject {
   id: number;
-  type: string;             // 'door' | 'hiddenWall' | 'trap' | 'chest' | 'stairs' | 'sealedGate' | 퍼즐 장치 ...
+  type: string;             // 'door' | 'hiddenWall' | 'trap' | 'chest' | 'stairs' | 'sealedGate' | 'spring' | 'lever' | 'plate' | 'boulder' | 'switch'
   defId?: string;           // traps.json 등의 id
   x: number; y: number;
   blocksMove: boolean;
   blocksSight: boolean;
-  state: Record<string, unknown>; // { open: true }, { revealed: false } 등
+  state: Record<string, unknown>; // 물체별 상태. 아래 표
 }
 
 interface Actor {
@@ -109,6 +109,23 @@ interface Status { id: string; turnsLeft: number; appliedTurn: number; } // appl
 interface FloorItem { id: number; defId: string; x: number; y: number; }
 interface Message { turn: number; text: string; }
 ```
+
+## 물체별 state (F005, F008, F009, F010)
+| type | state | blocksMove | blocksSight |
+|---|---|---|---|
+| `door` | `{ open }` | 닫힘 true | 닫힘 true |
+| `hiddenWall` | `{ discovered }` | 발견 전 true | 발견 전 true |
+| `trap` | `{ spent }` | false | false |
+| `chest` | `{ opened, locked? }` | 열기 전 true | false |
+| `spring` | `{ used }` | true | false |
+| `lever` | `{}` | true | false |
+| `plate` | `{ stepped, broken }` | broken이면 true | false |
+| `boulder` | `{ homeX, homeY }` (되돌림 위치) | true | false |
+| `switch` | `{ pressed }` | false | false |
+| `sealedGate` | `{}` | true | true |
+| `stairs` | `{}` | false | false |
+
+퍼즐방의 `Room.state`: `{ puzzleId, solved }`.
 
 ## 칸이 지나갈 수 있는가
 한 칸은 다음을 모두 만족할 때 이동할 수 있다.

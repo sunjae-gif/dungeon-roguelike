@@ -69,6 +69,7 @@ systems: [effects, turn-order, game-flow, game-state]
   } }
 ```
 - `noticeMessage`는 모든 몬스터에 쓸 수 있는 선택 필드다. 있으면 F014 "처음 발견 메시지" 대신 쓴다.
+- 발견 메시지는 몬스터 한 마리당 **판 전체에서 한 번만** 남긴다. 플레이어가 먼저 본 순간(F014)과 몬스터가 플레이어를 처음 본 순간(규칙 8)이 따로 있어도 한 번만 나온다(`ai.noticed`로 막는다).
 - 데이터 검사: `behavior: "boss"`면 `boss` 객체 필수. `isBoss`인 몬스터는 하나뿐.
 
 ### ui.json에 추가
