@@ -2,6 +2,10 @@
 
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
+## 2026-10-26 (M3)
+- [systems] rng.md: loot 흐름은 층을 만든 뒤 그 층에 있는 동안 RunState.rng.loot에 이어 쓴다 (상자 후보, 몬스터 드롭)
+- [tech] art-guide.md: 테마별 팔레트 기준색 (F011)
+
 ## 2026-10-26 (M2+)
 - [F014, F015] status → implemented (M2+ 완료). tech-stack.md 테스트 지도 문자표에 새 몬스터 6종 추가. progress.md 갱신
 - [F015] 전투 규칙 아이템 9종 데이터(items.json)와 그림 항목(sprites.json 대체 색) 추가, 완료 기준 테스트. 얻는 방법은 개발자 모드 아이템 생성 (드롭은 F005)
