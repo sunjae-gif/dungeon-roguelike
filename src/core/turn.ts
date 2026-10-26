@@ -1,6 +1,7 @@
 // 한 턴 처리. 30-systems/turn-order.md
 import type { GameData } from '../data/types';
 import { transition } from './flow';
+import { bossRoomNeedingWarning, sealBossRooms, warnBossRoom } from './boss';
 import { attack } from './combat';
 import { canUseConsumable, CHEST_OBJECT_TYPE, openChest, pickUp, useConsumable } from './items';
 import { STAIRS_OBJECT_TYPE } from './dungeon';
@@ -27,7 +28,8 @@ export type Action =
   | { type: 'interact'; direction: Direction; objectId: number }
   | { type: 'useItem'; index: number }
   | { type: 'rest' }
-  | { type: 'descend' };
+  | { type: 'descend' }
+  | { type: 'warn'; roomId: number };
 
 // 2단계: 입력을 행동으로. 무효면 null.
 // 방향 입력 판정 (turn-order.md 1~5)
@@ -48,7 +50,10 @@ export function toAction(state: RunState, input: PlayerInput, data: GameData): A
       const ranged = monsterInRange(state, direction, getStat(state.player, 'attackRange', data));
       if (ranged) return { type: 'attack', direction, targetId: ranged.id };
       // 4. 이동, 5. 무효 (F002 규칙 2: 벽으로는 이동할 수 없다)
-      return isPassable(state, x, y) ? { type: 'move', direction } : null;
+      if (!isPassable(state, x, y)) return null;
+      // F008 규칙 4: 보스방에 처음 들어가려 하면 이동 대신 경고
+      const bossRoom = bossRoomNeedingWarning(state, { x, y });
+      return bossRoom ? { type: 'warn', roomId: bossRoom.id } : { type: 'move', direction };
     }
     case 'rest':
       return input;
@@ -90,6 +95,8 @@ export function playTurn(state: RunState, input: PlayerInput, data: GameData): R
   const action = toAction(state, input, data);
   // 무효 행동: 턴 수 그대로, 메시지 없음
   if (!action) return state;
+  // F008 규칙 4: 경고는 무효 행동이지만 메시지를 남기는 예외 (turn-order.md)
+  if (action.type === 'warn') return warnBossRoom(state, data, action.roomId);
 
   // 3. onTurnStart (플레이어, effects.md 3절)
   let next = fireEvent(state, data, state.player.id, 'onTurnStart').state;
@@ -106,13 +113,14 @@ export function playTurn(state: RunState, input: PlayerInput, data: GameData): R
   next = fireForAll(next, data, 'onTurnEnd'); // 6-1 재생·중독
   next = tickStatuses(next, data); // 6-2
   next = sweepDeadMonsters(next, data); // 6-3
+  next = sealBossRooms(next, data); // F008 규칙 6 (봉인 문은 시야를 막으므로 시야 계산 전에)
   next = noticeMonsters(updateSight(next, getStat(next.player, 'sightRadius', data)), data); // 6-4
   next = vanishFleeing(next, data); // 6-5
   next = transition(next, { type: 'turnEnd' }, data); // 6-6
   return { ...next, turn: next.turn + 1 }; // 6-7
 }
 
-function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'descend' }>, data: GameData): RunState {
+function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'descend' | 'warn' }>, data: GameData): RunState {
   switch (action.type) {
     case 'move': {
       // F002 규칙 1, 5: 한 칸 이동하고 그 방향을 바라본다

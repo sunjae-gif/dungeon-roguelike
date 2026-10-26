@@ -6,7 +6,7 @@ import { cameraFor } from './camera';
 import { fontCss } from './font';
 import type { Box, Layout } from './layout';
 import type { SpriteBook } from './sprites';
-import { floorIntroLines, itemChoiceLines, objectSprite, drawableItems, drawableMonsters, gameOverLines, messageLines, statusLines, tileShade, type TextLine } from './view';
+import { bossBar, floorIntroLines, itemChoiceLines, objectSprite, telegraphTiles, victoryLines, drawableItems, drawableMonsters, gameOverLines, messageLines, statusLines, tileShade, type TextLine } from './view';
 
 export interface RenderContext {
   ctx: CanvasRenderingContext2D;
@@ -29,7 +29,7 @@ function centerLines(state: RunState, data: GameData): string[] | null {
     case 'gameOver':
       return gameOverLines(state, data);
     case 'victory':
-      return ['클리어', 'R: 새 판   Esc: 타이틀'];
+      return victoryLines(state, data);
   }
 }
 
@@ -126,6 +126,12 @@ function drawMap(rc: RenderContext, state: RunState): void {
       }
     }
   }
+  // F008 규칙 13: 강타할 칸
+  ctx.fillStyle = data.ui.colors.telegraph;
+  for (const t of telegraphTiles(state)) {
+    const p = toScreen(t.x, t.y);
+    ctx.fillRect(p.x, p.y, tileSize, tileSize);
+  }
   for (const item of drawableItems(state)) drawSprite(item.defId, item.x, item.y);
   for (const monster of drawableMonsters(state)) drawSprite(monster.defId, monster.x, monster.y, monster.facing);
   drawSprite(player.defId, player.x, player.y, player.facing);
@@ -143,9 +149,23 @@ function drawTextLines(rc: RenderContext, box: Box, lines: TextLine[], fromBotto
 }
 
 function drawStatus(rc: RenderContext, state: RunState): void {
-  drawTextLines(rc, rc.layout.status, statusLines(state, rc.data));
+  const { ctx, data, layout } = rc;
+  const box = layout.status;
+  drawTextLines(rc, box, statusLines(state, data));
   // F007 규칙 21: 개발자 모드면 맨 아래에 시드
-  drawTextLines(rc, rc.layout.status, rc.extraStatus, true);
+  drawTextLines(rc, box, rc.extraStatus, true);
+  // F008 규칙 14: 보스 HP 막대 (개발자 모드 줄 위)
+  const boss = bossBar(state, data);
+  if (!boss) return;
+  const lineHeight = data.ui.layout.messageLineHeight;
+  const barY = box.y + box.h - (rc.extraStatus.length + 1) * lineHeight;
+  const labelY = barY - lineHeight;
+  ctx.fillStyle = data.ui.colors.text;
+  ctx.fillText(`${boss.name}  ${boss.hp}/${boss.maxHp}`, box.x, labelY);
+  ctx.strokeStyle = data.ui.colors.text;
+  ctx.strokeRect(box.x, barY, box.w, lineHeight / 2);
+  ctx.fillStyle = data.ui.colors.bossHp;
+  ctx.fillRect(box.x, barY, (box.w * boss.hp) / boss.maxHp, lineHeight / 2);
 }
 
 function drawLog(rc: RenderContext, state: RunState): void {

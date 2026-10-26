@@ -16,6 +16,7 @@
     { "id": "wall_boss",  "path": "assets/tiles/wall_boss.png",  "fallbackColor": "#3a2a66" },
     { "id": "door_boss",  "path": "assets/tiles/door_boss.png",  "fallbackColor": "#5a3fa0" },
     { "id": "stairs",     "path": "assets/tiles/stairs.png",     "fallbackColor": "#e0c040" },
+    { "id": "sealedGate", "path": "assets/objects/sealedGate.png", "fallbackColor": "#f2efff" },
     { "id": "chest",      "path": "assets/objects/chest.png",      "fallbackColor": "#c09030" },
     { "id": "chest_open", "path": "assets/objects/chest_open.png", "fallbackColor": "#806020" },
     { "id": "trap_spike", "path": "assets/objects/trap_spike.png", "fallbackColor": "#b0b0b0" },

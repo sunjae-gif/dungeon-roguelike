@@ -24,7 +24,9 @@
     "hpNormal": "#e8e8e8",
     "hpLow": "#ff4040",
     "missingSprite": "#ff00ff",
-    "rare": "#7fb8ff"
+    "rare": "#7fb8ff",
+    "telegraph": "rgba(255, 40, 40, 0.35)",
+    "bossHp": "#c02030"
   },
   "lowHpRatio": 0.3,
   "input": {

@@ -22,11 +22,18 @@ export interface AttackResult {
 }
 
 // 4절 1~9단계
-export function resolveAttack(state: RunState, data: GameData, attackerId: number, targetId: number): AttackResult {
+// extraOps: 공격 자체에 붙은 피해 수정 (F008 강타 ×2). 효과가 기록한 것보다 먼저 적용된다
+export function resolveAttack(
+  state: RunState,
+  data: GameData,
+  attackerId: number,
+  targetId: number,
+  extraOps: AttackInfo['damageOps'] = [],
+): AttackResult {
   const miss = (s: RunState): AttackResult => ({ state: s, damage: 0, killed: false, cancelled: false });
   if (!findActor(state, attackerId) || !findActor(state, targetId)) return miss(state);
   // 1~3. 공격 정보를 만들고 공격자, 대상 순서로 기록
-  const info: AttackInfo = { ignoreDefense: false, damageOps: [], cancelled: false };
+  const info: AttackInfo = { ignoreDefense: false, damageOps: [...extraOps], cancelled: false };
   let fired = fireEvent(state, data, attackerId, 'onBeforeAttack', { other: targetId, attack: info });
   fired = fireEvent(fired.state, data, targetId, 'onBeforeDamaged', { other: attackerId, attack: fired.ctx.attack });
   const attack = fired.ctx.attack ?? info;

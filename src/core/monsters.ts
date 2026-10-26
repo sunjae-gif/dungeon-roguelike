@@ -1,14 +1,15 @@
 // F004·F014 몬스터: 배치, 차례, 발견 메시지, 도망친 몬스터 사라짐
 import { themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
-import { actMonster } from './ai';
+import { actAmbush, actChase, actFlee, actRanged } from './ai';
+import { actBoss } from './boss';
 import type { Point } from './dungeon';
 import { baseStat } from './effects';
 import { findActor } from './events';
 import { addMessage, MESSAGES } from './messages';
 import { monsterAt, objectAt } from './movement';
 import { floorRng, nextInt, pickWeighted } from './rng';
-import { tileIndex, type Actor, type FloorState, type Room, type RunState } from './state';
+import { tileIndex, type Actor, type FloorState, type MonsterAi, type Room, type RunState } from './state';
 
 export { firstStep } from './ai';
 
@@ -98,6 +99,25 @@ export function spawnMonsters(
   return { floor: { ...floor, actors }, nextId };
 }
 
+// 몬스터 한 마리의 차례. behavior별로 (F004, F014, F008)
+function actMonster(state: RunState, data: GameData, monster: Actor): RunState {
+  const def = data.monsters.find((m) => m.id === monster.defId);
+  if (!def) return state;
+  const ai: MonsterAi = { ...monster.ai };
+  switch (def.behavior) {
+    case 'chase':
+      return actChase(state, data, monster, ai);
+    case 'ranged':
+      return actRanged(state, data, monster, def, ai);
+    case 'flee':
+      return actFlee(state, data, monster, def, ai);
+    case 'ambush':
+      return actAmbush(state, data, monster, ai);
+    case 'boss':
+      return actBoss(state, data, monster, def, ai);
+  }
+}
+
 // turn-order.md 5단계: 살아 있는 몬스터가 id 순서대로 한 번씩. 플레이어가 쓰러지면 남은 몬스터는 행동하지 않는다
 export function actMonsters(state: RunState, data: GameData): RunState {
   const ids = state.floor.actors.map((a) => a.id).sort((a, b) => a - b);
@@ -119,7 +139,9 @@ export function noticeMonsters(state: RunState, data: GameData): RunState {
   let next = state;
   for (const m of [...state.floor.actors].sort((a, b) => a.id - b.id)) {
     if (m.ai?.noticed || !isVisible(state.floor, m)) continue;
-    next = addMessage(next, MESSAGES.noticed(nameOf(data, m.defId)), data);
+    // F008: noticeMessage가 있으면 그것을 쓴다
+    const custom = data.monsters.find((d) => d.id === m.defId)?.noticeMessage;
+    next = addMessage(next, custom ?? MESSAGES.noticed(nameOf(data, m.defId)), data);
     const actors = next.floor.actors.map((a) => (a.id === m.id ? { ...a, ai: { ...a.ai, noticed: true } } : a));
     next = { ...next, floor: { ...next.floor, actors } };
   }

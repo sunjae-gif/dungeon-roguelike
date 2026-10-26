@@ -74,7 +74,7 @@ function checkStats(c: Checker, o: Obj, p: string, stats: readonly string[] = ST
 // 사거리는 없으면 1이라 따로 검사한다 (effects.md 1절)
 const MONSTER_STAT_IDS = STAT_IDS.filter((s) => s !== 'sightRadius' && s !== 'attackRange');
 // F014 행동 방식, 배치
-const MONSTER_BEHAVIORS = ['chase', 'ranged', 'flee', 'ambush'];
+const MONSTER_BEHAVIORS = ['chase', 'ranged', 'flee', 'ambush', 'boss'];
 const MONSTER_PLACEMENTS = ['room', 'chokepoint'];
 
 function checkPlayer(c: Checker, d: Obj): void {
@@ -122,8 +122,28 @@ function checkMonsters(c: Checker, d: Obj, refs: EffectRefs): Obj[] {
     c.oneOf(m, 'placement', p, MONSTER_PLACEMENTS, true);
     c.bool(m, 'piercing', p, true);
     c.str(m, 'attackVerb', p, true);
+    c.str(m, 'noticeMessage', p, true);
+    // F008: behavior boss면 boss 객체 필수
+    const boss = c.objField(m, 'boss', p, m.behavior !== 'boss');
+    if (boss) checkBoss(c, boss, `${p}.boss`);
   });
+  // F008: isBoss인 몬스터는 하나뿐
+  if (list.filter((m) => m.isBoss === true).length > 1) c.fail('monsters.json', 'isBoss인 몬스터가 둘 이상');
   return list;
+}
+
+// F008 보스 패턴
+function checkBoss(c: Checker, b: Obj, p: string): void {
+  c.num(b, 'chargeEvery', p, { integer: true, min: 1 });
+  c.num(b, 'slamRange', p, { integer: true, min: 1 });
+  c.num(b, 'slamDamageMul', p, { min: 0 });
+  const enrage = c.objField(b, 'enrage', p);
+  if (!enrage) return;
+  c.num(enrage, 'hpRatio', `${p}.enrage`, { min: 0, max: 1 });
+  c.num(enrage, 'chargeEvery', `${p}.enrage`, { integer: true, min: 1 });
+  c.str(enrage, 'message', `${p}.enrage`);
+  c.arr(enrage, 'modifiers', `${p}.enrage`);
+  checkModifiers(c, enrage, `${p}.enrage`);
 }
 
 function checkRoomTypes(c: Checker, d: Obj): Obj[] {
@@ -223,7 +243,7 @@ function checkUi(c: Checker, d: Obj): void {
   group('layout', ['padding', 'statusPanelWidth', 'messageLogLines', 'messageLineHeight']);
   group('fov', ['exploredBrightness'], ['unexploredColor']);
   group('font', ['size'], ['family', 'file', 'fallback']);
-  group('colors', [], ['background', 'text', 'hpNormal', 'hpLow', 'missingSprite', 'rare']);
+  group('colors', [], ['background', 'text', 'hpNormal', 'hpLow', 'missingSprite', 'rare', 'telegraph', 'bossHp']);
   group('input', ['keyRepeatIntervalMs']);
   c.num(d, 'lowHpRatio', p, { min: 0, max: 1 });
   c.num(d, 'floorIntroMs', p, { min: 0 });

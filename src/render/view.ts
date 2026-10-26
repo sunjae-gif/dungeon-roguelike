@@ -1,6 +1,7 @@
 // F007 무엇을 그릴지 정하는 순수 함수들. 캔버스를 쓰지 않아 테스트할 수 있다.
 import { tileIndex, type Actor, type FloorState, type MapObject, type RunState } from '../core/state';
 import { causeName } from '../core/events';
+import { MESSAGES } from '../core/messages';
 import { statusDef } from '../core/effects';
 import { getStat } from '../core/effects';
 import { formatSeed } from '../core/rng';
@@ -73,14 +74,50 @@ export function gameOverLines(state: RunState, data: GameData): string[] {
     ...(killedBy
       ? [data.monsters.some((m) => m.id === killedBy) ? `${causeName(data, killedBy)}에게 쓰러졌다` : `${causeName(data, killedBy)}(으)로 쓰러졌다`]
       : []),
+    ...resultLines(state, data),
+  ];
+}
+
+// F008 규칙 16: 클리어 화면
+export function victoryLines(state: RunState, data: GameData): string[] {
+  const boss = data.monsters.find((m) => m.isBoss);
+  return [MESSAGES.bossDefeated(boss?.name ?? ''), ...resultLines(state, data)];
+}
+
+// F006 결과 정보 + F008 규칙 16, 17: 이번 판의 빌드 아이템(얻은 순서)
+function resultLines(state: RunState, data: GameData): string[] {
+  const names = state.player.buildItems.map((id) => data.items.find((it) => it.id === id)?.name ?? id);
+  return [
     '',
     `도달한 층  ${state.runStats.floorsReached}층`,
     `쓰러뜨린 몬스터  ${state.runStats.kills}`,
     `턴 수  ${state.turn}`,
     `시드  ${formatSeed(state.runSeed)}`,
     '',
+    `빌드 아이템 (${names.length})`,
+    ...(names.length > 0 ? chunk(names, BUILD_NAMES_PER_LINE).map((row) => row.join(', ')) : ['없음']),
+    '',
     'R: 새 판   Esc: 타이틀',
   ];
+}
+
+// 결과 화면에서 빌드 아이템 이름을 한 줄에 몇 개씩
+const BUILD_NAMES_PER_LINE = 5;
+const chunk = <T,>(list: T[], size: number): T[][] =>
+  Array.from({ length: Math.ceil(list.length / size) }, (_, i) => list.slice(i * size, i * size + size));
+
+// F008 규칙 13: 보스가 힘을 모은 칸 중 플레이어에게 보이는 칸
+export function telegraphTiles(state: RunState): { x: number; y: number }[] {
+  return state.floor.actors
+    .flatMap((a) => a.ai?.charging ?? [])
+    .filter((t) => tileShade(state.floor, t.x, t.y) === 'visible');
+}
+
+// F008 규칙 14: 시야에 있는 보스의 HP
+export function bossBar(state: RunState, data: GameData): { name: string; hp: number; maxHp: number } | null {
+  const boss = drawableMonsters(state).find((a) => data.monsters.find((m) => m.id === a.defId)?.isBoss);
+  if (!boss) return null;
+  return { name: causeName(data, boss.defId), hp: Math.max(0, boss.hp), maxHp: getStat(boss, 'maxHp', data) };
 }
 
 // F013 규칙 5, F011 규칙 4: 층 번호, 테마 이름, 테마 첫 층이면 진입 문구

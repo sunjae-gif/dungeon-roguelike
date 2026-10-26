@@ -1,5 +1,5 @@
 {
-  "_note": "몬스터 종류(F004, F014). id는 themes.json, sprites.json에서 참조한다. 몬스터 시야는 모든 몬스터 공통 고정값 monsterSightRadius. 특성(modifiers, triggers)은 아이템과 같은 형식이고 chance는 1만. 수치는 모두 임시값.",
+  "_note": "몬스터 종류(F004, F014). id는 themes.json, sprites.json에서 참조한다. 몬스터 시야는 모든 몬스터 공통 고정값 monsterSightRadius. 특성(modifiers, triggers)은 아이템과 같은 형식이고 chance는 1만. 최종보스 패턴은 boss(F008). 수치는 모두 임시값.",
   "monsterSightRadius": 7,
   "monsters": [
     { "id": "rat",    "name": "쥐",     "maxHp": 4,  "attack": 3, "defense": 0, "behavior": "chase" },
@@ -23,6 +23,17 @@
       "triggers": [ { "event": "onTurnEnd", "chance": 1, "effects": [ { "type": "heal", "target": "self", "amount": 1 } ] } ] },
     { "id": "skeleton_archer", "name": "해골 궁수", "maxHp": 9, "attack": 5, "defense": 1,
       "behavior": "ranged", "attackRange": 5, "piercing": true, "attackVerb": "화살" },
-    { "id": "final_boss", "name": "최종보스", "maxHp": 80, "attack": 10, "defense": 4, "behavior": "chase", "isBoss": true }
+    { "id": "final_boss", "name": "심연의 왕", "maxHp": 80, "attack": 10, "defense": 4,
+      "behavior": "boss", "isBoss": true,
+      "noticeMessage": "심연의 왕이 당신을 내려다본다.",
+      "immunities": ["knockback", "steal", "status:weak"],
+      "boss": {
+        "chargeEvery": 3,
+        "slamRange": 2,
+        "slamDamageMul": 2,
+        "enrage": { "hpRatio": 0.5, "chargeEvery": 2,
+                    "modifiers": [ { "stat": "attack", "op": "add", "value": 2 } ],
+                    "message": "심연의 왕이 분노한다!" }
+      } }
   ]
 }

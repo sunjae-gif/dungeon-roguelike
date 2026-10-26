@@ -1,7 +1,7 @@
 // F003 전투: 공격 실행과 전투 메시지
 import type { GameData } from '../data/types';
 import { resolveAttack } from './damage';
-import { findActor } from './events';
+import { findActor, type AttackInfo } from './events';
 import { addMessage, MESSAGES } from './messages';
 import type { RunState } from './state';
 
@@ -10,12 +10,17 @@ export function monsterName(data: GameData, defId: string): string {
 }
 
 // F003 규칙 2~5: 피해 처리(effects.md)를 하고 결과를 메시지 로그에 남긴다
-// ranged: 원거리 공격 메시지를 쓴다 (F014)
-export function attack(state: RunState, data: GameData, attackerId: number, targetId: number, ranged = false): RunState {
+export interface AttackOptions {
+  ranged?: boolean; // 원거리 공격 메시지 (F014)
+  extraOps?: AttackInfo['damageOps']; // F008 강타
+}
+
+export function attack(state: RunState, data: GameData, attackerId: number, targetId: number, options: AttackOptions = {}): RunState {
+  const { ranged = false, extraOps = [] } = options;
   const attacker = findActor(state, attackerId);
   const target = findActor(state, targetId);
   if (!attacker || !target) return state;
-  const result = resolveAttack(state, data, attackerId, targetId);
+  const result = resolveAttack(state, data, attackerId, targetId, extraOps);
   let next = result.state;
   // 회피: 발동 메시지는 trigger가 남겼다 (effects.md 3절 규칙 6)
   if (result.cancelled) return next;

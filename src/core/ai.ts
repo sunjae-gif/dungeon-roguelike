@@ -1,6 +1,6 @@
 // F004·F014 몬스터 행동 방식. 무작위 요소 없음
 import type { GameData, MonsterDef } from '../data/types';
-import { attack } from './combat';
+import { attack, type AttackOptions } from './combat';
 import type { Point } from './dungeon';
 import { getStat } from './effects';
 import { fireEvent, updateActor } from './events';
@@ -10,10 +10,10 @@ import { tileIndex, type Actor, type Direction, type FloorState, type MonsterAi,
 // F004 규칙 14: 최단 경로가 여러 개면 위 → 오른쪽 → 아래 → 왼쪽
 const STEP_ORDER: Direction[] = ['up', 'right', 'down', 'left'];
 
-const stepFrom = (p: Point, dir: Direction): Point => ({ x: p.x + DIRECTION_DELTAS[dir].x, y: p.y + DIRECTION_DELTAS[dir].y });
+export const stepFrom = (p: Point, dir: Direction): Point => ({ x: p.x + DIRECTION_DELTAS[dir].x, y: p.y + DIRECTION_DELTAS[dir].y });
 
 // F004 규칙 13: 경로 계산에서 벽과 막힌 물체만 장애물. 다른 몬스터와 플레이어는 장애물이 아니다.
-function walkable(floor: FloorState, x: number, y: number): boolean {
+export function walkable(floor: FloorState, x: number, y: number): boolean {
   return inBounds(floor, x, y) && floor.tiles[tileIndex(floor, x, y)] === 'floor' && !objectAt(floor, x, y)?.blocksMove;
 }
 
@@ -96,7 +96,7 @@ function retreatStep(state: RunState, monster: Actor): Direction | null {
 }
 
 // 한 칸 움직인다. 첫 걸음 칸에 다른 개체가 있으면 기다린다 (F004 규칙 15)
-function moveOrWait(state: RunState, data: GameData, monster: Actor, dir: Direction, ai: MonsterAi): RunState {
+export function moveOrWait(state: RunState, data: GameData, monster: Actor, dir: Direction, ai: MonsterAi): RunState {
   const to = stepFrom(monster, dir);
   if (monsterAt(state.floor, to.x, to.y) || (to.x === state.player.x && to.y === state.player.y)) {
     return updateActor(state, { ...monster, ai, facing: dir });
@@ -105,13 +105,13 @@ function moveOrWait(state: RunState, data: GameData, monster: Actor, dir: Direct
   return fireEvent(moved, data, monster.id, 'onMove', { from: { x: monster.x, y: monster.y }, to }).state;
 }
 
-function strike(state: RunState, data: GameData, monster: Actor, ai: MonsterAi, ranged = false): RunState {
+export function strike(state: RunState, data: GameData, monster: Actor, ai: MonsterAi, options: AttackOptions = {}): RunState {
   const facing = updateActor(state, { ...monster, ai, facing: directionTo(monster, state.player) });
-  return attack(facing, data, monster.id, state.player.id, ranged);
+  return attack(facing, data, monster.id, state.player.id, options);
 }
 
-const isAdjacent = (state: RunState, monster: Actor) => manhattanDistance(monster, state.player) === 1;
-const seesPlayer = (state: RunState, data: GameData, monster: Actor) =>
+export const isAdjacent = (state: RunState, monster: Actor) => manhattanDistance(monster, state.player) === 1;
+export const seesPlayer = (state: RunState, data: GameData, monster: Actor) =>
   canSee(state.floor, monster, state.player, data.monsterSightRadius);
 
 // 마지막 목격 위치로 한 칸, 아니면 제자리 (F004 규칙 12-3, 12-4)
@@ -129,7 +129,7 @@ function followMemory(state: RunState, data: GameData, monster: Actor, ai: Monst
 }
 
 // F004 규칙 12 chase
-function actChase(state: RunState, data: GameData, monster: Actor, ai: MonsterAi): RunState {
+export function actChase(state: RunState, data: GameData, monster: Actor, ai: MonsterAi): RunState {
   if (isAdjacent(state, monster)) return strike(state, data, monster, ai);
   if (!seesPlayer(state, data, monster)) return followMemory(state, data, monster, ai);
   ai.lastSeenPlayer = { x: state.player.x, y: state.player.y };
@@ -138,7 +138,7 @@ function actChase(state: RunState, data: GameData, monster: Actor, ai: MonsterAi
 }
 
 // F014 ranged
-function actRanged(state: RunState, data: GameData, monster: Actor, def: MonsterDef, ai: MonsterAi): RunState {
+export function actRanged(state: RunState, data: GameData, monster: Actor, def: MonsterDef, ai: MonsterAi): RunState {
   const adjacent = isAdjacent(state, monster);
   // 1. 붙어 있고 지난 턴에 물러나지 않았으면 물러난다
   if (adjacent && !ai.retreatedLastTurn) {
@@ -153,7 +153,7 @@ function actRanged(state: RunState, data: GameData, monster: Actor, def: Monster
   const range = getStat(monster, 'attackRange', data);
   const piercing = def.piercing ?? false;
   // 3. 사격선이 있으면 그 자리에서 공격
-  if (lineOfFire(state, monster, state.player, range, piercing, monster.id)) return strike(state, data, monster, ai, true);
+  if (lineOfFire(state, monster, state.player, range, piercing, monster.id)) return strike(state, data, monster, ai, { ranged: true });
   // 4. 사격 위치(플레이어와 같은 줄, 2칸 이상 떨어진 바닥)로. 없으면 chase처럼 다가간다
   const spots: Point[] = [];
   for (const dir of STEP_ORDER) {
@@ -166,7 +166,7 @@ function actRanged(state: RunState, data: GameData, monster: Actor, def: Monster
 }
 
 // F014 flee
-function actFlee(state: RunState, data: GameData, monster: Actor, def: MonsterDef, ai: MonsterAi): RunState {
+export function actFlee(state: RunState, data: GameData, monster: Actor, def: MonsterDef, ai: MonsterAi): RunState {
   // 1. HP 조건(또는 steal 성공)으로 도망 상태. 한번 되면 풀리지 않는다
   if (monster.hp <= getStat(monster, 'maxHp', data) * (def.fleeHpRatio ?? 0)) ai.fleeing = true;
   if (!ai.fleeing) return actChase(state, data, monster, ai);
@@ -177,28 +177,8 @@ function actFlee(state: RunState, data: GameData, monster: Actor, def: MonsterDe
 }
 
 // F014 ambush
-function actAmbush(state: RunState, data: GameData, monster: Actor, ai: MonsterAi): RunState {
+export function actAmbush(state: RunState, data: GameData, monster: Actor, ai: MonsterAi): RunState {
   if (ai.awake) return actChase(state, data, monster, ai);
   if (!isAdjacent(state, monster)) return state;
   return strike(state, data, monster, { ...ai, awake: true });
-}
-
-// 몬스터 한 마리의 차례. behavior별로 (turn-order.md 5단계)
-export function actMonster(state: RunState, data: GameData, monster: Actor): RunState {
-  const def = data.monsters.find((m) => m.id === monster.defId);
-  if (!def) return state;
-  const ai: MonsterAi = { ...monster.ai };
-  switch (def.behavior) {
-    case 'chase':
-      return actChase(state, data, monster, ai);
-    case 'ranged':
-      return actRanged(state, data, monster, def, ai);
-    case 'flee':
-      return actFlee(state, data, monster, def, ai);
-    case 'ambush':
-      return actAmbush(state, data, monster, ai);
-    case 'boss':
-      // F008 보스 패턴은 bossAi.ts가 맡는다 (아래 단계에서 연결)
-      return actChase(state, data, monster, ai);
-  }
 }

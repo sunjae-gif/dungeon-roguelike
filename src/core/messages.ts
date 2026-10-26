@@ -2,6 +2,13 @@
 import type { GameData } from '../data/types';
 import type { RunState } from './state';
 
+// 받침이 있으면 withFinal(이·을), 없으면 without(가·를)
+export function josa(word: string, withFinal: string, without: string): string {
+  const code = word.charCodeAt(word.length - 1) - 0xac00;
+  const hasFinal = code >= 0 && code < 11172 && code % 28 !== 0;
+  return `${word}${hasFinal ? withFinal : without}`;
+}
+
 export const MESSAGES = {
   // F013 규칙 7, 8
   stairsHere: () => '계단이 있다. >를 눌러 내려간다.',
@@ -25,6 +32,12 @@ export const MESSAGES = {
   // F005
   gotItem: (item: string) => `${item}을(를) 얻었다.`,
   bagFull: () => '가방이 가득 찼다.',
+  // F008 최종보스
+  bossWarning: (boss: string) => `이 너머는 ${boss}의 방이다. 들어가면 돌아올 수 없다.`,
+  sealed: () => '뒤에서 문이 닫혔다.',
+  bossCharge: (boss: string) => `${josa(boss, '이', '가')} 힘을 모은다!`,
+  bossSlam: (boss: string) => `${josa(boss, '이', '가')} 내려친다!`,
+  bossDefeated: (boss: string) => `${josa(boss, '을', '를')} 쓰러뜨렸다!`,
   // effects.md 7절 면역
   immune: (target: string) => `${target}에게는 통하지 않는다.`,
   playerName: '당신',
