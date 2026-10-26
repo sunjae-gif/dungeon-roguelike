@@ -121,7 +121,14 @@ function start(data: GameData): void {
   // F012: 개발 서버에서만 켜진다. 배포 빌드에서는 이 블록과 dev/ 코드가 빠진다.
   if (import.meta.env.DEV) {
     void import('./dev/devMode').then(({ installDevMode }) => {
-      dev = installDevMode(() => state, data.ui.colors.text);
+      dev = installDevMode({
+        data,
+        getState: () => state,
+        setState: (next) => {
+          state = next;
+          onStateChange();
+        },
+      });
       dev.update(state);
       draw();
     });

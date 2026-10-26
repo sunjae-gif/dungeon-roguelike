@@ -1,8 +1,11 @@
 // F012 개발자 모드. main.ts가 import.meta.env.DEV일 때만 불러온다.
-// M0 범위: 창 열고 닫기, 시드 표시, 상태 내보내기
-import { formatSeed } from '../core/rng';
+// 창 열고 닫기, 시드 표시, 시드로 시작, 층 이동, 지도 공개, 아이템 생성, 상태 내보내기·불러오기
+// (무적은 아직 없다)
+import { formatSeed, parseSeed } from '../core/rng';
 import type { RunState } from '../core/state';
+import type { GameData } from '../data/types';
 import type { TextLine } from '../render/view';
+import { grantItem, jumpToFloor, loadState, revealMap, startWithSeed, type DevResult } from './commands';
 
 const TOGGLE_KEY = '`';
 
@@ -20,10 +23,21 @@ const STYLE = `
 #dev-panel.open { display: block; }
 #dev-panel h2 { font-size: 14px; margin: 0 0 8px; }
 #dev-panel button { font: inherit; margin-bottom: 6px; }
-#dev-panel textarea { width: 100%; height: 160px; box-sizing: border-box; font: 11px monospace; }
+#dev-panel textarea { width: 100%; height: 120px; box-sizing: border-box; font: 11px monospace; }
+#dev-panel input { font: inherit; width: 160px; }
+#dev-panel .row { margin-bottom: 6px; }
+#dev-panel [data-result] { color: #9cf; min-height: 1em; }
 `;
 
-export function installDevMode(getState: () => RunState, textColor: string): DevMode {
+export interface DevHost {
+  data: GameData;
+  getState(): RunState;
+  setState(state: RunState): void;
+}
+
+export function installDevMode(host: DevHost): DevMode {
+  const { data, getState } = host;
+  const textColor = data.ui.colors.text;
   const style = document.createElement('style');
   style.textContent = STYLE;
   document.head.append(style);
@@ -34,13 +48,37 @@ export function installDevMode(getState: () => RunState, textColor: string): Dev
   panel.innerHTML = `
     <h2>개발자 모드 (\` 로 닫기)</h2>
     <div>시드: <span data-seed></span></div>
+    <div data-result></div>
     <hr>
-    <button data-export>상태 내보내기</button>
-    <textarea data-export-out readonly placeholder="내보낸 상태 JSON"></textarea>
+    <div class="row"><input data-seed-in placeholder="시드 (16진수)"> <button data-seed-go>시드로 시작</button></div>
+    <div class="row"><input data-floor-in placeholder="층 (1~${data.dungeon.maxFloor})"> <button data-floor-go>층 이동</button></div>
+    <div class="row"><input data-item-in list="dev-items" placeholder="아이템 id"> <button data-item-go>아이템 생성</button></div>
+    <datalist id="dev-items">${data.items.map((it) => `<option value="${it.id}">${it.name}</option>`).join('')}</datalist>
+    <div class="row"><button data-reveal>지도 공개</button></div>
+    <hr>
+    <button data-export>상태 내보내기</button> <button data-load>상태 불러오기</button>
+    <textarea data-export-out placeholder="상태 JSON (불러오기는 여기에 붙여 넣기)"></textarea>
   `;
   document.body.append(panel);
   const seedText = panel.querySelector('[data-seed]') as HTMLElement;
   const exportOut = panel.querySelector('[data-export-out]') as HTMLTextAreaElement;
+  const resultText = panel.querySelector('[data-result]') as HTMLElement;
+  const input = (name: string) => (panel.querySelector(`[data-${name}-in]`) as HTMLInputElement).value;
+  const on = (name: string, run: () => DevResult) =>
+    panel.querySelector(`[data-${name}]`)!.addEventListener('click', () => {
+      const result = run();
+      if (result.ok) host.setState(result.state);
+      resultText.textContent = result.ok ? result.note : `실패: ${result.error}`;
+    });
+
+  on('seed-go', () => {
+    const seed = parseSeed(input('seed'));
+    return seed === null ? { ok: false, error: '16진수 8자리 이하' } : startWithSeed(data, seed);
+  });
+  on('floor-go', () => jumpToFloor(getState(), data, Number(input('floor'))));
+  on('item-go', () => grantItem(getState(), data, input('item')));
+  on('reveal', () => revealMap(getState()));
+  on('load', () => loadState(exportOut.value));
 
   // F012: 상태 내보내기. 클립보드에 복사하고, 실패해도 글상자에서 복사할 수 있게 둔다.
   panel.querySelector('[data-export]')!.addEventListener('click', () => {
