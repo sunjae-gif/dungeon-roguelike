@@ -2,7 +2,7 @@
 id: F011
 name: 층 테마
 serves: [P3, P1]
-status: confirmed
+status: implemented
 depends_on: [F001, F013, F014]
 data: [20-data/themes.json, 20-data/sprites.json, 20-data/dungeon.json]
 systems: [rng]

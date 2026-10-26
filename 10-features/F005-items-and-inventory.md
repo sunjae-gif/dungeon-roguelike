@@ -2,7 +2,7 @@
 id: F005
 name: 아이템과 빌드
 serves: [P3, P2]
-status: confirmed
+status: implemented
 depends_on: [F001, F002, F015]
 data: [20-data/items.json, 20-data/player.json, 20-data/loot.json, 20-data/themes.json, 20-data/statuses.json]
 systems: [effects, turn-order, game-flow, game-state, rng]

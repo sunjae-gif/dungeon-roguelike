@@ -2,7 +2,7 @@
 id: F008
 name: 최종보스
 serves: [P1, P4, P2]
-status: confirmed
+status: implemented
 depends_on: [F001, F003, F004, F014, F006]
 data: [20-data/monsters.json, 20-data/ui.json]
 systems: [effects, turn-order, game-flow, game-state]
