@@ -2,7 +2,7 @@
 id: F004
 name: 몬스터
 serves: [P3, P4]
-status: confirmed
+status: implemented
 depends_on: [F001, F002, F003]
 data: [20-data/monsters.json, 20-data/themes.json]
 systems: [game-state, turn-order, rng]
@@ -43,7 +43,7 @@ systems: [game-state, turn-order, rng]
 17. 대각선으로 인접한 플레이어는 공격할 수 없다.
 
 ## 이번 버전에서 하지 않는 것
-- 원거리 공격, 도망, 순찰 같은 다른 행동 (나중에 `behavior` 값을 추가해서 넣는다)
+- 원거리 공격, 도망, 순찰 같은 다른 행동 (나중에 `behavior` 값을 추가해서 넣는다. 설계안은 F014)
 - 몬스터별 속도
 - 몬스터의 강함을 미리 보여주는 정보 (상태창 몬스터 목록, HP 막대)
 

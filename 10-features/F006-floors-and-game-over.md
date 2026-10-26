@@ -2,7 +2,7 @@
 id: F006
 name: 게임 종료와 재시작
 serves: [P1]
-status: confirmed
+status: implemented
 depends_on: [F003, F013]
 data: []
 systems: [game-flow]

@@ -3,6 +3,9 @@
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
 ## 2026-10-26
+- [F003, F004, F006] status → implemented (M2 완료)
+- [F014] 몬스터 다양화 설계안 신규 (draft): 원거리·겁쟁이·매복 행동, 몬스터 특성, 새 몬스터 6종, 일시 효과 2종
+- [F005] 전투 규칙을 넘나드는 빌드 아이템 설계안 추가 (치명타·회피·2칸 공격·넉백·중독·관통)
 - [F003] 전투 구현: 몬스터 방향 입력 = 공격, 피해 처리(effects.md), 전투 메시지, 처치 수, killedBy
 - [F004] 몬스터 구현: spawn 흐름으로 방 안 배치(구조용 방 제외), 공통 시야 monsterSightRadius, chase(BFS 첫 걸음, 위→오른쪽→아래→왼쪽), lastSeenPlayer
 - [systems] game-state.md: runStats.killedBy 추가 (F006 게임 오버 화면의 "{몬스터}에게 쓰러졌다")
