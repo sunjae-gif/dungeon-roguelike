@@ -24,6 +24,7 @@ function centerLines(state: RunState, data: GameData): string[] | null {
     case 'floorIntro':
       return [`${state.floorNumber}층`, themeForFloor(data, state.floorNumber).name];
     case 'playing':
+    case 'itemChoice':
       return null;
     case 'gameOver':
       return gameOverLines(state, data);

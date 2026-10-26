@@ -5,7 +5,7 @@ export type Direction = 'up' | 'down' | 'left' | 'right';
 export type TileType = 'wall' | 'floor';
 
 // 30-systems/game-flow.md
-export type Phase = 'title' | 'playing' | 'floorIntro' | 'gameOver' | 'victory';
+export type Phase = 'title' | 'playing' | 'floorIntro' | 'itemChoice' | 'gameOver' | 'victory';
 
 export interface RunState {
   version: 1;
@@ -18,7 +18,14 @@ export interface RunState {
   player: Actor;
   floor: FloorState;
   messageLog: Message[];
-  runStats: { kills: number; floorsReached: number; itemsFound: number; killedBy?: string };
+  pendingChoice?: ItemChoice; // F005: 있으면 턴 끝에 phase가 itemChoice가 된다
+  runStats: { kills: number; floorsReached: number; itemsFound: number; killedBy?: string; bossKilled?: boolean };
+}
+
+// F005 빌드 아이템 고르기
+export interface ItemChoice {
+  source: 'chest' | 'secret' | 'puzzle';
+  options: string[];
 }
 
 export interface FloorState {
@@ -77,6 +84,10 @@ export interface MonsterAi {
   retreatedLastTurn?: boolean;
   fleeing?: boolean;
   unseenTurns?: number;
+  // F008 보스
+  turnsUntilCharge?: number;
+  charging?: { x: number; y: number }[];
+  enraged?: boolean;
 }
 
 export interface Status {

@@ -1,7 +1,7 @@
 // 20-data/ 전체 검사. 40-tech/tech-stack.md "데이터 검사"
 import { EFFECT_TYPES, STAT_IDS } from '../core/effects';
 import { Checker, idsOf, type Obj } from './check';
-import { checkEffects, checkModifiers, checkTriggers, type EffectRefs } from './validateEffects';
+import { checkEffects, checkImmunities, checkModifiers, checkTriggers, type EffectRefs } from './validateEffects';
 import type { GameData, RawData } from './types';
 
 export type ValidationResult = { ok: true; data: GameData } | { ok: false; errors: string[] };
@@ -104,6 +104,7 @@ function checkMonsters(c: Checker, d: Obj, refs: EffectRefs): Obj[] {
     // effects.md 2절: 몬스터 특성. 3절 규칙 7: 확률 없음
     checkModifiers(c, m, p);
     checkTriggers(c, m, p, refs, true);
+    checkImmunities(c, m, p, refs);
     c.str(m, 'behavior', p);
     if (typeof m.behavior === 'string' && !MONSTER_BEHAVIORS.includes(m.behavior)) {
       c.fail(`${p}.behavior`, `알 수 없는 행동 방식 "${m.behavior}" (가능: ${MONSTER_BEHAVIORS.join(', ')})`);
@@ -167,6 +168,7 @@ function checkItems(c: Checker, d: Obj, spriteIds: Set<string>, refs: EffectRefs
     }
     checkModifiers(c, item, p);
     checkTriggers(c, item, p, refs, false);
+    checkImmunities(c, item, p, refs);
   });
   return list;
 }

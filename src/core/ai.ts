@@ -197,5 +197,8 @@ export function actMonster(state: RunState, data: GameData, monster: Actor): Run
       return actFlee(state, data, monster, def, ai);
     case 'ambush':
       return actAmbush(state, data, monster, ai);
+    case 'boss':
+      // F008 보스 패턴은 bossAi.ts가 맡는다 (아래 단계에서 연결)
+      return actChase(state, data, monster, ai);
   }
 }

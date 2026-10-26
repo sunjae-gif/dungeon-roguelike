@@ -61,7 +61,7 @@ function attackDeath(state: RunState, data: GameData, attackerId: number, target
   if (!target || target.hp > 0) return state;
   if (targetId === state.player.id) return recordPlayerDeath(state, findActor(state, attackerId)?.defId);
   let next = fireEvent(state, data, attackerId, 'onKill', { other: targetId }).state;
-  next = removeMonster(next, targetId);
+  next = removeMonster(next, data, targetId);
   if (attackerId === next.player.id) next = { ...next, runStats: { ...next.runStats, kills: next.runStats.kills + 1 } };
   return next;
 }
@@ -94,24 +94,28 @@ export function applyDamage(
     next = addMessage(next, isMonster ? MESSAGES.playerKilled(name) : MESSAGES.playerKilledBy(name), data);
     return recordPlayerDeath(next, source.cause);
   }
-  return sweepDeadMonsters(next);
+  return sweepDeadMonsters(next, data);
 }
 
 // turn-order.md 6-3: HP가 0 이하인 몬스터 제거·처치 수 증가 (onKill 없음)
-export function sweepDeadMonsters(state: RunState): RunState {
+export function sweepDeadMonsters(state: RunState, data: GameData): RunState {
   let next = state;
   for (const dead of state.floor.actors.filter((a) => a.hp <= 0)) {
-    next = removeMonster(next, dead.id);
+    next = removeMonster(next, data, dead.id);
     next = { ...next, runStats: { ...next.runStats, kills: next.runStats.kills + 1 } };
   }
   return next;
 }
 
 // 몬스터 제거. 훔친 물건(carried)이 있으면 떨어뜨린다 (6절 steal 규칙 5)
-function removeMonster(state: RunState, id: number): RunState {
+// F008 규칙 15: 보스가 어떤 이유로든 쓰러지면 bossKilled
+function removeMonster(state: RunState, data: GameData, id: number): RunState {
   const monster = state.floor.actors.find((a) => a.id === id);
   if (!monster) return state;
   let next: RunState = { ...state, floor: { ...state.floor, actors: state.floor.actors.filter((a) => a.id !== id) } };
+  if (data.monsters.find((m) => m.id === monster.defId)?.isBoss) {
+    next = { ...next, runStats: { ...next.runStats, bossKilled: true } };
+  }
   for (const itemId of monster.carried ?? []) {
     const spot = nearestFreeFloor(next, monster);
     if (!spot) break;

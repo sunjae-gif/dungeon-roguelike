@@ -88,7 +88,7 @@ export function playTurn(state: RunState, input: PlayerInput, data: GameData): R
   // 6. 턴 마무리
   next = fireForAll(next, data, 'onTurnEnd'); // 6-1 재생·중독
   next = tickStatuses(next, data); // 6-2
-  next = sweepDeadMonsters(next); // 6-3
+  next = sweepDeadMonsters(next, data); // 6-3
   next = noticeMonsters(updateSight(next, getStat(next.player, 'sightRadius', data)), data); // 6-4
   next = vanishFleeing(next, data); // 6-5
   next = transition(next, { type: 'turnEnd' }, data); // 6-6

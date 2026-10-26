@@ -57,3 +57,13 @@ export function checkEffects(c: Checker, list: unknown[] | null, p: string, refs
     }
   });
 }
+
+// 7절 면역: knockback, steal, status:{statuses.json id}
+export function checkImmunities(c: Checker, o: Obj, p: string, refs: EffectRefs): void {
+  c.arr(o, 'immunities', p, true)?.forEach((v, i) => {
+    const ip = `${p}.immunities[${i}]`;
+    if (v === 'knockback' || v === 'steal') return;
+    if (typeof v === 'string' && v.startsWith('status:')) return c.ref(v.slice('status:'.length), refs.statuses, ip, 'statuses.json');
+    c.fail(ip, `knockback / steal / status:{id} 중 하나여야 함 (지금: ${JSON.stringify(v)})`);
+  });
+}

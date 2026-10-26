@@ -84,7 +84,11 @@ export interface EffectSource {
 export function sourcesOf(actor: Actor, data: GameData): EffectSource[] {
   const sources: EffectSource[] = [];
   const def = data.monsters.find((m) => m.id === actor.defId);
-  if (def) sources.push({ modifiers: def.modifiers ?? [], triggers: def.triggers ?? [] });
+  if (def) {
+    // F008: 보스 2단계 보정은 개체 정의 보정에 더한다
+    const enraged = def.boss && actor.ai?.enraged ? def.boss.enrage.modifiers : [];
+    sources.push({ modifiers: [...(def.modifiers ?? []), ...enraged], triggers: def.triggers ?? [] });
+  }
   for (const id of actor.buildItems) {
     const item = itemDef(data, id);
     if (item) sources.push({ modifiers: item.modifiers ?? [], triggers: item.triggers ?? [] });
@@ -95,6 +99,14 @@ export function sourcesOf(actor: Actor, data: GameData): EffectSource[] {
   }
   return sources;
 }
+
+// 7절 면역: 개체 정의와 가진 빌드 아이템의 immunities를 모두 갖는다
+export function immunitiesOf(actor: Actor, data: GameData): string[] {
+  const def = data.monsters.find((m) => m.id === actor.defId);
+  return [...(def?.immunities ?? []), ...actor.buildItems.flatMap((id) => itemDef(data, id)?.immunities ?? [])];
+}
+
+export const statusImmunity = (statusId: string) => `status:${statusId}`;
 
 // 최종값 = floor((기본값 + add 합) × (1 + mul 합)), 최솟값·상한 적용. 상태에 저장하지 않고 필요할 때 계산한다.
 export function getStat(actor: Actor, stat: StatId, data: GameData): number {

@@ -20,6 +20,12 @@ export const MESSAGES = {
   fled: (monster: string) => `${monster}이(가) 달아났다.`,
   // effects.md 4절: 공격이 아닌 피해(일시 효과 등)로 쓰러짐
   playerKilledBy: (cause: string) => `${cause}(으)로 쓰러졌다.`,
+  // F005
+  gotItem: (item: string) => `${item}을(를) 얻었다.`,
+  bagFull: () => '가방이 가득 찼다.',
+  // effects.md 7절 면역
+  immune: (target: string) => `${target}에게는 통하지 않는다.`,
+  playerName: '당신',
   // effects.md 6절 steal
   stole: (monster: string, item: string) => `${monster}이(가) ${item}을(를) 훔쳤다!`,
 };

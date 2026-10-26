@@ -7,6 +7,7 @@ export type Command =
   | { type: 'introDone' }
   | { type: 'restart' }
   | { type: 'toTitle' }
+  | { type: 'choose'; index: number }
   | { type: 'player'; input: PlayerInput };
 
 // F002 키 배치: 방향키 또는 WASD
@@ -43,6 +44,11 @@ export function keyToCommand(phase: Phase, key: string): Command | null {
       return MODIFIER_KEYS.includes(key) ? null : { type: 'introDone' };
     case 'playing':
       return playingCommand(key);
+    case 'itemChoice': {
+      // F005 규칙 13: 숫자키로 고른다
+      const n = Number(key);
+      return Number.isInteger(n) && n >= 1 && n <= 9 ? { type: 'choose', index: n - 1 } : null;
+    }
     case 'gameOver':
     case 'victory':
       if (key === 'r' || key === 'R') return { type: 'restart' };

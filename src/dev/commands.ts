@@ -1,6 +1,7 @@
 // F012 개발자 모드 명령. 화면(devMode.ts)과 나눠서 테스트할 수 있게 한다.
 // 바뀐 상태도 game-state.md 구조를 그대로 따른다.
 import { itemDef } from '../core/effects';
+import { addBuildItem } from '../core/items';
 import { createRun, enterFloor } from '../core/run';
 import { STATE_VERSION, type RunState } from '../core/state';
 import type { GameData } from '../data/types';
@@ -13,7 +14,7 @@ export function grantItem(state: RunState, data: GameData, id: string): DevResul
   if (!def) return { ok: false, error: `items.json에 없는 id "${id}"` };
   const { player } = state;
   if (def.kind === 'build') {
-    return { ok: true, state: { ...state, player: { ...player, buildItems: [...player.buildItems, def.id] } }, note: `빌드에 ${def.name}` };
+    return { ok: true, state: addBuildItem(state, data, def.id), note: `빌드에 ${def.name}` };
   }
   if (player.consumables.length >= data.player.inventorySize) return { ok: false, error: '인벤토리가 가득 찼다' };
   return { ok: true, state: { ...state, player: { ...player, consumables: [...player.consumables, def.id] } }, note: `인벤토리에 ${def.name}` };

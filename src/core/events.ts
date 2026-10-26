@@ -1,7 +1,7 @@
 // 30-systems/effects.md 3. 이벤트, 5. 일시 효과, 6. 효과 실행
 // 공격과 피해 처리(4절)는 damage.ts
 import type { EffectDef, GameData } from '../data/types';
-import { clampHp, getStat, itemDef, sourcesOf, statusDef, type EventName } from './effects';
+import { clampHp, getStat, immunitiesOf, itemDef, sourcesOf, statusDef, statusImmunity, type EventName } from './effects';
 import { addMessage, MESSAGES } from './messages';
 import { applyDamage, knockback, type DamageSource } from './damage';
 import { chance, useRunRng } from './rng';
@@ -96,6 +96,11 @@ export function applyEffect(
   // 3절 규칙 4: 상대가 없으면 아무것도 하지 않는다
   const target = targetId === undefined ? undefined : findActor(state, targetId);
   const attack = ctx.attack;
+  // 7절 규칙 1: 면역이면 아무 일도 없고 메시지를 남긴다
+  const immunity = immunityFor(effect);
+  if (target && immunity && immunitiesOf(target, data).includes(immunity)) {
+    return { state: addMessage(state, MESSAGES.immune(actorName(state, data, target)), data), ctx };
+  }
   switch (effect.type) {
     case 'heal': {
       if (!target) return { state, ctx };
@@ -126,6 +131,18 @@ export function applyEffect(
     default:
       return { state, ctx };
   }
+}
+
+// 7절 면역 표: 이 효과를 막는 면역 값
+function immunityFor(effect: EffectDef): string | undefined {
+  if (effect.type === 'knockback' || effect.type === 'steal') return effect.type;
+  if (effect.type === 'applyStatus' && effect.status) return statusImmunity(effect.status);
+  return undefined;
+}
+
+export function actorName(state: RunState, data: GameData, actor: Actor): string {
+  if (actor.id === state.player.id) return MESSAGES.playerName;
+  return data.monsters.find((m) => m.id === actor.defId)?.name ?? actor.defId;
 }
 
 // 5절 규칙 1, 2: 일시 효과 걸기. 이미 걸려 있으면 남은 턴을 max로

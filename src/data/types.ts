@@ -38,9 +38,22 @@ export interface MonsterDef {
   fleeHpRatio?: number;
   vanishWhenUnseen?: number;
   placement?: 'room' | 'chokepoint';
+  // effects.md 7절
+  immunities?: string[];
+  // F008: 있으면 F014 처음 발견 메시지 대신 쓴다
+  noticeMessage?: string;
+  boss?: BossDef;
 }
 
-export type MonsterBehavior = 'chase' | 'ranged' | 'flee' | 'ambush';
+export type MonsterBehavior = 'chase' | 'ranged' | 'flee' | 'ambush' | 'boss';
+
+// F008 보스 패턴
+export interface BossDef {
+  chargeEvery: number;
+  slamRange: number;
+  slamDamageMul: number;
+  enrage: { hpRatio: number; chargeEvery: number; modifiers: Modifier[]; message: string };
+}
 
 export interface Modifier {
   stat: string;
@@ -77,6 +90,11 @@ export interface ItemDef {
   use?: { requires?: string; effects: EffectDef[] };
   modifiers?: Modifier[];
   triggers?: Trigger[];
+  // F005
+  rarity?: 'common' | 'rare';
+  description?: string;
+  // effects.md 7절
+  immunities?: string[];
 }
 
 // effects.md 5절
