@@ -1,0 +1,8 @@
+{
+  "_note": "아이템을 얻는 규칙(F005). item은 items.json의 소모품 id. 수치는 모두 임시값.",
+  "chestChoices": 3,
+  "secretChoices": 2,
+  "puzzleChoices": 3,
+  "monsterDrop": { "item": "potion_heal", "chance": 0.08 },
+  "exhaustedReward": { "item": "potion_heal", "count": 2 }
+}

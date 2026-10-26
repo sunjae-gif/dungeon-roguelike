@@ -23,7 +23,8 @@
     "text": "#e8e8e8",
     "hpNormal": "#e8e8e8",
     "hpLow": "#ff4040",
-    "missingSprite": "#ff00ff"
+    "missingSprite": "#ff00ff",
+    "rare": "#7fb8ff"
   },
   "lowHpRatio": 0.3,
   "input": {

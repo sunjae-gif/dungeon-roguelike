@@ -58,7 +58,7 @@ describe('데이터 검사', () => {
 
   it('효과 type, 이벤트 이름, 능력치 id가 effects.md 표에 있어야 한다', () => {
     const buildItem = {
-      id: 'test_build', name: '테스트', kind: 'build', weight: 1, sprite: 'potion_heal',
+      id: 'test_build', name: '테스트', kind: 'build', weight: 1, sprite: 'potion_heal', rarity: 'common', description: '테스트',
       modifiers: [{ stat: 'attack', op: 'add', value: 1 }],
       triggers: [{ event: 'onHit', chance: 1, effects: [{ type: 'heal', target: 'self', amount: 2 }] }],
     };

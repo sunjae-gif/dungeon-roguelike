@@ -311,15 +311,15 @@ describe('effects.md 2~3. 이벤트와 피해 처리', () => {
       { event: 'onHit', chance: 0.5, message: 'x', effects: [{ type: 'heal', target: 'self', amount: 1 }] },
     ])).join()).toMatch(/chance가 1이어야/);
     expect(errorsOf((r) => r['items.json'].items.push({
-      id: 't', name: 't', kind: 'build', sprite: 'potion_heal',
+      id: 't', name: 't', kind: 'build', sprite: 'potion_heal', rarity: 'common', description: 't',
       triggers: [{ event: 'onHit', chance: 0.5, effects: [{ type: 'heal', target: 'self', amount: 1 }] }],
     })).join()).toMatch(/message가 필요/);
     expect(errorsOf((r) => r['items.json'].items.push({
-      id: 't', name: 't', kind: 'build', sprite: 'potion_heal',
+      id: 't', name: 't', kind: 'build', sprite: 'potion_heal', rarity: 'common', description: 't',
       triggers: [{ event: 'onHit', chance: 1, effects: [{ type: 'cancelAttack' }] }],
     })).join()).toMatch(/onBeforeDamaged에서만/);
     expect(errorsOf((r) => r['items.json'].items.push({
-      id: 't', name: 't', kind: 'build', sprite: 'potion_heal',
+      id: 't', name: 't', kind: 'build', sprite: 'potion_heal', rarity: 'common', description: 't',
       triggers: [{ event: 'onHit', chance: 1, effects: [{ type: 'applyStatus', target: 'other', status: 'nope', turns: 1 }] }],
     })).join()).toMatch(/statuses\.json에 없는 id "nope"/);
   });

@@ -12,7 +12,10 @@ export function gameData(): GameData {
 
 // 테스트 전용 빌드 아이템을 더한 데이터. 형식 검사도 통과해야 한다.
 export function withItems(...items: Omit<ItemDef, 'name' | 'kind' | 'weight' | 'sprite'>[]): GameData {
-  const full = items.map((it) => ({ name: it.id, kind: 'build' as const, weight: 0, sprite: 'potion_heal', ...it }));
+  // weight 0: 보물상자 후보로는 나오지 않는 시험용
+  const full = items.map((it) => ({
+    name: it.id, kind: 'build' as const, weight: 0, sprite: 'potion_heal', rarity: 'common' as const, description: it.id, ...it,
+  }));
   const raw = structuredClone(RAW_DATA) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   raw['items.json'].items.push(...full);
   const result = validateGameData(raw as typeof RAW_DATA);

@@ -102,7 +102,10 @@ function start(data: GameData): void {
     const command = keyToCommand(state.phase, e.key);
     if (!command) return;
     e.preventDefault();
-    if (command.type === 'player') {
+    if (command.type === 'player' && command.input.type !== 'direction' && command.input.type !== 'rest') {
+      // 내려가기·아이템 사용은 반복하지 않는다 (F002의 반복은 이동·쉬기)
+      play(command.input);
+    } else if (command.type === 'player') {
       const { input } = command;
       repeater.press(e.code, () => {
         const prev = state;

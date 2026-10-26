@@ -1,6 +1,7 @@
 // 20-data/ 파일을 불러와 검사한다. 게임 시작과 테스트에서 같은 함수를 쓴다.
 import dungeon from '../../20-data/dungeon.json';
 import items from '../../20-data/items.json';
+import loot from '../../20-data/loot.json';
 import monsters from '../../20-data/monsters.json';
 import player from '../../20-data/player.json';
 import rooms from '../../20-data/rooms.json';
@@ -22,6 +23,7 @@ export const RAW_DATA: RawData = {
   'themes.json': themes,
   'traps.json': traps,
   'statuses.json': statuses,
+  'loot.json': loot,
   'ui.json': ui,
 };
 

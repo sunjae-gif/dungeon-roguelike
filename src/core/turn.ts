@@ -2,6 +2,7 @@
 import type { GameData } from '../data/types';
 import { transition } from './flow';
 import { attack } from './combat';
+import { canUseConsumable, CHEST_OBJECT_TYPE, openChest, pickUp, useConsumable } from './items';
 import { STAIRS_OBJECT_TYPE } from './dungeon';
 import { getStat } from './effects';
 import { sweepDeadMonsters } from './damage';
@@ -9,21 +10,27 @@ import { fireEvent, fireForAll, tickStatuses } from './events';
 import { addMessage, MESSAGES } from './messages';
 import { actMonsters, noticeMonsters, vanishFleeing } from './monsters';
 import { DIRECTION_DELTAS, inBounds, isPassable, monsterAt, objectAt, updateSight } from './movement';
-import { tileIndex } from './state';
+import { tileIndex, type MapObject } from './state';
 import type { Direction, RunState } from './state';
 
 // 플레이어 입력 (input/이 키를 이것으로 바꾼다)
-export type PlayerInput = { type: 'direction'; direction: Direction } | { type: 'rest' } | { type: 'descend' };
+export type PlayerInput =
+  | { type: 'direction'; direction: Direction }
+  | { type: 'rest' }
+  | { type: 'descend' }
+  | { type: 'useItem'; index: number };
 
 // 게임 규칙이 이해하는 행동 (turn-order.md "플레이어 행동 종류")
 export type Action =
   | { type: 'move'; direction: Direction }
   | { type: 'attack'; direction: Direction; targetId: number }
+  | { type: 'interact'; direction: Direction; objectId: number }
+  | { type: 'useItem'; index: number }
   | { type: 'rest' }
   | { type: 'descend' };
 
 // 2단계: 입력을 행동으로. 무효면 null.
-// 방향 입력 판정 (turn-order.md 1~5). interact(F010)는 아직 없다.
+// 방향 입력 판정 (turn-order.md 1~5)
 export function toAction(state: RunState, input: PlayerInput, data: GameData): Action | null {
   switch (input.type) {
     case 'direction': {
@@ -34,6 +41,9 @@ export function toAction(state: RunState, input: PlayerInput, data: GameData): A
       // 1. 바로 앞 몬스터를 공격 (F003 규칙 1)
       const monster = monsterAt(state.floor, x, y);
       if (monster) return { type: 'attack', direction, targetId: monster.id };
+      // 2. 바로 앞의 막힌 물체: 상자 열기(F005). 할 수 있는 상호작용이 없으면 무효
+      const object = objectAt(state.floor, x, y);
+      if (object?.blocksMove) return isInteractable(object) ? { type: 'interact', direction, objectId: object.id } : null;
       // 3. 사거리 안 같은 줄의 몬스터 (F015 창)
       const ranged = monsterInRange(state, direction, getStat(state.player, 'attackRange', data));
       if (ranged) return { type: 'attack', direction, targetId: ranged.id };
@@ -45,7 +55,14 @@ export function toAction(state: RunState, input: PlayerInput, data: GameData): A
     case 'descend':
       // F013: 계단 칸 위에서만. 아니면 무효(턴 안 지남)
       return isOnStairs(state) ? input : null;
+    case 'useItem':
+      // F005 규칙 2, 4: 쓸 수 없으면 무효(턴 안 지남)
+      return canUseConsumable(state, data, input.index) ? input : null;
   }
+}
+
+function isInteractable(object: MapObject): boolean {
+  return object.type === CHEST_OBJECT_TYPE && !object.state.opened;
 }
 
 // turn-order.md 3: 그 방향 2~range칸 안의 가장 가까운 몬스터. 사이 칸은 모두 비어 있어야 한다
@@ -102,8 +119,9 @@ function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'des
       const d = DIRECTION_DELTAS[action.direction];
       const player = { ...state.player, x: state.player.x + d.x, y: state.player.y + d.y, facing: action.direction };
       const from = { x: state.player.x, y: state.player.y };
-      const moved = fireEvent({ ...state, player }, data, player.id, 'onMove', { from, to: { x: player.x, y: player.y } }).state;
-      // 도착한 칸 처리: 아이템 줍기(F005), 함정(F010)은 확정되면 여기에
+      let moved = fireEvent({ ...state, player }, data, player.id, 'onMove', { from, to: { x: player.x, y: player.y } }).state;
+      // 도착한 칸 처리: 아이템 자동 줍기(F005) → 함정(F010, M4)
+      moved = pickUp(moved, data);
       // F013 규칙 7: 계단 칸에 올라서면 알려준다
       return isOnStairs(moved) ? addMessage(moved, MESSAGES.stairsHere(), data) : moved;
     }
@@ -112,6 +130,14 @@ function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'des
       const facing = { ...state, player: { ...state.player, facing: action.direction } };
       return attack(facing, data, state.player.id, action.targetId);
     }
+    case 'interact': {
+      // F005 규칙 8: 상자 열기 (한 턴). 고르기 화면은 턴이 끝난 뒤 (game-flow.md)
+      const facing = { ...state, player: { ...state.player, facing: action.direction } };
+      return openChest(facing, data, action.objectId);
+    }
+    case 'useItem':
+      // F005 규칙 2: 소모품 사용 (한 턴)
+      return useConsumable(state, data, action.index);
     case 'rest':
       // F002 규칙 4
       return state;

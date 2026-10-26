@@ -4,6 +4,7 @@ import type { GameData } from '../data/types';
 import { generateFloor } from './dungeon';
 import { getStat } from './effects';
 import { fireEvent } from './events';
+import { placeFloorItems, placeTreasureChest } from './items';
 import { addMessage, MESSAGES } from './messages';
 import { noticeMonsters, spawnMonsters } from './monsters';
 import { updateSight } from './movement';
@@ -28,11 +29,11 @@ export function createRun(data: GameData, runSeed: number, phase: Phase): RunSta
   const seed = runSeed >>> 0;
   const firstFloor = 1;
   const playerId = 1;
-  const { floor, start, nextId } = buildFloor(data, seed, firstFloor, playerId + 1);
+  const { floor, start, nextId, lootState } = buildFloor(data, seed, firstFloor, playerId + 1);
   const run: RunState = {
     version: STATE_VERSION,
     runSeed: seed,
-    rng: initRunRng(seed),
+    rng: { ...initRunRng(seed), loot: lootState },
     phase,
     floorNumber: firstFloor,
     turn: 0,
@@ -48,9 +49,11 @@ export function createRun(data: GameData, runSeed: number, phase: Phase): RunSta
 // F013: 다른 층으로 옮긴다. 플레이어의 HP·아이템은 그대로 두고 위치만 새 층의 시작 지점으로.
 // 이전 층의 상태는 버린다. 시야는 바로 계산한다.
 export function enterFloor(state: RunState, data: GameData, floorNumber: number): RunState {
-  const { floor, start, nextId } = buildFloor(data, state.runSeed, floorNumber, state.nextId);
+  const { floor, start, nextId, lootState } = buildFloor(data, state.runSeed, floorNumber, state.nextId);
   const next: RunState = {
     ...state,
+    // rng.md: loot 흐름은 층을 만들 때 다시 시작한다
+    rng: { ...state.rng, loot: lootState },
     floorNumber,
     floor,
     nextId,
@@ -60,11 +63,13 @@ export function enterFloor(state: RunState, data: GameData, floorNumber: number)
   return arrive(next, data);
 }
 
-// F001 지형 → F004 몬스터 배치
+// F001 지형 → F005 보물상자 → F004 몬스터 → F005 바닥 소모품
 function buildFloor(data: GameData, runSeed: number, floorNumber: number, firstId: number) {
   const generated = generateFloor(data, runSeed, floorNumber, firstId);
-  const spawned = spawnMonsters(generated.floor, data, runSeed, floorNumber, generated.nextId);
-  return { floor: spawned.floor, start: generated.start, nextId: spawned.nextId };
+  const withChest = placeTreasureChest(generated.floor, data, runSeed, floorNumber, generated.nextId);
+  const spawned = spawnMonsters(withChest.floor, data, runSeed, floorNumber, withChest.nextId);
+  const items = placeFloorItems(spawned.floor, data, runSeed, floorNumber, spawned.nextId, generated.start);
+  return { floor: items.floor, start: generated.start, nextId: items.nextId, lootState: items.lootState };
 }
 
 // 새 층에 들어온 직후: 메시지, onFloorEnter, 시야

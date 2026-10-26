@@ -30,6 +30,9 @@ function playingCommand(key: string): Command | null {
   if (direction) return { type: 'player', input: { type: 'direction', direction } };
   if (key === REST_KEY) return { type: 'player', input: { type: 'rest' } };
   if (DESCEND_KEYS.includes(key)) return { type: 'player', input: { type: 'descend' } };
+  // F005 규칙 2: 숫자키 1~9로 소모품 사용
+  const n = Number(key);
+  if (Number.isInteger(n) && n >= 1 && n <= 9) return { type: 'player', input: { type: 'useItem', index: n - 1 } };
   return null;
 }
 

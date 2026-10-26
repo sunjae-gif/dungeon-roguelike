@@ -1,11 +1,12 @@
 // 30-systems/effects.md 4. 공격과 피해 처리 순서, 6절 knockback·steal의 떨어뜨리기
 import type { GameData } from '../data/types';
-import type { Point } from './dungeon';
 import { getStat } from './effects';
 import { causeName, fireEvent, findActor, updateActor, type AttackInfo } from './events';
 import { addMessage, MESSAGES } from './messages';
-import { inBounds, isPassable, objectAt } from './movement';
-import { tileIndex, type Actor, type RunState } from './state';
+import { dropItem } from './floorItems';
+import { monsterDrop } from './items';
+import { isPassable } from './movement';
+import type { Actor, RunState } from './state';
 
 // 피해의 출처. actorId는 상대(onDamaged의 other)가 될 개체, cause는 killedBy에 남길 원인 id
 export interface DamageSource {
@@ -116,33 +117,10 @@ function removeMonster(state: RunState, data: GameData, id: number): RunState {
   if (data.monsters.find((m) => m.id === monster.defId)?.isBoss) {
     next = { ...next, runStats: { ...next.runStats, bossKilled: true } };
   }
-  for (const itemId of monster.carried ?? []) {
-    const spot = nearestFreeFloor(next, monster);
-    if (!spot) break;
-    const item = { id: next.nextId, defId: itemId, ...spot };
-    next = { ...next, nextId: next.nextId + 1, floor: { ...next.floor, items: [...next.floor.items, item] } };
-  }
-  return next;
-}
-
-// 아이템을 놓을 수 있는 가장 가까운 바닥 칸 (물체·아이템이 없는 칸, game-state.md)
-function nearestFreeFloor(state: RunState, from: Point): Point | null {
-  const { floor } = state;
-  const free = (x: number, y: number) =>
-    inBounds(floor, x, y) &&
-    floor.tiles[tileIndex(floor, x, y)] === 'floor' &&
-    !objectAt(floor, x, y) &&
-    !floor.items.some((it) => it.x === x && it.y === y);
-  const maxRadius = floor.width + floor.height;
-  for (let r = 0; r <= maxRadius; r++) {
-    for (let dy = -r; dy <= r; dy++) {
-      const span = r - Math.abs(dy);
-      for (const dx of span === 0 ? [0] : [-span, span]) {
-        if (free(from.x + dx, from.y + dy)) return { x: from.x + dx, y: from.y + dy };
-      }
-    }
-  }
-  return null;
+  // effects.md 6절 steal 규칙 5: 훔친 물건을 떨어뜨린다
+  for (const itemId of monster.carried ?? []) next = dropItem(next, itemId, monster);
+  // F005 규칙 6: 몬스터 드롭 (보스 제외, 처치 원인과 상관없이)
+  return monsterDrop(next, data, monster);
 }
 
 // 6절 knockback: 공격자 → 대상 방향으로 distance칸. 막히면 그 자리에서 충돌 피해(공격이 아닌 피해)

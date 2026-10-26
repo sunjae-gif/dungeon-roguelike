@@ -47,7 +47,18 @@
     { "id": "spear", "path": "assets/items/spear.png", "fallbackColor": "#a08060" },
     { "id": "war_hammer", "path": "assets/items/war_hammer.png", "fallbackColor": "#808890" },
     { "id": "poison_blade", "path": "assets/items/poison_blade.png", "fallbackColor": "#60c040" },
-    { "id": "piercing_tip", "path": "assets/items/piercing_tip.png", "fallbackColor": "#c06030" }
+    { "id": "piercing_tip", "path": "assets/items/piercing_tip.png", "fallbackColor": "#c06030" },
+    { "id": "leather_gloves", "path": "assets/items/leather_gloves.png", "fallbackColor": "#a07850" },
+    { "id": "iron_shield", "path": "assets/items/iron_shield.png", "fallbackColor": "#9098a0" },
+    { "id": "sturdy_heart", "path": "assets/items/sturdy_heart.png", "fallbackColor": "#d04050" },
+    { "id": "owl_eye", "path": "assets/items/owl_eye.png", "fallbackColor": "#e0d070" },
+    { "id": "berserker_belt", "path": "assets/items/berserker_belt.png", "fallbackColor": "#c05030" },
+    { "id": "turtle_shell", "path": "assets/items/turtle_shell.png", "fallbackColor": "#508050" },
+    { "id": "chain_vest", "path": "assets/items/chain_vest.png", "fallbackColor": "#7880a0" },
+    { "id": "explorer_boots", "path": "assets/items/explorer_boots.png", "fallbackColor": "#806040" },
+    { "id": "purity_charm", "path": "assets/items/purity_charm.png", "fallbackColor": "#f0f0ff" },
+    { "id": "life_ring", "path": "assets/items/life_ring.png", "fallbackColor": "#ff80a0" },
+    { "id": "blood_rage", "path": "assets/items/blood_rage.png", "fallbackColor": "#a01020" }
   ],
   "illustrations": [
     { "id": "player_portrait",     "path": "assets/illust/player_portrait.png" },

@@ -8,6 +8,7 @@ export type ValidationResult = { ok: true; data: GameData } | { ok: false; error
 
 const DIRECTIONS = ['up', 'down', 'left', 'right'] as const;
 const ITEM_KINDS = ['consumable', 'build'] as const;
+const RARITIES = ['common', 'rare'] as const;
 
 export function validateGameData(raw: RawData): ValidationResult {
   const c = new Checker();
@@ -26,6 +27,7 @@ export function validateGameData(raw: RawData): ValidationResult {
   const items = checkItems(c, file('items.json'), spriteIds, effectRefs);
   const traps = checkTraps(c, file('traps.json'), spriteIds);
   checkUi(c, file('ui.json'));
+  checkLoot(c, file('loot.json'), items);
 
   // 테마: 다른 파일을 가리키는 id, 층 범위
   const refs = { monsters: idsOf(monsters), traps: idsOf(traps), sprites: spriteIds, roomTypes: idsOf(roomTypes) };
@@ -40,6 +42,7 @@ export function validateGameData(raw: RawData): ValidationResult {
     monsterSightRadius: (raw['monsters.json'] as Obj).monsterSightRadius,
     items,
     statuses,
+    loot: raw['loot.json'],
     roomTypes,
     sprites: raw['sprites.json'],
     themes,
@@ -160,6 +163,10 @@ function checkItems(c: Checker, d: Obj, spriteIds: Set<string>, refs: EffectRefs
     c.num(item, 'weight', p, { min: 0, optional: true });
     c.str(item, 'sprite', p);
     c.ref(item.sprite, spriteIds, `${p}.sprite`, 'sprites.json');
+    // F005: 빌드 아이템은 등급과 설명이 필수
+    const build = item.kind === 'build';
+    c.oneOf(item, 'rarity', p, RARITIES, !build);
+    c.str(item, 'description', p, !build);
 
     const use = c.objField(item, 'use', p, item.kind !== 'consumable');
     if (use) {
@@ -171,6 +178,23 @@ function checkItems(c: Checker, d: Obj, spriteIds: Set<string>, refs: EffectRefs
     checkImmunities(c, item, p, refs);
   });
   return list;
+}
+
+// F005 loot.json: item은 items.json의 소모품
+function checkLoot(c: Checker, d: Obj, items: Obj[]): void {
+  const p = 'loot.json';
+  for (const k of ['chestChoices', 'secretChoices', 'puzzleChoices']) c.num(d, k, p, { integer: true, min: 1 });
+  const consumables = new Set(items.filter((it) => it.kind === 'consumable').map((it) => String(it.id)));
+  const drop = c.objField(d, 'monsterDrop', p);
+  if (drop) {
+    c.ref(drop.item, consumables, `${p}.monsterDrop.item`, 'items.json 소모품');
+    c.num(drop, 'chance', `${p}.monsterDrop`, { min: 0, max: 1 });
+  }
+  const reward = c.objField(d, 'exhaustedReward', p);
+  if (reward) {
+    c.ref(reward.item, consumables, `${p}.exhaustedReward.item`, 'items.json 소모품');
+    c.num(reward, 'count', `${p}.exhaustedReward`, { integer: true, min: 1 });
+  }
 }
 
 function checkTraps(c: Checker, d: Obj, spriteIds: Set<string>): Obj[] {
@@ -199,7 +223,7 @@ function checkUi(c: Checker, d: Obj): void {
   group('layout', ['padding', 'statusPanelWidth', 'messageLogLines', 'messageLineHeight']);
   group('fov', ['exploredBrightness'], ['unexploredColor']);
   group('font', ['size'], ['family', 'file', 'fallback']);
-  group('colors', [], ['background', 'text', 'hpNormal', 'hpLow', 'missingSprite']);
+  group('colors', [], ['background', 'text', 'hpNormal', 'hpLow', 'missingSprite', 'rare']);
   group('input', ['keyRepeatIntervalMs']);
   c.num(d, 'lowHpRatio', p, { min: 0, max: 1 });
   c.num(d, 'floorIntroMs', p, { min: 0 });

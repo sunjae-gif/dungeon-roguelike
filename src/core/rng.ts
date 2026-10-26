@@ -87,16 +87,19 @@ export function initRunRng(runSeed: number): Record<string, number> {
   return rng;
 }
 
-// "판 전체" 흐름을 꺼내 쓰고, 바뀐 내부값을 새 객체로 돌려준다.
-export function useRunRng<T>(
+// RunState.rng에 저장된 흐름을 꺼내 쓰고, 바뀐 내부값을 새 객체로 돌려준다.
+// "판 전체" 흐름과, 층 안에서 이어 쓰는 loot 흐름(rng.md)이 쓴다.
+export function useStoredRng<T>(
   rngState: Record<string, number>,
-  stream: RunStream,
+  stream: RunStream | 'loot',
   fn: (rng: Rng) => T,
 ): { value: T; rng: Record<string, number> } {
   const rng = createRng(rngState[stream]);
   const value = fn(rng);
   return { value, rng: { ...rngState, [stream]: rng.state } };
 }
+
+export const useRunRng = useStoredRng;
 
 // 시드는 8자리 16진수 대문자로 보여준다. 예: 3FA2C910
 export function formatSeed(seed: number): string {

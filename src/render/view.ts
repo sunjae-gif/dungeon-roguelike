@@ -1,5 +1,5 @@
 // F007 무엇을 그릴지 정하는 순수 함수들. 캔버스를 쓰지 않아 테스트할 수 있다.
-import { tileIndex, type Actor, type FloorState, type RunState } from '../core/state';
+import { tileIndex, type Actor, type FloorState, type MapObject, type RunState } from '../core/state';
 import { causeName } from '../core/events';
 import { statusDef } from '../core/effects';
 import { getStat } from '../core/effects';
@@ -87,4 +87,31 @@ export function gameOverLines(state: RunState, data: GameData): string[] {
 export function floorIntroLines(state: RunState, data: GameData): string[] {
   const theme = themeForFloor(data, state.floorNumber);
   return [`${state.floorNumber}층`, theme.name, ...(isThemeStart(data, state.floorNumber) ? ['', theme.intro] : [])];
+}
+
+// 물체 그림 id. 열린 물체(상자 등)는 "{id}_open" 그림이 있으면 그것을 쓴다
+export function objectSprite(obj: MapObject, data: GameData): string {
+  const base = obj.defId ?? obj.type;
+  const open = `${base}_open`;
+  return obj.state.opened && data.sprites.sprites.some((s) => s.id === open) ? open : base;
+}
+
+const RARITY_LABEL: Record<string, string> = { common: '일반', rare: '희귀' };
+
+// F005 화면: itemChoice 후보 목록. "1. 광전사의 띠 (일반) — 공격 +2, 방어 −1", 희귀는 색을 다르게
+export function itemChoiceLines(state: RunState, data: GameData): TextLine[] {
+  const { colors } = data.ui;
+  const options = state.pendingChoice?.options ?? [];
+  return [
+    { text: '빌드 아이템을 하나 고른다 (숫자키)', color: colors.text },
+    { text: '', color: colors.text },
+    ...options.map((id, i) => {
+      const def = data.items.find((it) => it.id === id);
+      const rarity = def?.rarity ?? 'common';
+      return {
+        text: `${i + 1}. ${def?.name ?? id} (${RARITY_LABEL[rarity] ?? rarity}) — ${def?.description ?? ''}`,
+        color: rarity === 'rare' ? colors.rare : colors.text,
+      };
+    }),
+  ];
 }

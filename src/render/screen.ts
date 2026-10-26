@@ -6,7 +6,7 @@ import { cameraFor } from './camera';
 import { fontCss } from './font';
 import type { Box, Layout } from './layout';
 import type { SpriteBook } from './sprites';
-import { floorIntroLines, drawableItems, drawableMonsters, gameOverLines, messageLines, statusLines, tileShade, type TextLine } from './view';
+import { floorIntroLines, itemChoiceLines, objectSprite, drawableItems, drawableMonsters, gameOverLines, messageLines, statusLines, tileShade, type TextLine } from './view';
 
 export interface RenderContext {
   ctx: CanvasRenderingContext2D;
@@ -47,6 +47,22 @@ export function renderScreen(rc: RenderContext, state: RunState): void {
   drawMap(rc, state);
   drawStatus(rc, state);
   drawLog(rc, state);
+  if (state.phase === 'itemChoice') drawChoice(rc, state);
+}
+
+// F005 itemChoice: 지도 가운데에 상자를 띄운다
+function drawChoice(rc: RenderContext, state: RunState): void {
+  const { ctx, data, layout } = rc;
+  const { padding, messageLineHeight } = data.ui.layout;
+  const lines = itemChoiceLines(state, data);
+  const w = layout.map.w - padding * 4;
+  const h = lines.length * messageLineHeight + padding * 2;
+  const box = { x: layout.map.x + (layout.map.w - w) / 2, y: layout.map.y + (layout.map.h - h) / 2, w, h };
+  ctx.fillStyle = data.ui.colors.background;
+  ctx.fillRect(box.x, box.y, box.w, box.h);
+  ctx.strokeStyle = data.ui.colors.text;
+  ctx.strokeRect(box.x, box.y, box.w, box.h);
+  drawTextLines(rc, { x: box.x + padding, y: box.y + padding, w: box.w - padding * 2, h: box.h - padding * 2 }, lines);
 }
 
 function drawCentered(rc: RenderContext, lines: string[]): void {
@@ -99,7 +115,7 @@ function drawMap(rc: RenderContext, state: RunState): void {
       drawSprite(theme.tiles[floor.tiles[y * floor.width + x]], x, y);
       // 물체는 탐색됨 칸에서도 그린다 (마지막으로 본 모습)
       const obj = floor.objects.find((o) => o.x === x && o.y === y);
-      if (obj) drawSprite(obj.defId ?? obj.type, x, y);
+      if (obj) drawSprite(objectSprite(obj, data), x, y);
       if (shade === 'explored') {
         // F007 규칙 7: 탐색됨 칸은 exploredBrightness 밝기로
         const p = toScreen(x, y);

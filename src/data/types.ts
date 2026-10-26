@@ -165,13 +165,22 @@ export interface TrapDef {
   sprite: string;
 }
 
+// F005 loot.json
+export interface LootData {
+  chestChoices: number;
+  secretChoices: number;
+  puzzleChoices: number;
+  monsterDrop: { item: string; chance: number };
+  exhaustedReward: { item: string; count: number };
+}
+
 export interface UiData {
   baseResolution: { width: number; height: number };
   viewportTiles: { width: number; height: number };
   layout: { padding: number; statusPanelWidth: number; messageLogLines: number; messageLineHeight: number };
   fov: { exploredBrightness: number; unexploredColor: string };
   font: { family: string; file: string; size: number; fallback: string };
-  colors: { background: string; text: string; hpNormal: string; hpLow: string; missingSprite: string };
+  colors: { background: string; text: string; hpNormal: string; hpLow: string; missingSprite: string; rare: string };
   lowHpRatio: number;
   input: { keyRepeatIntervalMs: number };
   floorIntroMs: number;
@@ -186,6 +195,7 @@ export interface GameData {
   monsterSightRadius: number;
   items: ItemDef[];
   statuses: StatusDef[];
+  loot: LootData;
   roomTypes: RoomTypeDef[];
   sprites: SpritesData;
   themes: ThemeDef[];
@@ -205,4 +215,5 @@ export type DataFileName =
   | 'themes.json'
   | 'traps.json'
   | 'statuses.json'
+  | 'loot.json'
   | 'ui.json';
