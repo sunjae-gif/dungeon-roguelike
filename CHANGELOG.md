@@ -2,6 +2,9 @@
 
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
+## 2026-10-26
+- [systems] game-state.md: runStats.killedBy 추가 (F006 게임 오버 화면의 "{몬스터}에게 쓰러졌다")
+
 ## 2026-10-22 (M2 기획 확정)
 - [F004] 몬스터 시야를 "플레이어 시야 −1"에서 공통 고정값 monsterSightRadius(7)로 변경. 몬스터 위치에서 F002 방식 시야로 계산
 - [data] monsters.json: sightOffsetFromPlayer → monsterSightRadius

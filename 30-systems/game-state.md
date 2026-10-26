@@ -41,7 +41,7 @@ interface RunState {
   player: Actor;
   floor: FloorState;
   messageLog: Message[];   // 최대 ui.json `messageLogMaxStored`(100)개. 넘으면 오래된 것부터 버린다
-  runStats: { kills: number; floorsReached: number; itemsFound: number };
+  runStats: { kills: number; floorsReached: number; itemsFound: number; killedBy?: string }; // killedBy: 플레이어를 쓰러뜨린 몬스터의 defId (F006)
 }
 
 interface FloorState {
