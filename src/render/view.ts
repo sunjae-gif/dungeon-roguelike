@@ -1,6 +1,8 @@
 // F007 무엇을 그릴지 정하는 순수 함수들. 캔버스를 쓰지 않아 테스트할 수 있다.
 import { tileIndex, type Actor, type FloorState, type RunState } from '../core/state';
+import { monsterName } from '../core/combat';
 import { getStat } from '../core/effects';
+import { formatSeed } from '../core/rng';
 import { themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
 
@@ -56,4 +58,20 @@ export function messageLines(state: RunState, data: GameData): string[] {
     .slice(-data.ui.layout.messageLogLines)
     .reverse()
     .map((m) => m.text);
+}
+
+// F006 규칙 1: 게임 오버 화면 내용
+export function gameOverLines(state: RunState, data: GameData): string[] {
+  const { killedBy } = state.runStats;
+  return [
+    '게임 오버',
+    ...(killedBy ? [`${monsterName(data, killedBy)}에게 쓰러졌다`] : []),
+    '',
+    `도달한 층  ${state.runStats.floorsReached}층`,
+    `쓰러뜨린 몬스터  ${state.runStats.kills}`,
+    `턴 수  ${state.turn}`,
+    `시드  ${formatSeed(state.runSeed)}`,
+    '',
+    'R: 새 판   Esc: 타이틀',
+  ];
 }

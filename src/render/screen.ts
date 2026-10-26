@@ -6,7 +6,7 @@ import { cameraFor } from './camera';
 import { fontCss } from './font';
 import type { Box, Layout } from './layout';
 import type { SpriteBook } from './sprites';
-import { drawableItems, drawableMonsters, messageLines, statusLines, tileShade, type TextLine } from './view';
+import { drawableItems, drawableMonsters, gameOverLines, messageLines, statusLines, tileShade, type TextLine } from './view';
 
 export interface RenderContext {
   ctx: CanvasRenderingContext2D;
@@ -26,7 +26,7 @@ function centerLines(state: RunState, data: GameData): string[] | null {
     case 'playing':
       return null;
     case 'gameOver':
-      return ['게임 오버', 'R: 새 판   Esc: 타이틀'];
+      return gameOverLines(state, data);
     case 'victory':
       return ['클리어', 'R: 새 판   Esc: 타이틀'];
   }
