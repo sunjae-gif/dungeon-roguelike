@@ -2,7 +2,7 @@
 id: F014
 name: 몬스터 다양화
 serves: [P3, P2, P4]
-status: confirmed
+status: implemented
 depends_on: [F004, F003]
 data: [20-data/monsters.json, 20-data/themes.json, 20-data/statuses.json]
 systems: [effects, turn-order, game-state, rng]

@@ -77,7 +77,7 @@ tests/               # core/ 단위 테스트
   | `>` | 계단 |
   | `$` | 상자 |
   | `!` | 회복 물약 |
-  | 영문자 | 몬스터 (`r` rat, `g` goblin, `o` orc, `t` troll, `B` final_boss) |
+  | 영문자 | 몬스터 (`r` rat, `g` goblin, `o` orc, `t` troll, `B` final_boss, `a` goblin_archer, `s` slime, `h` goblin_thief, `m` orc_shaman, `G` gargoyle, `k` skeleton_archer) |
   새 물체가 생기면 이 표에 문자를 추가한다.
 - 생성기(F001, F009 등)는 시드 여러 개(기본 1000개)로 돌려서 조건을 확인한다.
 

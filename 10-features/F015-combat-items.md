@@ -2,7 +2,7 @@
 id: F015
 name: 전투 규칙 아이템
 serves: [P3, P2, P4]
-status: confirmed
+status: implemented
 depends_on: [F003, F014]
 data: [20-data/items.json, 20-data/statuses.json, 20-data/player.json]
 systems: [effects, turn-order, rng]
