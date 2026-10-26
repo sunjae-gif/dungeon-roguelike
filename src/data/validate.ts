@@ -1,5 +1,5 @@
 // 20-data/ 전체 검사. 40-tech/tech-stack.md "데이터 검사"
-import { EFFECT_TYPES, STAT_IDS } from '../core/effects';
+import { STAT_IDS, TRAP_EVENT } from '../core/effects';
 import { Checker, idsOf, type Obj } from './check';
 import { checkEffects, checkImmunities, checkModifiers, checkTriggers, type EffectRefs } from './validateEffects';
 import type { GameData, RawData } from './types';
@@ -25,7 +25,7 @@ export function validateGameData(raw: RawData): ValidationResult {
   const { sprites } = checkSprites(c, file('sprites.json'));
   const spriteIds = idsOf(sprites);
   const items = checkItems(c, file('items.json'), spriteIds, effectRefs);
-  const traps = checkTraps(c, file('traps.json'), spriteIds);
+  const traps = checkTraps(c, file('traps.json'), spriteIds, effectRefs);
   checkUi(c, file('ui.json'));
   checkLoot(c, file('loot.json'), items);
 
@@ -187,6 +187,7 @@ function checkItems(c: Checker, d: Obj, spriteIds: Set<string>, refs: EffectRefs
     const build = item.kind === 'build';
     c.oneOf(item, 'rarity', p, RARITIES, !build);
     c.str(item, 'description', p, !build);
+    c.str(item, 'useMessage', p, true);
 
     const use = c.objField(item, 'use', p, item.kind !== 'consumable');
     if (use) {
@@ -217,13 +218,14 @@ function checkLoot(c: Checker, d: Obj, items: Obj[]): void {
   }
 }
 
-function checkTraps(c: Checker, d: Obj, spriteIds: Set<string>): Obj[] {
+// F010: effects는 effects.md 효과 형식 (이벤트 자리에는 'trap')
+function checkTraps(c: Checker, d: Obj, spriteIds: Set<string>, refs: EffectRefs): Obj[] {
   const list = c.idList(d, 'traps', 'traps.json');
   list.forEach((t, i) => {
     const p = `traps.json.traps[${i}]`;
     c.str(t, 'name', p);
-    c.oneOf(t, 'effect', p, EFFECT_TYPES);
-    c.num(t, 'amount', p, { min: 0 });
+    checkEffects(c, c.arr(t, 'effects', p), `${p}.effects`, refs, TRAP_EVENT);
+    c.bool(t, 'once', p, true);
     c.str(t, 'sprite', p);
     c.ref(t.sprite, spriteIds, `${p}.sprite`, 'sprites.json');
   });

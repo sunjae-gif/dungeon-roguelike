@@ -42,6 +42,14 @@ describe('F005 소모품', () => {
     expect(after.runStats.itemsFound).toBe(s.runStats.itemsFound + 1);
   });
 
+  it('물약을 주우면 "회복 물약을 주웠다.", 마시면 "회복 물약을 마셨다. (HP +n)". HP 25/30에서 마시면 n은 5', () => {
+    const picked = right(withPotionAt(stateFromMap(CORRIDOR, data), 2, 1));
+    expect(picked.messageLog.map((m) => m.text)).toContain('회복 물약을 주웠다.');
+    const hurt = { ...picked, player: { ...picked.player, hp: 25 } };
+    const used = use(hurt, 0);
+    expect(used.messageLog.at(-1)?.text).toBe('회복 물약을 마셨다. (HP +5)');
+  });
+
   it('인벤토리가 가득 차면 아이템이 바닥에 남고 메시지가 나온다', () => {
     const s0 = withPotionAt(stateFromMap(CORRIDOR, data), 2, 1);
     const s = { ...s0, player: { ...s0.player, consumables: new Array(data.player.inventorySize).fill('potion_heal') } };

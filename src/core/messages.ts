@@ -30,8 +30,14 @@ export const MESSAGES = {
   // effects.md 4절: 공격이 아닌 피해(일시 효과 등)로 쓰러짐
   playerKilledBy: (cause: string) => `${cause}(으)로 쓰러졌다.`,
   // F005
-  gotItem: (item: string) => `${item}을(를) 얻었다.`,
+  gotItem: (item: string) => `${josa(item, '을', '를')} 얻었다.`,
   bagFull: () => '가방이 가득 찼다.',
+  // F005 규칙 3-1
+  pickedUp: (item: string) => `${josa(item, '을', '를')} 주웠다.`,
+  usedItem: (item: string) => `${josa(item, '을', '를')} 사용했다.`,
+  healAmountKey: '{회복량}',
+  // F010
+  alarm: () => '경보가 울렸다! 발소리가 다가온다.',
   // F008 최종보스
   bossWarning: (boss: string) => `이 너머는 ${boss}의 방이다. 들어가면 돌아올 수 없다.`,
   sealed: () => '뒤에서 문이 닫혔다.',

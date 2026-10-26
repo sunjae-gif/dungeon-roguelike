@@ -33,13 +33,18 @@ export const EFFECT_FIELDS = {
   applyStatus: ['target', 'status', 'turns'],
   knockback: ['target', 'distance', 'collisionDamage'],
   steal: ['target'],
+  alarm: ['radius'],
   message: ['text'],
 } as const;
 export type EffectType = keyof typeof EFFECT_FIELDS;
 export const EFFECT_TYPES = Object.keys(EFFECT_FIELDS) as EffectType[];
 
+// 함정(traps.json)의 효과는 이벤트가 아니라 밟을 때 실행된다 (F010)
+export const TRAP_EVENT = 'trap';
+
 // "쓸 수 있는 이벤트" 열. 없는 종류는 모든 이벤트에서 쓸 수 있다
-export const EFFECT_EVENTS: Partial<Record<EffectType, readonly EventName[]>> = {
+export const EFFECT_EVENTS: Partial<Record<EffectType, readonly (EventName | typeof TRAP_EVENT)[]>> = {
+  alarm: [TRAP_EVENT],
   modifyDamage: ['onBeforeAttack', 'onBeforeDamaged'],
   ignoreDefense: ['onBeforeAttack'],
   cancelAttack: ['onBeforeDamaged'],

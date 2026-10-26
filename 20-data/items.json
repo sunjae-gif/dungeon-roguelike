@@ -1,7 +1,7 @@
 {
-  "_note": "아이템 종류. 형식은 30-systems/effects.md. 빌드 아이템은 rarity·description 필수(F005), 효과는 F005·F015. weight는 뽑힐 때의 가중치(기본 1). 수치는 모두 임시값.",
+  "_note": "아이템 종류. 형식은 30-systems/effects.md. 빌드 아이템은 rarity·description 필수(F005), 효과는 F005·F015. weight는 뽑힐 때의 가중치(기본 1). 소모품 useMessage의 {회복량}은 실제로 오른 HP(F005 규칙 3-1). 수치는 모두 임시값.",
   "items": [
-    {"id": "potion_heal", "name": "회복 물약", "kind": "consumable", "weight": 10, "description": "HP 10 회복", "sprite": "potion_heal", "use": {"requires": "hpNotFull", "effects": [{"type": "heal", "target": "self", "amount": 10}]}},
+    {"id": "potion_heal", "name": "회복 물약", "kind": "consumable", "weight": 10, "description": "HP 10 회복", "useMessage": "회복 물약을 마셨다. (HP +{회복량})", "sprite": "potion_heal", "use": {"requires": "hpNotFull", "effects": [{"type": "heal", "target": "self", "amount": 10}]}},
     {"id": "sharp_dagger", "name": "날카로운 단검", "kind": "build", "rarity": "rare", "weight": 1, "description": "25% 확률로 피해 ×2 (치명타)", "sprite": "sharp_dagger", "triggers": [{"event": "onBeforeAttack", "chance": 0.25, "message": "치명타!", "effects": [{"type": "modifyDamage", "op": "mul", "value": 2}]}]},
     {"id": "vampire_ring", "name": "흡혈 반지", "kind": "build", "rarity": "common", "weight": 1, "description": "공격이 맞으면 HP 1 회복", "sprite": "vampire_ring", "triggers": [{"event": "onHit", "chance": 1, "effects": [{"type": "heal", "target": "self", "amount": 1}]}]},
     {"id": "thorn_armor", "name": "가시 갑옷", "kind": "build", "rarity": "common", "weight": 1, "description": "공격받으면 공격자에게 1 피해", "sprite": "thorn_armor", "triggers": [{"event": "onDamaged", "chance": 1, "effects": [{"type": "damage", "target": "other", "amount": 1}]}]},

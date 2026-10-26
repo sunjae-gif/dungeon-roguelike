@@ -1,6 +1,11 @@
 {
-  "_note": "함정 종류(F010). 수치는 모두 임시값.",
+  "_note": "함정 종류(F010). effects는 effects.md 효과 형식이고 self는 밟은 개체. once면 한 번 발동하고 사라진다. 수치는 모두 임시값.",
   "traps": [
-    { "id": "spike", "name": "가시 함정", "effect": "damage", "amount": 4, "sprite": "trap_spike" }
+    { "id": "spike", "name": "가시 함정", "sprite": "trap_spike",
+      "effects": [ { "type": "damage", "target": "self", "amount": 4 } ] },
+    { "id": "poison_gas", "name": "독 가스 함정", "sprite": "trap_gas",
+      "effects": [ { "type": "applyStatus", "target": "self", "status": "poison", "turns": 3 } ] },
+    { "id": "alarm", "name": "경보 함정", "sprite": "trap_alarm", "once": true,
+      "effects": [ { "type": "alarm", "radius": 12 } ] }
   ]
 }

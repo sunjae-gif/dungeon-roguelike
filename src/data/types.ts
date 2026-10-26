@@ -72,6 +72,7 @@ export interface EffectDef {
   turns?: number;
   distance?: number;
   collisionDamage?: number;
+  radius?: number;
 }
 
 export interface Trigger {
@@ -93,6 +94,7 @@ export interface ItemDef {
   // F005
   rarity?: 'common' | 'rare';
   description?: string;
+  useMessage?: string; // F005 규칙 3-1. {회복량}은 실제로 오른 HP
   // effects.md 7절
   immunities?: string[];
 }
@@ -157,11 +159,12 @@ export interface ThemeDef {
   boss?: string;
 }
 
+// F010
 export interface TrapDef {
   id: string;
   name: string;
-  effect: string;
-  amount: number;
+  effects: EffectDef[];
+  once?: boolean;
   sprite: string;
 }
 

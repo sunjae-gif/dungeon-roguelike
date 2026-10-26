@@ -116,7 +116,8 @@ export function pickUp(state: RunState, data: GameData): RunState {
     runStats: { ...state.runStats, itemsFound: state.runStats.itemsFound + 1 },
   };
   next = fireEvent(next, data, player.id, 'onPickup', { itemId: item.defId }).state;
-  return next;
+  // F005 규칙 3-1
+  return addMessage(next, MESSAGES.pickedUp(itemDef(data, item.defId)?.name ?? item.defId), data);
 }
 
 // F005 규칙 2, 4: 소모품을 쓸 수 있는가. HP가 최대일 때 회복 물약은 쓰이지 않는다
@@ -133,8 +134,12 @@ export function useConsumable(state: RunState, data: GameData, index: number): R
   const consumables = state.player.consumables.filter((_, i) => i !== index);
   let next: RunState = { ...state, player: { ...state.player, consumables } };
   const origin = { actorId: next.player.id, cause: next.player.defId };
+  const hpBefore = next.player.hp;
   for (const effect of def.use.effects) next = applyEffect(next, data, next.player.id, origin, effect, {}, 1).state;
-  return next;
+  // F005 규칙 3-1: useMessage의 {회복량}은 실제로 오른 HP
+  const healed = String(Math.max(0, next.player.hp - hpBefore));
+  const text = def.useMessage ? def.useMessage.split(MESSAGES.healAmountKey).join(healed) : MESSAGES.usedItem(def.name);
+  return addMessage(next, text, data);
 }
 
 // F005 규칙 12: 빌드 아이템 후보 만들기 (loot 흐름). 후보가 없으면 빈 목록

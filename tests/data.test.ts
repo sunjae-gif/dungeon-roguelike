@@ -74,7 +74,12 @@ describe('데이터 검사', () => {
     expectError(withItem((i) => (i.triggers[0].effects[0].type = 'explode')), /effects\[0\]\.type/);
     expectError(withItem((i) => delete i.triggers[0].effects[0].amount), /effects\[0\]\.amount: 필수 필드/);
     expectError((r) => (r['items.json'].items[0].use.effects[0].type = 'teleport'), /use\.effects\[0\]\.type/);
-    expectError((r) => (r['traps.json'].traps[0].effect = 'fire'), /traps\[0\]\.effect/);
+    expectError((r) => (r['traps.json'].traps[0].effects[0].type = 'fire'), /traps\[0\]\.effects\[0\]\.type/);
+    // alarm은 함정에서만 쓸 수 있다
+    expectError((r) => r['items.json'].items.push({
+      id: 't_alarm', name: 't', kind: 'build', sprite: 'potion_heal', rarity: 'common', description: 't',
+      triggers: [{ event: 'onHit', chance: 1, effects: [{ type: 'alarm', radius: 3 }] }],
+    }), /alarm은\(는\) trap에서만/);
   });
 
   it('여러 곳이 틀리면 모두 알려준다', () => {

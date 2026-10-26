@@ -2,6 +2,10 @@
 
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
+## 2026-10-26 (M4)
+- [systems] M4 시스템 확장 구현: effects.md alarm 효과(함정 전용), 함정 effects 형식(traps.json 개편, trap_gas·trap_alarm 그림), 테마 함정 설정
+- [F005] 줍기·사용 메시지 구현 (useMessage, {회복량})
+
 ## 2026-10-26 (M3)
 - [F005, F008, F011] status → implemented (M3 완료). progress.md 갱신
 - [F008] 최종보스 "심연의 왕" 구현: 보스방 가운데 배치, 첫 진입 경고(턴 안 씀), 봉인 문(sealedGate), 보스 패턴(추적 2번 → 힘 모으기 → 강타 ×2, 십자 2칸·벽에서 끊김), 2단계(HP 50%: 공격 +2, 2차례마다), 면역(밀쳐내기·훔치기·약화), 강타 칸 표시·보스 HP 막대, 클리어 화면, 결과 화면 빌드 아이템 목록. ui.json telegraph·bossHp, sprites.json sealedGate

@@ -20,6 +20,8 @@
     { "id": "chest",      "path": "assets/objects/chest.png",      "fallbackColor": "#c09030" },
     { "id": "chest_open", "path": "assets/objects/chest_open.png", "fallbackColor": "#806020" },
     { "id": "trap_spike", "path": "assets/objects/trap_spike.png", "fallbackColor": "#b0b0b0" },
+    { "id": "trap_gas",   "path": "assets/objects/trap_gas.png",   "fallbackColor": "#70c060" },
+    { "id": "trap_alarm", "path": "assets/objects/trap_alarm.png", "fallbackColor": "#e0a020" },
     { "id": "player",     "path": "assets/chars/player.png",   "fallbackColor": "#4080ff",
       "directions": {
         "up":    "assets/chars/player_up.png",

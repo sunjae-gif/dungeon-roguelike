@@ -15,7 +15,7 @@
       "itemCount": [2, 3],
       "roomWeights": { "normal": 70, "treasure": 15, "secret": 5, "puzzle": 10 },
       "doorChance": 0.3,
-      "trapCount": [0, 2],
+      "trapCount": [1, 3],
       "trapTypes": ["spike"]
     },
     {
@@ -33,7 +33,7 @@
       "roomWeights": { "normal": 60, "treasure": 15, "secret": 10, "puzzle": 15 },
       "doorChance": 0.4,
       "trapCount": [2, 4],
-      "trapTypes": ["spike"]
+      "trapTypes": ["spike", "alarm"]
     },
     {
       "id": "theme_3",
@@ -49,8 +49,8 @@
       "itemCount": [3, 4],
       "roomWeights": { "normal": 55, "treasure": 15, "secret": 15, "puzzle": 15 },
       "doorChance": 0.5,
-      "trapCount": [3, 6],
-      "trapTypes": ["spike"]
+      "trapCount": [3, 5],
+      "trapTypes": ["spike", "poison_gas", "alarm"]
     },
     {
       "id": "theme_boss",

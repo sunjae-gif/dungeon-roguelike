@@ -126,6 +126,8 @@ export function applyEffect(
     case 'steal':
       if (!target) return { state, ctx };
       return { state: steal(state, data, ownerId, target.id), ctx };
+    case 'alarm':
+      return { state: alarm(state, data, ownerId, effect.radius ?? 0), ctx };
     case 'message':
       return { state: addMessage(state, effect.text ?? '', data), ctx };
     default:
@@ -152,6 +154,18 @@ export function addStatus(actor: Actor, id: string, turns: number, turn: number)
   if (turns <= existing.turnsLeft) return actor;
   const renewed: Status = { id, turnsLeft: turns, appliedTurn: turn };
   return { ...actor, statuses: actor.statuses.map((s) => (s.id === id ? renewed : s)) };
+}
+
+// 6절 alarm (F010): 주인 칸에서 4방향 거리 radius 안의 모든 몬스터(벽 무시)가 그 칸을 마지막 목격 위치로
+// 매복 몬스터는 깨우지 않는다 (awake를 바꾸지 않는다)
+function alarm(state: RunState, data: GameData, ownerId: number, radius: number): RunState {
+  const owner = findActor(state, ownerId);
+  if (!owner) return state;
+  const spot = { x: owner.x, y: owner.y };
+  const actors = state.floor.actors.map((a) =>
+    a.id !== ownerId && Math.abs(a.x - spot.x) + Math.abs(a.y - spot.y) <= radius ? { ...a, ai: { ...a.ai, lastSeenPlayer: spot } } : a,
+  );
+  return addMessage({ ...state, floor: { ...state.floor, actors } }, MESSAGES.alarm(), data);
 }
 
 // 6절 steal: 대상의 가장 나중에 얻은 소모품을 훔친다. 성공하면 도망 상태
