@@ -2,7 +2,7 @@
 id: F010
 name: 문과 함정
 serves: [P2, P4]
-status: confirmed
+status: implemented
 depends_on: [F001, F002, F004, F014, F015, F011]
 data: [20-data/traps.json, 20-data/themes.json, 20-data/sprites.json]
 systems: [effects, turn-order, game-state, rng]

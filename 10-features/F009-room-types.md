@@ -2,7 +2,7 @@
 id: F009
 name: 방 종류
 serves: [P3, P2, P4]
-status: confirmed
+status: implemented
 depends_on: [F001, F005, F010, F011]
 data: [20-data/rooms.json, 20-data/themes.json, 20-data/puzzles.json, 20-data/sprites.json, 20-data/loot.json]
 systems: [game-state, turn-order, rng, effects]
