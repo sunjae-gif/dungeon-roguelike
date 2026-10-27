@@ -2,7 +2,7 @@
 id: F016
 name: 화면 연출과 다듬기
 serves: [P2, P4, P1]
-status: draft
+status: confirmed
 depends_on: [F007, F008, F006, F011]
 data: [20-data/ui.json, 20-data/sprites.json]
 systems: [game-flow]
@@ -80,4 +80,4 @@ F007이 미뤄 둔 것들(창 맞춤 확대, 이동 연출, 스탠딩 일러스�
 - 대화창, 컷신
 
 ## 미결정 사항
-- [ ] 게임 제목 (vision.md)
+없음. (게임 제목: "무너진 왕국의 지하", vision.md)
