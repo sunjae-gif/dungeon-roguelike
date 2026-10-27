@@ -1,6 +1,7 @@
 // F009 방 종류 (가중치, 보물상자방, 비밀방, 샘방)
 import { describe, expect, it } from 'vitest';
-import { generateFloor, HIDDEN_WALL_OBJECT_TYPE } from '../src/core/dungeon';
+import { generateFloor } from '../src/core/dungeon';
+import { HIDDEN_WALL_OBJECT_TYPE } from '../src/core/secretRooms';
 import { getStat } from '../src/core/effects';
 import { CHEST_OBJECT_TYPE } from '../src/core/items';
 import { placeRoomFeatures, SPRING_OBJECT_TYPE } from '../src/core/roomFeatures';

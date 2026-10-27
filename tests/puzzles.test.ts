@@ -1,6 +1,7 @@
 // F009 퍼즐방
 import { describe, expect, it } from 'vitest';
-import { generateFloor, HIDDEN_WALL_OBJECT_TYPE } from '../src/core/dungeon';
+import { generateFloor } from '../src/core/dungeon';
+import { HIDDEN_WALL_OBJECT_TYPE } from '../src/core/secretRooms';
 import { CHEST_OBJECT_TYPE } from '../src/core/items';
 import { BOULDER_OBJECT_TYPE, LEVER_OBJECT_TYPE, PLATE_OBJECT_TYPE, placePuzzles, SWITCH_OBJECT_TYPE } from '../src/core/puzzles';
 import { createRng, floorRng } from '../src/core/rng';

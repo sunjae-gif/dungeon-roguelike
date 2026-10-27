@@ -3,7 +3,7 @@ import { causeName } from '../core/actors';
 import { tileIndex, type Actor, type FloorState, type MapObject, type RunState } from '../core/state';
 import { MESSAGES } from '../core/messages';
 import { DOOR_OBJECT_TYPE } from '../core/doors';
-import { HIDDEN_WALL_OBJECT_TYPE } from '../core/dungeon';
+import { HIDDEN_WALL_OBJECT_TYPE } from '../core/secretRooms';
 import { getStat } from '../core/effects';
 
 import { TRAP_OBJECT_TYPE } from '../core/traps';

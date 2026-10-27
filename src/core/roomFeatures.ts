@@ -1,6 +1,6 @@
 // F009 방 종류별 물체: 보물상자방·비밀방의 상자, 샘방의 샘, 숨은 벽 찾기
 import type { GameData } from '../data/types';
-import { HIDDEN_WALL_OBJECT_TYPE } from './dungeon';
+import { HIDDEN_WALL_OBJECT_TYPE } from './secretRooms';
 import { getStat } from './effects';
 
 import { CHEST_OBJECT_TYPE } from './items';
