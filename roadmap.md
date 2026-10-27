@@ -84,7 +84,7 @@ M5는 세 갈래로 나뉜다. 서로 기다리지 않으므로 순서를 바꾸
 2. 첫 보고서를 보고 사용자와 함께 20-data 수치 조정 (몬스터 능력치, 보스 HP, 희귀 확률, 물약 드롭, 함정 피해)
 3. 사용자가 직접 몇 판 해 보고 한 판 시간을 재서 balance-targets.json의 턴 수 목표를 고친다
 
-### M5-c. 그림 (사용자, 생성 도구)
+### M5-c. 그림 (사용자: 픽셀은 직접, 일러스트는 Leonardo)
 40-tech/art-guide.md "작업 순서"와 40-tech/asset-list.md를 따른다. 그림이 하나씩 들어올 때마다 Claude Code는 sprites.json 등록과 화면 확인만 한다.
 
 M5의 범위 메모:
@@ -100,4 +100,4 @@ M5의 범위 메모:
 | M2+ | 없음 (F012, F014, F015 모두 confirmed) |
 | M3 | 없음 (F005, F008, F011 모두 confirmed) |
 | M4 | 없음 (F009, F010 모두 confirmed) |
-| M5 | F016, F017, art-guide.md (게임 제목, 화풍, 생성 도구 결정 필요) |
+| M5 | 없음 (F016 implemented, F017·art-guide.md confirmed) |

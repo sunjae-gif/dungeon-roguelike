@@ -2,6 +2,12 @@
 
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
+## 2026-10-27 (M5 결정)
+- [F017] 밸런스 시뮬레이터 status → confirmed
+- [art-guide] 마스터 팔레트 고정 안 함(팔레트 파일을 쌓아 씀), 픽셀아트 직접 그리기(우선순위 3단계, CC0 타일 바탕 허용), 일러스트 Leonardo, 기준 프롬프트를 데포르메로 다시 씀. status → confirmed
+- [asset-list] 출처 칸 기준 변경
+- [docs] roadmap M5 표, progress
+
 ## 2026-10-27 (M5)
 - [F016] status → implemented (M5-a 완료). progress.md 갱신
 - [F016] 타이틀 화면(제목·안내·버전·어둡게 깐 1층 바닥, 개발자 모드 시드 입력), 스탠딩 일러스트 층(타이틀·10층 진입·게임 오버·클리어, 없으면 비움), 상태창 아이콘(빌드 아이템·일시 효과). sprites.json 일러스트 2장·일시 효과 아이콘, statuses.json sprite, ui.json title·illustration 추가
