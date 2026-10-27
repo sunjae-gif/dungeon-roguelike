@@ -31,6 +31,9 @@
     { "id": "switch",         "path": "assets/objects/switch.png",         "fallbackColor": "#a04040" },
     { "id": "switch_pressed", "path": "assets/objects/switch_pressed.png", "fallbackColor": "#40a040" },
     { "id": "lever",          "path": "assets/objects/lever.png",          "fallbackColor": "#c0a060" },
+    { "id": "status_weak",   "path": "assets/items/status_weak.png",   "fallbackColor": "#8060a0" },
+    { "id": "status_poison", "path": "assets/items/status_poison.png", "fallbackColor": "#60c040" },
+    { "id": "status_rage",   "path": "assets/items/status_rage.png",   "fallbackColor": "#e04030" },
     { "id": "trap_spike", "path": "assets/objects/trap_spike.png", "fallbackColor": "#b0b0b0" },
     { "id": "trap_gas",   "path": "assets/objects/trap_gas.png",   "fallbackColor": "#70c060" },
     { "id": "trap_alarm", "path": "assets/objects/trap_alarm.png", "fallbackColor": "#e0a020" },
@@ -77,6 +80,8 @@
   ],
   "illustrations": [
     { "id": "player_portrait",     "path": "assets/illust/player_portrait.png" },
-    { "id": "final_boss_portrait", "path": "assets/illust/final_boss_portrait.png" }
+    { "id": "final_boss_portrait", "path": "assets/illust/final_boss_portrait.png" },
+    { "id": "player_portrait_defeat",  "path": "assets/illust/player_portrait_defeat.png" },
+    { "id": "player_portrait_victory", "path": "assets/illust/player_portrait_victory.png" }
   ]
 }

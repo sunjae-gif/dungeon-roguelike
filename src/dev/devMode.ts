@@ -21,6 +21,8 @@ const STYLE = `
 #dev-panel { position: fixed; top: 32px; right: 8px; width: 360px; font: 13px monospace; color: #ddd;
   background: rgba(20,20,30,.95); border: 1px solid #555; padding: 10px; display: none; }
 #dev-panel.open { display: block; }
+#dev-title-seed { position: fixed; bottom: 16px; left: 16px; font: 13px monospace; color: #ddd; display: none; }
+#dev-title-seed.show { display: block; }
 #dev-panel h2 { font-size: 14px; margin: 0 0 8px; }
 #dev-panel button { font: inherit; margin-bottom: 6px; }
 #dev-panel textarea { width: 100%; height: 120px; box-sizing: border-box; font: 11px monospace; }
@@ -60,6 +62,21 @@ export function installDevMode(host: DevHost): DevMode {
     <textarea data-export-out placeholder="상태 JSON (불러오기는 여기에 붙여 넣기)"></textarea>
   `;
   document.body.append(panel);
+
+  // F016 타이틀 화면: 개발자 모드면 시드 입력 칸
+  const titleSeed = document.createElement('div');
+  titleSeed.id = 'dev-title-seed';
+  titleSeed.innerHTML = '시드 <input data-title-seed placeholder="16진수"> <button>이 시드로 시작</button>';
+  document.body.append(titleSeed);
+  const titleSeedInput = titleSeed.querySelector('input') as HTMLInputElement;
+  // 입력 칸에 친 글자가 게임 입력(Enter: 새 게임)으로 넘어가지 않게
+  titleSeedInput.addEventListener('keydown', (e) => e.stopPropagation());
+  titleSeed.querySelector('button')!.addEventListener('click', () => {
+    const seed = parseSeed(titleSeedInput.value);
+    if (seed === null) return;
+    const started = startWithSeed(data, seed);
+    if (started.ok) host.setState(started.state);
+  });
   const seedText = panel.querySelector('[data-seed]') as HTMLElement;
   const exportOut = panel.querySelector('[data-export-out]') as HTMLTextAreaElement;
   const resultText = panel.querySelector('[data-result]') as HTMLElement;
@@ -103,6 +120,7 @@ export function installDevMode(host: DevHost): DevMode {
     },
     update(state) {
       seedText.textContent = formatSeed(state.runSeed);
+      titleSeed.classList.toggle('show', state.phase === 'title');
     },
     statusLines(state) {
       return [{ text: `시드 ${formatSeed(state.runSeed)}`, color: textColor }];

@@ -41,5 +41,7 @@
   "messageLogMaxStored": 100,
   "anim": { "moveMs": 80, "attackBumpMs": 100, "hitFlashMs": 80, "damageNumberMs": 500,
             "projectileMs": 100, "telegraphPulseMs": 600, "trapFlashMs": 150 },
-  "scaling": { "preferInteger": true }
+  "scaling": { "preferInteger": true },
+  "title": { "text": "무너진 왕국의 지하", "fontSize": 36, "version": "0.5.0" },
+  "illustration": { "aspectWidth": 2, "aspectHeight": 3, "bossIntroAlpha": 0.35 }
 }

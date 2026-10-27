@@ -9,6 +9,7 @@ import { type Command, keyToCommand } from './input/keys';
 import { blocksRepeatedStep, KeyRepeater, shouldStopRepeat } from './input/repeat';
 import { Animator } from './render/anim';
 import { loadFont } from './render/font';
+import { IllustrationLayer } from './render/illustration';
 import { computeLayout } from './render/layout';
 import { computeScale } from './render/scale';
 import { type RenderContext, renderScreen } from './render/screen';
@@ -47,8 +48,14 @@ function start(data: GameData): void {
   canvas.className = 'pixel';
   canvas.width = layout.canvas.width;
   canvas.height = layout.canvas.height;
-  stage.append(canvas);
+  // F016 규칙 7: 스탠딩 일러스트는 매끄럽게 확대되는 별도 층
+  const illustCanvas = document.createElement('canvas');
+  illustCanvas.className = 'smooth';
+  illustCanvas.width = layout.canvas.width;
+  illustCanvas.height = layout.canvas.height;
+  stage.append(canvas, illustCanvas);
   document.body.append(stage);
+  const illustCtx = illustCanvas.getContext('2d')!;
   const fitToWindow = () => {
     const scale = computeScale({ width: window.innerWidth, height: window.innerHeight }, layout.canvas, data.ui.scaling.preferInteger);
     stage.style.width = `${layout.canvas.width * scale}px`;
@@ -69,6 +76,7 @@ function start(data: GameData): void {
     sprites: new SpriteBook(data.sprites, data.ui.colors.missingSprite, browserImageLoader(baseUrl, () => draw())),
     extraStatus: [],
   };
+  const illustrations = new IllustrationLayer(data, browserImageLoader(baseUrl, () => draw()));
   // F016 움직임 연출: 그리는 쪽에만 있다. 연출이나 강타 예고 깜빡임이 있는 동안만 매 프레임 다시 그린다
   const animator = new Animator();
   let frameRequested = false;
@@ -78,6 +86,7 @@ function start(data: GameData): void {
     rc.anim = animator.frame(now);
     rc.now = now;
     renderScreen(rc, state);
+    illustrations.draw(illustCtx, state, layout);
     const pulsing = data.ui.anim.telegraphPulseMs > 0 && telegraphTiles(state).length > 0;
     if ((animator.active(now) || pulsing) && !frameRequested) {
       frameRequested = true;

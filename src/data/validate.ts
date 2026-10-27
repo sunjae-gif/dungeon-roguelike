@@ -25,6 +25,7 @@ export function validateGameData(raw: RawData): ValidationResult {
   const roomTypes = checkRoomTypes(c, file('rooms.json'));
   const { sprites } = checkSprites(c, file('sprites.json'));
   const spriteIds = idsOf(sprites);
+  statuses.forEach((st, i) => c.ref(st.sprite, spriteIds, `statuses.json.statuses[${i}].sprite`, 'sprites.json'));
   const items = checkItems(c, file('items.json'), spriteIds, effectRefs);
   const traps = checkTraps(c, file('traps.json'), spriteIds, effectRefs);
   checkUi(c, file('ui.json'));
@@ -79,6 +80,7 @@ function checkStatuses(c: Checker, d: Obj): Obj[] {
   list.forEach((s, i) => {
     const p = `statuses.json.statuses[${i}]`;
     c.str(s, 'name', p);
+    c.str(s, 'sprite', p, true);
     checkModifiers(c, s, p);
     checkTriggers(c, s, p, refs, true);
   });
@@ -233,4 +235,6 @@ function checkUi(c: Checker, d: Obj): void {
   group('anim', ['moveMs', 'attackBumpMs', 'hitFlashMs', 'damageNumberMs', 'projectileMs', 'telegraphPulseMs', 'trapFlashMs']);
   const scaling = c.objField(d, 'scaling', p);
   if (scaling) c.bool(scaling, 'preferInteger', `${p}.scaling`);
+  group('title', ['fontSize'], ['text', 'version']);
+  group('illustration', ['aspectWidth', 'aspectHeight', 'bossIntroAlpha']);
 }

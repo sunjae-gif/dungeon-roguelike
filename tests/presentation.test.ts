@@ -5,6 +5,12 @@ import { describe, expect, it } from 'vitest';
 import type { RunState } from '../src/core/state';
 import { playTurn } from '../src/core/turn';
 import { Animator, deriveAnims } from '../src/render/anim';
+import { IllustrationLayer, illustrationBox } from '../src/render/illustration';
+import { computeLayout } from '../src/render/layout';
+import { renderScreen } from '../src/render/screen';
+import { SpriteBook } from '../src/render/sprites';
+import { illustrationFor, statusLines, titleLines } from '../src/render/view';
+import { createRun, enterFloor } from '../src/core/run';
 import { computeScale } from '../src/render/scale';
 import { stateFromMap } from './parseMap';
 import { gameData } from './helpers';
@@ -142,5 +148,66 @@ describe('F016 움직임 연출', () => {
       #####`, data);
     expect(deriveAnims({ ...s, phase: 'itemChoice' }, go(s, 'right'), anim, 0)).toEqual([]);
     expect(deriveAnims(s, { ...go(s, 'right'), floorNumber: s.floorNumber + 1 }, anim, 0)).toEqual([]);
+  });
+});
+
+describe('F016 타이틀, 일러스트, 아이콘', () => {
+  const layout = computeLayout(data);
+  const fakeCtx = () =>
+    new Proxy({}, {
+      get: (t: Record<string, unknown>, k: string) => (k in t ? t[k] : () => undefined),
+      set: (t: Record<string, unknown>, k: string, v) => ((t[k] = v), true),
+    }) as unknown as CanvasRenderingContext2D;
+  const run = createRun(data, 3, 'playing');
+  const bossFloor = { ...enterFloor(run, data, data.dungeon.maxFloor), phase: 'floorIntro' as const };
+  const screens = [
+    { ...run, phase: 'title' as const },
+    bossFloor,
+    { ...run, phase: 'gameOver' as const },
+    { ...run, phase: 'victory' as const },
+  ];
+
+  it('일러스트는 네 화면에서만: 타이틀·10층 진입·게임 오버·클리어', () => {
+    expect(screens.map((st) => illustrationFor(st, data))).toEqual([
+      'player_portrait', 'final_boss_portrait', 'player_portrait_defeat', 'player_portrait_victory',
+    ]);
+    expect(illustrationFor({ ...run, phase: 'floorIntro' }, data)).toBeNull();
+    expect(illustrationFor(run, data)).toBeNull();
+    for (const id of ['player_portrait', 'final_boss_portrait', 'player_portrait_defeat', 'player_portrait_victory']) {
+      expect(data.sprites.illustrations.some((i) => i.id === id), id).toBe(true);
+    }
+  });
+
+  it('일러스트 자리: 타이틀은 오른쪽, 결과 화면은 왼쪽, 보스 진입은 가운데. 비율 2:3', () => {
+    const [title, intro, over] = screens.map((st) => illustrationBox(st, data, layout));
+    const mid = layout.canvas.width / 2;
+    expect(title.x).toBeGreaterThanOrEqual(mid);
+    expect(over.x + over.w).toBeLessThanOrEqual(mid);
+    expect(intro.x + intro.w / 2).toBeCloseTo(mid);
+    expect(title.w / title.h).toBeCloseTo(2 / 3);
+  });
+
+  it('일러스트 파일이 없어도 네 화면이 깨지지 않는다', () => {
+    const none = () => ({ get: () => null });
+    const layer = new IllustrationLayer(data, none);
+    const rc = { ctx: fakeCtx(), data, layout, sprites: new SpriteBook(data.sprites, '', none), extraStatus: [] };
+    for (const st of screens) {
+      expect(() => layer.draw(fakeCtx(), st, layout)).not.toThrow();
+      expect(() => renderScreen(rc, st)).not.toThrow();
+    }
+  });
+
+  it('타이틀 화면에 게임 제목, 새 게임 안내, 버전이 나온다', () => {
+    const lines = titleLines(data);
+    expect(lines[0]).toBe('무너진 왕국의 지하');
+    expect(lines).toContain('Enter: 새 게임');
+    expect(lines).toContain(`v${data.ui.title.version}`);
+  });
+
+  it('상태창: 빌드 아이템과 일시 효과 앞에 아이콘', () => {
+    const st = { ...run, player: { ...run.player, buildItems: ['spear'], statuses: [{ id: 'weak', turnsLeft: 2, appliedTurn: 0 }] } };
+    const lines = statusLines(st, data);
+    expect(lines.find((l) => l.text === '창')?.icon).toBe('spear');
+    expect(lines.find((l) => l.text.startsWith('약화'))?.icon).toBe('status_weak');
   });
 });

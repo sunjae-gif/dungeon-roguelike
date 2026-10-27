@@ -7,7 +7,7 @@ import { fontCss } from './font';
 import type { AnimFrame } from './anim';
 import type { Box, Layout } from './layout';
 import type { SpriteBook } from './sprites';
-import { bossBar, drawableItems, drawableMonsters, floorIntroLines, gameOverLines, itemChoiceLines, messageLines, objectSprite, statusLines, telegraphTiles, type TextLine, tileShade, victoryLines } from './view';
+import { bossBar, drawableItems, drawableMonsters, floorIntroLines, gameOverLines, itemChoiceLines, messageLines, objectSprite, statusLines, telegraphTiles, type TextLine, tileShade, titleLines, victoryLines } from './view';
 
 export interface RenderContext {
   ctx: CanvasRenderingContext2D;
@@ -27,7 +27,7 @@ const STILL: AnimFrame = { offset: () => ({ x: 0, y: 0 }), flashing: () => 0, nu
 function centerLines(state: RunState, data: GameData): string[] | null {
   switch (state.phase) {
     case 'title':
-      return ['타이틀', 'Enter: 새 게임'];
+      return titleLines(data);
     case 'floorIntro':
       return floorIntroLines(state, data);
     case 'playing':
@@ -50,7 +50,8 @@ export function renderScreen(rc: RenderContext, state: RunState): void {
   ctx.textBaseline = 'top';
 
   const lines = centerLines(state, data);
-  if (lines) return drawCentered(rc, lines);
+  if (state.phase === 'title') drawTitleBackground(rc);
+  if (lines) return drawCentered(rc, lines, textCenterX(state, layout), state.phase === 'title');
   drawMap(rc, state);
   drawStatus(rc, state);
   drawLog(rc, state);
@@ -72,17 +73,49 @@ function drawChoice(rc: RenderContext, state: RunState): void {
   drawTextLines(rc, { x: box.x + padding, y: box.y + padding, w: box.w - padding * 2, h: box.h - padding * 2 }, lines);
 }
 
-function drawCentered(rc: RenderContext, lines: string[]): void {
+// F016: 일러스트가 있는 화면은 글을 반대쪽 반에 둔다 (타이틀은 왼쪽, 결과 화면은 오른쪽)
+function textCenterX(state: RunState, layout: Layout): number {
+  const { width } = layout.canvas;
+  if (state.phase === 'title') return width / 4;
+  if (state.phase === 'gameOver' || state.phase === 'victory') return (width * 3) / 4;
+  return width / 2;
+}
+
+// bigFirst: 첫 줄(게임 제목)을 크게 (타이틀 화면)
+function drawCentered(rc: RenderContext, lines: string[], centerX: number, bigFirst: boolean): void {
   const { ctx, data, layout } = rc;
   const lineHeight = data.ui.layout.messageLineHeight;
   ctx.fillStyle = data.ui.colors.text;
   ctx.textAlign = 'center';
   let y = layout.canvas.height / 2 - (lines.length * lineHeight) / 2;
-  for (const line of lines) {
-    ctx.fillText(line, layout.canvas.width / 2, y);
+  lines.forEach((line, i) => {
+    const big = bigFirst && i === 0;
+    if (big) ctx.font = `${data.ui.title.fontSize}px "${data.ui.font.family}", ${data.ui.font.fallback}`;
+    ctx.fillText(line, centerX, big ? y - data.ui.title.fontSize : y);
+    if (big) ctx.font = fontCss(data.ui);
     y += lineHeight;
-  }
+  });
   ctx.textAlign = 'left';
+}
+
+// F016 타이틀 배경: 테마 1(1층)의 바닥 타일을 어둡게 깐다
+function drawTitleBackground(rc: RenderContext): void {
+  const { ctx, data, layout, sprites } = rc;
+  const tile = sprites.get(themeForFloor(data, 1).tiles.floor);
+  const size = layout.tileSize;
+  for (let y = 0; y < layout.canvas.height; y += size) {
+    for (let x = 0; x < layout.canvas.width; x += size) {
+      if (tile.image) ctx.drawImage(tile.image, x, y, size, size);
+      else {
+        ctx.fillStyle = tile.color;
+        ctx.fillRect(x, y, size, size);
+      }
+    }
+  }
+  ctx.globalAlpha = 1 - data.ui.fov.exploredBrightness;
+  ctx.fillStyle = data.ui.colors.background;
+  ctx.fillRect(0, 0, layout.canvas.width, layout.canvas.height);
+  ctx.globalAlpha = 1;
 }
 
 // F007 규칙 10: 바닥·벽 → 물체 → 아이템 → 몬스터 → 플레이어
@@ -183,12 +216,26 @@ const PULSE_LOW = 0.35;
 const PROJECTILE_FRACTION = 4;
 
 function drawTextLines(rc: RenderContext, box: Box, lines: TextLine[], fromBottom = false): void {
-  const { ctx } = rc;
-  const lineHeight = rc.data.ui.layout.messageLineHeight;
+  const { ctx, data, sprites } = rc;
+  const lineHeight = data.ui.layout.messageLineHeight;
+  // F016: 아이콘은 원본 크기(1배)로, 글은 아이콘 뒤에
+  const icon = data.sprites.sourcePixelSize;
+  const gap = data.ui.layout.padding / 2;
   const startY = fromBottom ? box.y + box.h - lines.length * lineHeight : box.y;
   lines.forEach((line, i) => {
+    const y = startY + i * lineHeight;
+    let x = box.x;
+    if (line.icon) {
+      const s = sprites.get(line.icon);
+      if (s.image) ctx.drawImage(s.image, x, y, icon, icon);
+      else {
+        ctx.fillStyle = s.color;
+        ctx.fillRect(x, y, icon, icon);
+      }
+      x += icon + gap;
+    }
     ctx.fillStyle = line.color;
-    ctx.fillText(line.text, box.x, startY + i * lineHeight);
+    ctx.fillText(line.text, x, y);
   });
 }
 

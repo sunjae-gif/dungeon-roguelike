@@ -103,6 +103,7 @@ export interface ItemDef {
 export interface StatusDef {
   id: string;
   name: string;
+  sprite?: string; // F016 상태창 아이콘
   modifiers?: Modifier[];
   triggers?: Trigger[];
 }
@@ -208,6 +209,9 @@ export interface UiData {
     trapFlashMs: number;
   };
   scaling: { preferInteger: boolean };
+  // F016 타이틀 화면, 스탠딩 일러스트
+  title: { text: string; fontSize: number; version: string };
+  illustration: { aspectWidth: number; aspectHeight: number; bossIntroAlpha: number };
 }
 
 export interface GameData {

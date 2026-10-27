@@ -31,6 +31,7 @@ export function drawableItems(state: RunState) {
 export interface TextLine {
   text: string;
   color: string;
+  icon?: string; // F016: 줄 앞에 그릴 아이콘 그림 id
 }
 
 // F007 규칙 18~20: 상태창 내용 (위에서부터)
@@ -50,10 +51,11 @@ export function statusLines(state: RunState, data: GameData): TextLine[] {
     ...state.player.consumables.map((id, i) => text(`${i + 1}. ${itemName(data, id)}`)),
     text(''),
     // F014 화면: 걸린 일시 효과 (빌드 아이템 목록 위)
-    ...state.player.statuses.map((s) => text(`${statusDef(data, s.id)?.name ?? s.id} (${s.turnsLeft}턴)`)),
+    ...state.player.statuses.map((s) => ({ ...text(`${statusDef(data, s.id)?.name ?? s.id} (${s.turnsLeft}턴)`), icon: statusDef(data, s.id)?.sprite })),
     ...(state.player.statuses.length > 0 ? [text('')] : []),
     text('빌드 아이템'),
-    ...state.player.buildItems.map((id) => text(`- ${itemName(data, id)}`)),
+    // F016: 빌드 아이템 이름 앞에 아이템 아이콘
+    ...state.player.buildItems.map((id) => ({ ...text(itemName(data, id)), icon: itemDef(data, id)?.sprite })),
   ];
   return lines;
 }
@@ -166,4 +168,29 @@ export function itemChoiceLines(state: RunState, data: GameData): TextLine[] {
       };
     }),
   ];
+}
+
+// F016 타이틀 화면: 게임 제목, 새 게임 안내, 버전
+export function titleLines(data: GameData): string[] {
+  return [data.ui.title.text, '', 'Enter: 새 게임', '', `v${data.ui.title.version}`];
+}
+
+// F016 스탠딩 일러스트: 네 화면에서만. 없으면 null
+export const PLAYER_PORTRAIT = 'player_portrait';
+export function illustrationFor(state: RunState, data: GameData): string | null {
+  switch (state.phase) {
+    case 'title':
+      return PLAYER_PORTRAIT;
+    case 'gameOver':
+      return `${PLAYER_PORTRAIT}_defeat`;
+    case 'victory':
+      return `${PLAYER_PORTRAIT}_victory`;
+    case 'floorIntro': {
+      // 보스가 있는 테마의 층(10층) 진입: 그 보스의 일러스트
+      const boss = themeForFloor(data, state.floorNumber).boss;
+      return boss ? `${boss}_portrait` : null;
+    }
+    default:
+      return null;
+  }
 }

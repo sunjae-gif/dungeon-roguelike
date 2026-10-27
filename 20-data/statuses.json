@@ -1,9 +1,9 @@
 {
-  "_note": "일시 효과(effects.md 5절, F014). applyStatus 효과로 건다. trigger의 chance는 1이어야 한다. 수치는 모두 임시값.",
+  "_note": "일시 효과(effects.md 5절, F014). applyStatus 효과로 건다. sprite는 상태창 아이콘(F016). trigger의 chance는 1이어야 한다. 수치는 모두 임시값.",
   "statuses": [
-    { "id": "weak", "name": "약화", "modifiers": [ { "stat": "attack", "op": "add", "value": -2 } ] },
-    { "id": "rage", "name": "분노", "modifiers": [ { "stat": "attack", "op": "add", "value": 2 } ] },
-    { "id": "poison", "name": "중독",
+    { "id": "weak", "sprite": "status_weak", "name": "약화", "modifiers": [ { "stat": "attack", "op": "add", "value": -2 } ] },
+    { "id": "rage", "sprite": "status_rage", "name": "분노", "modifiers": [ { "stat": "attack", "op": "add", "value": 2 } ] },
+    { "id": "poison", "sprite": "status_poison", "name": "중독",
       "triggers": [ { "event": "onTurnEnd", "chance": 1, "effects": [ { "type": "damage", "target": "self", "amount": 1 } ] } ] }
   ]
 }
