@@ -4,6 +4,7 @@ import { transition } from './flow';
 import { bossRoomNeedingWarning, sealBossRooms, warnBossRoom } from './boss';
 import { attack } from './combat';
 import { DOOR_OBJECT_TYPE, isClosedDoor, openDoor } from './doors';
+import { discoverHiddenWalls, drinkSpring, SPRING_OBJECT_TYPE, springNotice } from './roomFeatures';
 import { triggerTrap } from './traps';
 import { canUseConsumable, CHEST_OBJECT_TYPE, openChest, pickUp, useConsumable } from './items';
 import { STAIRS_OBJECT_TYPE } from './dungeon';
@@ -31,7 +32,8 @@ export type Action =
   | { type: 'useItem'; index: number }
   | { type: 'rest' }
   | { type: 'descend' }
-  | { type: 'warn'; roomId: number };
+  | { type: 'warn'; roomId: number }
+  | { type: 'notice'; text: string };
 
 // 2단계: 입력을 행동으로. 무효면 null.
 // 방향 입력 판정 (turn-order.md 1~5)
@@ -45,9 +47,9 @@ export function toAction(state: RunState, input: PlayerInput, data: GameData): A
       // 1. 바로 앞 몬스터를 공격 (F003 규칙 1)
       const monster = monsterAt(state.floor, x, y);
       if (monster) return { type: 'attack', direction, targetId: monster.id };
-      // 2. 바로 앞의 막힌 물체: 상자 열기(F005). 할 수 있는 상호작용이 없으면 무효
+      // 2. 바로 앞의 막힌 물체: 문·상자·샘 (F010, F005, F009). 효과가 없으면 무효(안내 메시지가 있으면 그것만)
       const object = objectAt(state.floor, x, y);
-      if (object?.blocksMove) return isInteractable(object) ? { type: 'interact', direction, objectId: object.id } : null;
+      if (object?.blocksMove) return interactionWith(state, data, object, direction);
       // 3. 사거리 안 같은 줄의 몬스터 (F015 창)
       const ranged = monsterInRange(state, direction, getStat(state.player, 'attackRange', data));
       if (ranged) return { type: 'attack', direction, targetId: ranged.id };
@@ -68,8 +70,18 @@ export function toAction(state: RunState, input: PlayerInput, data: GameData): A
   }
 }
 
-function isInteractable(object: MapObject): boolean {
-  return isClosedDoor(object) || (object.type === CHEST_OBJECT_TYPE && !object.state.opened);
+// turn-order.md 2: 막힌 물체와의 상호작용. 효과 없는 interact는 안내 메시지만 남기는 무효 행동
+function interactionWith(state: RunState, data: GameData, object: MapObject, direction: Direction): Action | null {
+  const interact: Action = { type: 'interact', direction, objectId: object.id };
+  if (isClosedDoor(object)) return interact;
+  if (object.type === CHEST_OBJECT_TYPE && !object.state.opened) {
+    return object.state.locked ? { type: 'notice', text: MESSAGES.chestLocked() } : interact;
+  }
+  if (object.type === SPRING_OBJECT_TYPE) {
+    const notice = springNotice(state, data, object);
+    return notice ? { type: 'notice', text: notice } : interact;
+  }
+  return null;
 }
 
 // turn-order.md 3: 그 방향 2~range칸 안의 가장 가까운 몬스터. 사이 칸은 모두 비어 있어야 한다
@@ -99,6 +111,7 @@ export function playTurn(state: RunState, input: PlayerInput, data: GameData): R
   if (!action) return state;
   // F008 규칙 4: 경고는 무효 행동이지만 메시지를 남기는 예외 (turn-order.md)
   if (action.type === 'warn') return warnBossRoom(state, data, action.roomId);
+  if (action.type === 'notice') return addMessage(state, action.text, data);
 
   // 3. onTurnStart (플레이어, effects.md 3절)
   let next = fireEvent(state, data, state.player.id, 'onTurnStart').state;
@@ -122,7 +135,7 @@ export function playTurn(state: RunState, input: PlayerInput, data: GameData): R
   return { ...next, turn: next.turn + 1 }; // 6-7
 }
 
-function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'descend' | 'warn' }>, data: GameData): RunState {
+function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'descend' | 'warn' | 'notice' }>, data: GameData): RunState {
   switch (action.type) {
     case 'move': {
       // F002 규칙 1, 5: 한 칸 이동하고 그 방향을 바라본다
@@ -145,6 +158,8 @@ function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'des
       const object = state.floor.objects.find((o) => o.id === action.objectId);
       // F010 규칙 2: 문 열기 (제자리, 한 턴)
       if (object?.type === DOOR_OBJECT_TYPE) return openDoor(facing, data, state.player.id, action.objectId);
+      // F009 규칙 31: 샘 마시기 (한 턴)
+      if (object?.type === SPRING_OBJECT_TYPE) return drinkSpring(facing, data, action.objectId);
       // F005 규칙 8: 상자 열기 (한 턴). 고르기 화면은 턴이 끝난 뒤 (game-flow.md)
       return openChest(facing, data, action.objectId);
     }
@@ -152,7 +167,7 @@ function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'des
       // F005 규칙 2: 소모품 사용 (한 턴)
       return useConsumable(state, data, action.index);
     case 'rest':
-      // F002 규칙 4
-      return state;
+      // F002 규칙 4. F009 규칙 12: 숨은 벽 옆이면 찾는다
+      return discoverHiddenWalls(state, data);
   }
 }

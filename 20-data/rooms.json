@@ -1,9 +1,10 @@
 {
-  "_note": "방 종류(F009). weight는 기본 가중치이고 테마의 roomWeights가 있으면 그것을 쓴다. 수치는 모두 임시값.",
+  "_note": "방 종류(F009). weight는 기본 가중치이고 테마의 roomWeights가 있으면 그것을 쓴다. 테마 가중치가 0인 종류는 minPerFloor를 무시한다. minRoomSize는 방의 짧은 변 최소 길이. 수치는 모두 임시값.",
   "roomTypes": [
-    { "id": "normal",   "name": "일반방",     "weight": 70, "minPerFloor": 1, "maxPerFloor": 99 },
-    { "id": "treasure", "name": "보물상자방", "weight": 15, "minPerFloor": 0, "maxPerFloor": 2 },
-    { "id": "secret",   "name": "비밀방",     "weight": 5,  "minPerFloor": 0, "maxPerFloor": 1 },
-    { "id": "puzzle",   "name": "퍼즐방",     "weight": 10, "minPerFloor": 0, "maxPerFloor": 1 }
+    { "id": "normal",   "name": "일반방",     "weight": 60, "minPerFloor": 1, "maxPerFloor": 99, "minRoomSize": 4 },
+    { "id": "treasure", "name": "보물상자방", "weight": 15, "minPerFloor": 1, "maxPerFloor": 2,  "minRoomSize": 4 },
+    { "id": "secret",   "name": "비밀방",     "weight": 6,  "minPerFloor": 0, "maxPerFloor": 1,  "minRoomSize": 4 },
+    { "id": "puzzle",   "name": "퍼즐방",     "weight": 9,  "minPerFloor": 0, "maxPerFloor": 1,  "minRoomSize": 6 },
+    { "id": "spring",   "name": "샘방",       "weight": 8,  "minPerFloor": 0, "maxPerFloor": 1,  "minRoomSize": 4 }
   ]
 }

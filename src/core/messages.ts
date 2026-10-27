@@ -39,6 +39,12 @@ export const MESSAGES = {
   // F010
   alarm: () => '경보가 울렸다! 발소리가 다가온다.',
   doorOpened: () => '문을 열었다.',
+  // F009
+  hiddenWallFound: () => '벽 틈으로 바람이 새어 나온다. 숨은 통로를 찾았다!',
+  springDrank: (healed: number) => `샘물을 마셨다. (HP +${healed})`,
+  springNotThirsty: () => '지금은 목이 마르지 않다.',
+  springDry: () => '샘이 말라 있다.',
+  chestLocked: () => '잠겨 있다.',
   monsterOpenedDoor: (monsterWithJosa: string) => `${monsterWithJosa} 문을 열었다.`,
   steppedOnTrap: (trapWithJosa: string) => `${trapWithJosa} 밟았다!`,
   monsterSteppedOnTrap: (monsterWithJosa: string, trapWithJosa: string) => `${monsterWithJosa} ${trapWithJosa} 밟았다!`,

@@ -1,20 +1,20 @@
 // F005 아이템과 빌드: 바닥 소모품, 몬스터 드롭, 보물상자와 빌드 아이템 고르기
 import { themeForFloor } from '../data/query';
 import type { GameData, ItemDef } from '../data/types';
-import { isBossFloor, type Point } from './dungeon';
+import type { Point } from './dungeon';
 import { getStat, immunitiesOf, itemDef, statusImmunity } from './effects';
 import { applyEffect, fireEvent } from './events';
 import { dropItem } from './floorItems';
 import { addMessage, MESSAGES } from './messages';
 import { monsterAt, objectAt } from './movement';
 import { chance, floorRng, hashSeed, nextInt, pickWeighted, useStoredRng, type Rng } from './rng';
-import { tileIndex, type Actor, type FloorState, type ItemChoice, type MapObject, type Room, type RunState } from './state';
+import { PUZZLE_ROOM_TYPE, SECRET_ROOM_TYPE } from './roomTypes';
+import { roomTiles } from './rooms';
+import type { Actor, FloorState, ItemChoice, RunState } from './state';
 
 export const CHEST_OBJECT_TYPE = 'chest';
-// 구조용 방 (F009 규칙 1). 보물상자방이 될 수 없다
-const STRUCTURAL_ROOMS = ['start', 'stairs', 'boss'];
-// rooms.json의 보물상자방 id
-const TREASURE_ROOM_TYPE = 'treasure';
+// F009 방 종류별 바닥 아이템: 비밀방·퍼즐방에는 놓지 않는다
+const NO_ITEM_ROOMS = [SECRET_ROOM_TYPE, PUZZLE_ROOM_TYPE];
 
 const weightOf = (it: ItemDef) => it.weight ?? 1;
 
@@ -27,45 +27,7 @@ function withLoot<T>(state: RunState, fn: (rng: Rng) => T): { value: T; state: R
   return { value: used.value, state: { ...state, rng: used.rng } };
 }
 
-function roomTiles(floor: FloorState, room: Room): Point[] {
-  const tiles: Point[] = [];
-  for (let y = room.y; y < room.y + room.h; y++) {
-    for (let x = room.x; x < room.x + room.w; x++) {
-      if (floor.tiles[tileIndex(floor, x, y)] === 'floor') tiles.push({ x, y });
-    }
-  }
-  return tiles;
-}
 
-// F005 규칙 10, 11: 1~9층에 보물상자방 1개, 방 가운데에 가장 가까운 빈 바닥 칸에 상자 (rooms 흐름)
-export function placeTreasureChest(
-  floor: FloorState,
-  data: GameData,
-  runSeed: number,
-  floorNumber: number,
-  firstId: number,
-): { floor: FloorState; nextId: number } {
-  if (isBossFloor(data, floorNumber)) return { floor, nextId: firstId };
-  const candidates = floor.rooms.filter((r) => !STRUCTURAL_ROOMS.includes(r.type));
-  if (candidates.length === 0) return { floor, nextId: firstId };
-  const room = candidates[nextInt(floorRng(runSeed, floorNumber, 'rooms'), 0, candidates.length - 1)];
-  const center = { x: room.x + Math.floor(room.w / 2), y: room.y + Math.floor(room.h / 2) };
-  const spot = roomTiles(floor, room)
-    .filter((p) => !objectAt(floor, p.x, p.y))
-    .sort((a, b) => dist(a, center) - dist(b, center) || a.y - b.y || a.x - b.x)[0];
-  if (!spot) return { floor, nextId: firstId };
-  const chest: MapObject = { id: firstId, type: CHEST_OBJECT_TYPE, ...spot, blocksMove: true, blocksSight: false, state: { opened: false } };
-  return {
-    floor: {
-      ...floor,
-      rooms: floor.rooms.map((r) => (r.id === room.id ? { ...r, type: TREASURE_ROOM_TYPE } : r)),
-      objects: [...floor.objects, chest],
-    },
-    nextId: firstId + 1,
-  };
-}
-
-const dist = (a: Point, b: Point) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 
 // F005 규칙 5: 바닥 소모품. 테마 itemCount만큼, weight 비율로, 방 안 빈 바닥 칸에 (loot 흐름)
 // 다 놓은 뒤의 loot 흐름 상태를 돌려준다. 그 층에 있는 동안 이어 쓴다
@@ -82,6 +44,7 @@ export function placeFloorItems(
   const consumables = data.items.filter((it) => it.kind === 'consumable' && weightOf(it) > 0).map((it) => [it.id, weightOf(it)] as const);
   const count = nextInt(rng, theme.itemCount[0], theme.itemCount[1]);
   let free = floor.rooms
+    .filter((r) => !NO_ITEM_ROOMS.includes(r.type))
     .flatMap((r) => roomTiles(floor, r))
     .filter((p) => !objectAt(floor, p.x, p.y) && !monsterAt(floor, p.x, p.y) && !(p.x === start.x && p.y === start.y));
   let nextId = firstId;
@@ -151,7 +114,8 @@ export function generateChoice(state: RunState, data: GameData, source: ItemChoi
   const rolled = withLoot(state, (rng) => {
     const options: string[] = [];
     for (let i = 0; i < slots; i++) {
-      const rare = chance(rng, rareChance);
+      // F005 규칙 12 표: 비밀방은 모두 희귀 (모자라면 일반)
+      const rare = source === 'secret' || chance(rng, rareChance);
       const available = (rarity: string) => builds.filter((it) => it.rarity === rarity && !owned.has(it.id) && !options.includes(it.id));
       // 정한 등급이 비었으면 다른 등급에서. 둘 다 비면 그 칸은 비운다
       const primary = available(rare ? 'rare' : 'common');
@@ -170,9 +134,11 @@ export function openChest(state: RunState, data: GameData, chestId: number): Run
   if (!chest || chest.state.opened) return state;
   const opened = { ...chest, blocksMove: false, state: { ...chest.state, opened: true } };
   let next: RunState = { ...state, floor: { ...state.floor, objects: state.floor.objects.map((o) => (o.id === chestId ? opened : o)) } };
-  const choice = generateChoice(next, data, 'chest');
+  // F009: 비밀방 상자는 secret, 퍼즐방 상자는 puzzle 규칙으로 후보를 만든다
+  const source = (chest.state.source as ItemChoice['source'] | undefined) ?? 'chest';
+  const choice = generateChoice(next, data, source);
   next = choice.state;
-  if (choice.options.length > 0) return { ...next, pendingChoice: { source: 'chest', options: choice.options } };
+  if (choice.options.length > 0) return { ...next, pendingChoice: { source, options: choice.options } };
   // 규칙 12-5: 후보가 하나도 없으면 exhaustedReward. 인벤토리에 자리가 없으면 상자 옆 바닥에
   const { item, count } = data.loot.exhaustedReward;
   for (let i = 0; i < count; i++) {

@@ -4,6 +4,7 @@ import { causeName } from '../core/events';
 import { MESSAGES } from '../core/messages';
 import { statusDef } from '../core/effects';
 import { DOOR_OBJECT_TYPE } from '../core/doors';
+import { HIDDEN_WALL_OBJECT_TYPE } from '../core/dungeon';
 import { getStat } from '../core/effects';
 import { TRAP_OBJECT_TYPE } from '../core/traps';
 import { formatSeed } from '../core/rng';
@@ -136,9 +137,15 @@ export function objectSprite(obj: MapObject, data: GameData, floorNumber: number
     return obj.state.open ? tiles.doorOpen : tiles.door;
   }
   if (obj.type === TRAP_OBJECT_TYPE) return data.traps.find((t) => t.id === obj.defId)?.sprite ?? obj.type;
+  // F009 규칙 11, 12: 숨은 벽은 찾기 전에는 벽, 찾은 뒤에는 통로(바닥)
+  if (obj.type === HIDDEN_WALL_OBJECT_TYPE) {
+    const { tiles } = themeForFloor(data, floorNumber);
+    return obj.state.discovered ? tiles.floor : tiles.wall;
+  }
+  // 열린 상자 "{id}_open", 마른 샘 "{id}_used" 그림이 있으면 그것
   const base = obj.defId ?? obj.type;
-  const open = `${base}_open`;
-  return obj.state.opened && data.sprites.sprites.some((s) => s.id === open) ? open : base;
+  const variant = obj.state.opened ? `${base}_open` : obj.state.used ? `${base}_used` : base;
+  return data.sprites.sprites.some((s) => s.id === variant) ? variant : base;
 }
 
 const RARITY_LABEL: Record<string, string> = { common: '일반', rare: '희귀' };

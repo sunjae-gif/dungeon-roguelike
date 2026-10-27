@@ -20,6 +20,8 @@ function reachable(floor: FloorState, start: Point): Set<number> {
       if (x < 0 || y < 0 || x >= floor.width || y >= floor.height) continue;
       const i = tileIndex(floor, x, y);
       if (floor.tiles[i] !== 'floor' || seen.has(i)) continue;
+      // 숨은 벽은 찾기 전에는 벽과 같다
+      if (floor.objects.some((o) => o.type === 'hiddenWall' && o.x === x && o.y === y)) continue;
       seen.add(i);
       queue.push({ x, y });
     }
@@ -49,9 +51,16 @@ function checkCommon(g: GeneratedFloor): Set<number> {
     }
   }
   // 모든 바닥 칸이 시작 지점에서 닿는다
+  // F001 규칙 6: 비밀방(F009)과 그 숨은 벽을 뺀 모든 바닥 칸이 닿는다
   const reach = reachable(floor, start);
-  const floorCount = floor.tiles.filter((t) => t === 'floor').length;
-  expect(reach.size).toBe(floorCount);
+  const secret = floor.rooms.filter((r) => r.type === 'secret');
+  const hidden = new Set(floor.objects.filter((o) => o.type === 'hiddenWall').map((o) => tileIndex(floor, o.x, o.y)));
+  const expected = floor.tiles.filter((t, i) => {
+    const x = i % floor.width;
+    const y = Math.floor(i / floor.width);
+    return t === 'floor' && !hidden.has(i) && !secret.some((r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
+  }).length;
+  expect(reach.size).toBe(expected);
   // 지도 테두리는 벽
   for (let x = 0; x < floor.width; x++) {
     expect(floor.tiles[tileIndex(floor, x, 0)]).toBe('wall');

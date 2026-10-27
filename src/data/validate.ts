@@ -151,7 +151,7 @@ function checkRoomTypes(c: Checker, d: Obj): Obj[] {
   list.forEach((r, i) => {
     const p = `rooms.json.roomTypes[${i}]`;
     c.str(r, 'name', p);
-    for (const k of ['weight', 'minPerFloor', 'maxPerFloor']) c.num(r, k, p, { integer: true, min: 0 });
+    for (const k of ['weight', 'minPerFloor', 'maxPerFloor', 'minRoomSize']) c.num(r, k, p, { integer: true, min: 0 });
   });
   return list;
 }
@@ -211,6 +211,7 @@ function checkLoot(c: Checker, d: Obj, items: Obj[]): void {
     c.ref(drop.item, consumables, `${p}.monsterDrop.item`, 'items.json 소모품');
     c.num(drop, 'chance', `${p}.monsterDrop`, { min: 0, max: 1 });
   }
+  c.num(d, 'springHealRatio', p, { min: 0, max: 1 });
   const reward = c.objField(d, 'exhaustedReward', p);
   if (reward) {
     c.ref(reward.item, consumables, `${p}.exhaustedReward.item`, 'items.json 소모품');

@@ -113,6 +113,7 @@ export interface RoomTypeDef {
   weight: number;
   minPerFloor: number;
   maxPerFloor: number;
+  minRoomSize: number; // F009: 방의 짧은 변 최소 길이
 }
 
 export interface SpriteDef {
@@ -175,6 +176,7 @@ export interface LootData {
   puzzleChoices: number;
   monsterDrop: { item: string; chance: number };
   exhaustedReward: { item: string; count: number };
+  springHealRatio: number; // F009 회복의 샘
 }
 
 export interface UiData {

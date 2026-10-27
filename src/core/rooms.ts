@@ -45,3 +45,12 @@ export function outsideEntrances(floor: FloorState, room: Room): Point[] {
 export function roomAt(floor: FloorState, p: Point): Room | undefined {
   return floor.rooms.find((r) => inRoom(r, p));
 }
+
+// 방 가운데에 가장 가까운 빈 바닥 칸 (물체·개체가 없는 칸). 같으면 위쪽·왼쪽 먼저
+export function centerSpot(floor: FloorState, room: Room): Point | undefined {
+  const center = { x: room.x + Math.floor(room.w / 2), y: room.y + Math.floor(room.h / 2) };
+  const dist = (p: Point) => Math.abs(p.x - center.x) + Math.abs(p.y - center.y);
+  return roomTiles(floor, room)
+    .filter((p) => !floor.objects.some((o) => o.x === p.x && o.y === p.y) && !floor.actors.some((a) => a.x === p.x && a.y === p.y))
+    .sort((a, b) => dist(a) - dist(b) || a.y - b.y || a.x - b.x)[0];
+}

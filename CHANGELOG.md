@@ -3,6 +3,7 @@
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
 ## 2026-10-26 (M4)
+- [F009] 방 종류 일부 구현: 테마 가중치·최소/최대·최소 크기로 종류 정하기(통로를 내기 전에), 보물상자방 1~2개, 샘방, 비밀방(막다른 통로 끝 숨은 벽, 쉬어서 찾기, 희귀 둘 중 하나). 2~3칸 입구 자리가 없으면 더 긴 가지 통로로 입구를 낸다. rooms.json minRoomSize·spring, loot.json springHealRatio
 - [F010] 문과 함정 구현: 문 배치(doorChance, objects 흐름)·열기(플레이어·몬스터), 함정 배치(방 안, 입구 주변·금지 방 제외, 방 안 길 유지)·발동(걸어서·밀려서, once, 메시지), 몬스터 길 찾기(문 포함, 함정은 다른 길이 없을 때만), 원거리·도망 칸에서 함정 제외, 키 반복은 함정·문 앞에서 멈춤. themes.json tiles.doorOpen, sprites.json door_open_*
 - [systems] M4 시스템 확장 구현: effects.md alarm 효과(함정 전용), 함정 effects 형식(traps.json 개편, trap_gas·trap_alarm 그림), 테마 함정 설정
 - [F005] 줍기·사용 메시지 구현 (useMessage, {회복량})

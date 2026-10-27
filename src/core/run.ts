@@ -8,7 +8,8 @@ import { placeBoss } from './boss';
 import { placeDoors } from './doors';
 import { floorRng, initRunRng } from './rng';
 import { placeTraps } from './traps';
-import { placeFloorItems, placeTreasureChest } from './items';
+import { placeFloorItems } from './items';
+import { placeRoomFeatures } from './roomFeatures';
 import { addMessage, MESSAGES } from './messages';
 import { noticeMonsters, spawnMonsters } from './monsters';
 import { updateSight } from './movement';
@@ -66,10 +67,10 @@ export function enterFloor(state: RunState, data: GameData, floorNumber: number)
   return arrive(next, data);
 }
 
-// F001 지형 → F005 보물상자 → F010 문·함정 → F004 몬스터 → F008 보스 → F005 바닥 소모품
+// F001 지형·방 종류 → F009 상자·샘 → F010 문·함정 → F004 몬스터 → F008 보스 → F005 바닥 소모품
 function buildFloor(data: GameData, runSeed: number, floorNumber: number, firstId: number) {
   const generated = generateFloor(data, runSeed, floorNumber, firstId);
-  const withChest = placeTreasureChest(generated.floor, data, runSeed, floorNumber, generated.nextId);
+  const withChest = placeRoomFeatures(generated.floor, generated.nextId); // F005 상자, F009 비밀방 상자·샘
   // F010: 문 → 함정 (objects 흐름)
   const objectsRng = floorRng(runSeed, floorNumber, 'objects');
   const doors = placeDoors(withChest.floor, data, floorNumber, objectsRng, withChest.nextId);

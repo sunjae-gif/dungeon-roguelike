@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { generateFloor } from '../src/core/dungeon';
 import { getStat } from '../src/core/effects';
 import { transition } from '../src/core/flow';
-import { CHEST_OBJECT_TYPE, generateChoice, monsterDrop, placeTreasureChest } from '../src/core/items';
+import { CHEST_OBJECT_TYPE, generateChoice, monsterDrop } from '../src/core/items';
+import { placeRoomFeatures } from '../src/core/roomFeatures';
 import { MESSAGES } from '../src/core/messages';
 import { createRun, enterFloor } from '../src/core/run';
 import type { MapObject, RunState } from '../src/core/state';
@@ -107,8 +108,8 @@ describe('F005 보물상자와 고르기', () => {
     for (let seed = 0; seed < 1000; seed++) {
       for (let floorNumber = 1; floorNumber <= data.dungeon.maxFloor; floorNumber++) {
         const g = generateFloor(data, seed, floorNumber, 1);
-        const { floor } = placeTreasureChest(g.floor, data, seed, floorNumber, g.nextId);
-        const chests = floor.objects.filter((o) => o.type === CHEST_OBJECT_TYPE);
+        const { floor } = placeRoomFeatures(g.floor, g.nextId);
+        const chests = floor.objects.filter((o) => o.type === CHEST_OBJECT_TYPE && o.state.source === 'chest');
         if (floorNumber === data.dungeon.maxFloor) expect(chests.length).toBe(0);
         else {
           expect(chests.length).toBeGreaterThanOrEqual(1);
