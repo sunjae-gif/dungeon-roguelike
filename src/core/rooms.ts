@@ -1,15 +1,12 @@
 // 방 안팎 칸 계산. 문(F010)·함정(F010)·매복 배치(F014)·퍼즐(F009)이 같이 쓴다
 import type { Point } from './dungeon';
+import { DIRECTIONS, stepFrom } from './movement';
 import { tileIndex, type FloorState, type Room } from './state';
 
-export const AROUND = (p: Point): Point[] => [
-  { x: p.x, y: p.y - 1 },
-  { x: p.x + 1, y: p.y },
-  { x: p.x, y: p.y + 1 },
-  { x: p.x - 1, y: p.y },
-];
+// 상하좌우 네 칸 (위 → 오른쪽 → 아래 → 왼쪽)
+export const AROUND = (p: Point): Point[] => DIRECTIONS.map((d) => stepFrom(p, d));
 
-export const inRoom = (r: Room, p: Point) => p.x >= r.x && p.x < r.x + r.w && p.y >= r.y && p.y < r.y + r.h;
+export const inRoom = (r: { x: number; y: number; w: number; h: number }, p: Point) => p.x >= r.x && p.x < r.x + r.w && p.y >= r.y && p.y < r.y + r.h;
 export const pointKey = (p: Point) => `${p.x},${p.y}`;
 
 const isFloor = (floor: FloorState, p: Point) =>

@@ -2,20 +2,18 @@
 import { updateActor } from './actors';
 import { monsterName, themeForFloor } from '../data/query';
 import type { GameData, MonsterDef } from '../data/types';
-import { firstStep, isAdjacent, moveOrWait, seesPlayer, stepFrom, strike, walkable } from './ai';
+import { firstStep, isAdjacent, moveOrWait, seesPlayer, strike, walkable } from './ai';
 import type { Point } from './dungeon';
 import { baseStat, getStat } from './effects';
 
 import { addMessage, MESSAGES } from './messages';
-import { monsterAt, objectAt } from './movement';
-import { tileIndex, type Actor, type Direction, type FloorState, type MapObject, type MonsterAi, type Room, type RunState } from './state';
+import { DIRECTIONS, monsterAt, objectAt, stepFrom } from './movement';
+import { centerSpot, inRoom } from './rooms';
+import { tileIndex, type Actor, type FloorState, type MapObject, type MonsterAi, type Room, type RunState } from './state';
 
 export const SEALED_GATE_TYPE = 'sealedGate';
 const BOSS_ROOM_TYPE = 'boss';
-const DIRECTIONS: Direction[] = ['up', 'right', 'down', 'left'];
 
-const inRoom = (r: Room, p: Point) => p.x >= r.x && p.x < r.x + r.w && p.y >= r.y && p.y < r.y + r.h;
-const dist = (a: Point, b: Point) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 
 export function bossRoomAt(floor: FloorState, p: Point): Room | undefined {
   return floor.rooms.find((r) => r.type === BOSS_ROOM_TYPE && inRoom(r, p));
@@ -31,14 +29,7 @@ export function placeBoss(floor: FloorState, data: GameData, floorNumber: number
   const bossId = themeForFloor(data, floorNumber).boss;
   const room = floor.rooms.find((r) => r.type === BOSS_ROOM_TYPE);
   if (!bossId || !room) return { floor, nextId: firstId };
-  const center = { x: room.x + Math.floor(room.w / 2), y: room.y + Math.floor(room.h / 2) };
-  const spots: Point[] = [];
-  for (let y = room.y; y < room.y + room.h; y++) {
-    for (let x = room.x; x < room.x + room.w; x++) {
-      if (floor.tiles[tileIndex(floor, x, y)] === 'floor' && !objectAt(floor, x, y) && !monsterAt(floor, x, y)) spots.push({ x, y });
-    }
-  }
-  const spot = spots.sort((a, b) => dist(a, center) - dist(b, center) || a.y - b.y || a.x - b.x)[0];
+  const spot = centerSpot(floor, room);
   if (!spot) return { floor, nextId: firstId };
   const boss: Actor = { id: firstId, defId: bossId, ...spot, facing: 'down', hp: 0, buildItems: [], consumables: [], statuses: [], ai: {} };
   return { floor: { ...floor, actors: [...floor.actors, { ...boss, hp: baseStat(boss, 'maxHp', data) }] }, nextId: firstId + 1 };

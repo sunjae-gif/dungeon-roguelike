@@ -9,14 +9,10 @@ import { getStat } from './effects';
 import { isClosedDoor, openDoor } from './doors';
 import { isPuzzleTile } from './puzzles';
 import { fireEvent } from './events';
-import { canSee, DIRECTION_DELTAS, inBounds, isPassable, manhattanDistance, monsterAt, objectAt } from './movement';
+import { DIRECTIONS, canSee, inBounds, isPassable, manhattanDistance, monsterAt, objectAt, stepFrom } from './movement';
 import { tileIndex, type Actor, type Direction, type FloorState, type MonsterAi, type RunState } from './state';
 import { trapAt, triggerTrap } from './traps';
 
-// F004 규칙 14: 최단 경로가 여러 개면 위 → 오른쪽 → 아래 → 왼쪽
-const STEP_ORDER: Direction[] = ['up', 'right', 'down', 'left'];
-
-export const stepFrom = (p: Point, dir: Direction): Point => ({ x: p.x + DIRECTION_DELTAS[dir].x, y: p.y + DIRECTION_DELTAS[dir].y });
 
 // 바닥이고 막힌 물체가 없는 칸. 사격선·강타 범위가 쓴다 (닫힌 문은 막는다)
 export function walkable(floor: FloorState, x: number, y: number): boolean {
@@ -48,7 +44,7 @@ function distancesFrom(floor: FloorState, goals: Point[], avoidTraps: boolean): 
   for (let head = 0; head < queue.length; head++) {
     const p = queue[head];
     const d = dist[tileIndex(floor, p.x, p.y)];
-    for (const dir of STEP_ORDER) {
+    for (const dir of DIRECTIONS) {
       const n = stepFrom(p, dir);
       if (!pathable(floor, n.x, n.y, avoidTraps) || dist[tileIndex(floor, n.x, n.y)] !== -1) continue;
       dist[tileIndex(floor, n.x, n.y)] = d + 1;
@@ -66,7 +62,7 @@ export function firstStepTo(floor: FloorState, from: Point, goals: Point[]): Dir
   if (dist[tileIndex(floor, from.x, from.y)] < 0) dist = distancesFrom(floor, goals, false);
   const here = dist[tileIndex(floor, from.x, from.y)];
   if (here <= 0) return null;
-  for (const dir of STEP_ORDER) {
+  for (const dir of DIRECTIONS) {
     const n = stepFrom(from, dir);
     if (inBounds(floor, n.x, n.y) && dist[tileIndex(floor, n.x, n.y)] === here - 1) return dir;
   }
@@ -104,7 +100,7 @@ export function lineOfFire(state: RunState, from: Point, to: Point, range: numbe
 function retreatStep(state: RunState, monster: Actor): Direction | null {
   let best: Direction | null = null;
   let bestDistance = manhattanDistance(monster, state.player);
-  for (const dir of STEP_ORDER) {
+  for (const dir of DIRECTIONS) {
     const n = stepFrom(monster, dir);
     const d = manhattanDistance(n, state.player);
     // F010 규칙 16: 함정 칸은 후보에서 뺀다
@@ -182,7 +178,7 @@ export function actRanged(state: RunState, data: GameData, monster: Actor, def: 
   if (lineOfFire(state, monster, state.player, range, piercing, monster.id)) return strike(state, data, monster, ai, { ranged: true });
   // 4. 사격 위치(플레이어와 같은 줄, 2칸 이상 떨어진 바닥)로. 없으면 chase처럼 다가간다
   const spots: Point[] = [];
-  for (const dir of STEP_ORDER) {
+  for (const dir of DIRECTIONS) {
     for (let k = 2, p = stepFrom(stepFrom(state.player, dir), dir); k <= range; k++, p = stepFrom(p, dir)) {
       // F010 규칙 16: 함정 칸, F009 규칙 21: 퍼즐 칸은 사격 위치에서 뺀다
       const tile = objectAt(state.floor, p.x, p.y);

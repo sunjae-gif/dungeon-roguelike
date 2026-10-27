@@ -10,6 +10,11 @@ export const DIRECTION_DELTAS: Record<Direction, Point> = {
   right: { x: 1, y: 0 },
 };
 
+// 4방향을 차례로 볼 때의 순서. 같은 조건이면 위 → 오른쪽 → 아래 → 왼쪽 (F004 규칙 14)
+export const DIRECTIONS: Direction[] = ['up', 'right', 'down', 'left'];
+
+export const stepFrom = (p: Point, dir: Direction): Point => ({ x: p.x + DIRECTION_DELTAS[dir].x, y: p.y + DIRECTION_DELTAS[dir].y });
+
 export function manhattanDistance(a: Point, b: Point): number {
   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
