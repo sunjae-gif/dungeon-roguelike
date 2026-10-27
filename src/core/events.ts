@@ -1,6 +1,10 @@
 // 30-systems/effects.md 3. 이벤트, 5. 일시 효과, 6. 효과 실행
 // 공격과 피해 처리(4절)는 damage.ts
-import { itemName, monsterDef, monsterName, statusDef, trapDef } from '../data/query';
+// events ↔ damage ↔ traps는 서로를 부른다. 효과가 피해를 주고(damage), 피해가 이벤트를 일으키고(onDamaged),
+// 밀쳐내기가 함정을 밟게 하고(traps), 함정 효과가 다시 효과를 실행하는 규칙 자체의 재귀라서 의도한 순환이다.
+// 깊이는 MAX_EVENT_DEPTH로 막는다. 이 셋 밖의 모듈은 이 순환에 끼지 않게 한다.
+import { actorName, findActor, updateActor } from './actors';
+import { itemName, monsterName } from '../data/query';
 import type { EffectDef, GameData } from '../data/types';
 import { clampHp, getStat, immunitiesOf, sourcesOf, statusImmunity, type EventName } from './effects';
 
@@ -32,15 +36,6 @@ export interface EventContext {
 }
 
 type Fired = { state: RunState; ctx: EventContext };
-
-export function findActor(state: RunState, id: number): Actor | undefined {
-  return state.player.id === id ? state.player : state.floor.actors.find((a) => a.id === id);
-}
-
-export function updateActor(state: RunState, actor: Actor): RunState {
-  if (state.player.id === actor.id) return { ...state, player: actor };
-  return { ...state, floor: { ...state.floor, actors: state.floor.actors.map((a) => (a.id === actor.id ? actor : a)) } };
-}
 
 // 이벤트 하나를 그 개체의 효과 출처(개체 정의 → 빌드 아이템 → 일시 효과)에 전달한다 (2절, 3절)
 export function fireEvent(
@@ -144,11 +139,6 @@ function immunityFor(effect: EffectDef): string | undefined {
   return undefined;
 }
 
-export function actorName(state: RunState, data: GameData, actor: Actor): string {
-  if (actor.id === state.player.id) return MESSAGES.playerName;
-  return monsterName(data, actor.defId);
-}
-
 // 5절 규칙 1, 2: 일시 효과 걸기. 이미 걸려 있으면 남은 턴을 max로
 export function addStatus(actor: Actor, id: string, turns: number, turn: number): Actor {
   const existing = actor.statuses.find((s) => s.id === id);
@@ -202,11 +192,4 @@ export function tickStatuses(state: RunState, data: GameData): RunState {
       data,
     );
   return { ...state, player: tick(state.player), floor: { ...state.floor, actors: state.floor.actors.map(tick) } };
-}
-
-// 피해 원인 이름: 몬스터, 일시 효과, 함정(F010)
-export function causeName(data: GameData, cause: string): string {
-  return (
-    monsterDef(data, cause)?.name ?? statusDef(data, cause)?.name ?? trapDef(data, cause)?.name ?? cause
-  );
 }

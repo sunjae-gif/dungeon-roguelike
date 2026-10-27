@@ -1,7 +1,7 @@
 // F010 문: 배치, 열기
+import { findActor } from './actors';
 import { monsterName, themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
-import { findActor } from './events';
 import { addMessage, josa, MESSAGES } from './messages';
 import { objectAt } from './movement';
 import { chance, type Rng } from './rng';

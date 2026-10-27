@@ -1,13 +1,14 @@
 // 30-systems/effects.md 4. 공격과 피해 처리 순서, 6절 knockback·steal의 떨어뜨리기
+import { monsterDrop } from './loot';
+import { causeName, findActor, updateActor } from './actors';
 import { monsterDef } from '../data/query';
 import type { GameData } from '../data/types';
 import { getStat } from './effects';
 
-import { causeName, fireEvent, findActor, updateActor, type AttackInfo } from './events';
+import { fireEvent, type AttackInfo } from './events';
 import { addMessage, MESSAGES } from './messages';
 import { dropItem } from './floorItems';
 import { triggerTrap } from './traps';
-import { monsterDrop } from './items';
 import { isPassable } from './movement';
 import type { Actor, RunState } from './state';
 

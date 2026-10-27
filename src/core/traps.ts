@@ -1,8 +1,9 @@
 // F010 함정: 배치, 발동
+import { findActor } from './actors';
 import { monsterName, themeForFloor, trapDef } from '../data/query';
 import type { GameData } from '../data/types';
 import type { Point } from './dungeon';
-import { applyEffect, fireEvent, findActor } from './events';
+import { applyEffect, fireEvent } from './events';
 import { addMessage, josa, MESSAGES } from './messages';
 import { objectAt } from './movement';
 import { nextInt, pick, type Rng } from './rng';

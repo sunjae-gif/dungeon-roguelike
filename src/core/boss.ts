@@ -1,11 +1,11 @@
 // F008 최종보스: 배치, 보스방 경고·봉인, 행동 패턴. 무작위 요소 없음
+import { updateActor } from './actors';
 import { monsterName, themeForFloor } from '../data/query';
 import type { GameData, MonsterDef } from '../data/types';
 import { firstStep, isAdjacent, moveOrWait, seesPlayer, stepFrom, strike, walkable } from './ai';
 import type { Point } from './dungeon';
 import { baseStat, getStat } from './effects';
 
-import { updateActor } from './events';
 import { addMessage, MESSAGES } from './messages';
 import { monsterAt, objectAt } from './movement';
 import { tileIndex, type Actor, type Direction, type FloorState, type MapObject, type MonsterAi, type Room, type RunState } from './state';

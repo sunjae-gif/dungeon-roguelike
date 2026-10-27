@@ -1,5 +1,6 @@
 // F005 아이템과 빌드: 바닥 소모품, 몬스터 드롭, 보물상자와 빌드 아이템 고르기
-import { itemDef, itemName, monsterDef, themeForFloor } from '../data/query';
+import { withLoot } from './loot';
+import { itemDef, itemName, themeForFloor } from '../data/query';
 import type { GameData, ItemDef } from '../data/types';
 import type { Point } from './dungeon';
 import { getStat, immunitiesOf, statusImmunity } from './effects';
@@ -8,26 +9,16 @@ import { applyEffect, fireEvent } from './events';
 import { dropItem } from './floorItems';
 import { addMessage, MESSAGES } from './messages';
 import { monsterAt, objectAt } from './movement';
-import { chance, floorRng, hashSeed, nextInt, pickWeighted, useStoredRng, type Rng } from './rng';
+import { chance, floorRng, nextInt, pickWeighted } from './rng';
 import { PUZZLE_ROOM_TYPE, SECRET_ROOM_TYPE } from './roomTypes';
 import { roomTiles } from './rooms';
-import type { Actor, FloorState, ItemChoice, RunState } from './state';
+import type { FloorState, ItemChoice, RunState } from './state';
 
 export const CHEST_OBJECT_TYPE = 'chest';
 // F009 방 종류별 바닥 아이템: 비밀방·퍼즐방에는 놓지 않는다
 const NO_ITEM_ROOMS = [SECRET_ROOM_TYPE, PUZZLE_ROOM_TYPE];
 
 const weightOf = (it: ItemDef) => it.weight ?? 1;
-
-// loot 흐름은 층 안에서 RunState.rng.loot에 이어 쓴다 (rng.md)
-function withLoot<T>(state: RunState, fn: (rng: Rng) => T): { value: T; state: RunState } {
-  const rngState = state.rng.loot === undefined
-    ? { ...state.rng, loot: hashSeed(state.runSeed, state.floorNumber, 'loot') }
-    : state.rng;
-  const used = useStoredRng(rngState, 'loot', fn);
-  return { value: used.value, state: { ...state, rng: used.rng } };
-}
-
 
 // F005 규칙 5: 바닥 소모품. 테마 itemCount만큼, weight 비율로, 방 안 빈 바닥 칸에 (loot 흐름)
 // 다 놓은 뒤의 loot 흐름 상태를 돌려준다. 그 층에 있는 동안 이어 쓴다
@@ -56,14 +47,6 @@ export function placeFloorItems(
     items.push({ id: nextId++, defId, ...spot });
   }
   return { floor: { ...floor, items }, nextId, lootState: rng.state };
-}
-
-// F005 규칙 6: 보스가 아니면 monsterDrop.chance 확률로 그 칸에 떨어뜨린다
-export function monsterDrop(state: RunState, data: GameData, monster: Actor): RunState {
-  if (monsterDef(data, monster.defId)?.isBoss) return state;
-  const { item, chance: p } = data.loot.monsterDrop;
-  const roll = withLoot(state, (rng) => chance(rng, p));
-  return roll.value ? dropItem(roll.state, item, monster) : roll.state;
 }
 
 // F005 규칙 1, 3: 플레이어 칸의 소모품을 자동으로 줍는다. 턴을 쓰지 않는다

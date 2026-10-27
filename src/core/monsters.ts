@@ -1,4 +1,5 @@
 // F004·F014 몬스터: 배치, 차례, 발견 메시지, 도망친 몬스터 사라짐
+import { findActor } from './actors';
 import { monsterDef, monsterName, themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
 import { actAmbush, actChase, actFlee, actRanged } from './ai';
@@ -6,7 +7,6 @@ import { actBoss } from './boss';
 import type { Point } from './dungeon';
 import { baseStat } from './effects';
 
-import { findActor } from './events';
 import { addMessage, MESSAGES } from './messages';
 import { monsterAt, objectAt } from './movement';
 import { floorRng, nextInt, pickWeighted } from './rng';

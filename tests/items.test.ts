@@ -1,9 +1,10 @@
 // F005 아이템과 빌드
+import { monsterDrop } from '../src/core/loot';
 import { describe, expect, it } from 'vitest';
 import { generateFloor } from '../src/core/dungeon';
 import { getStat } from '../src/core/effects';
 import { transition } from '../src/core/flow';
-import { CHEST_OBJECT_TYPE, generateChoice, monsterDrop } from '../src/core/items';
+import { CHEST_OBJECT_TYPE, generateChoice } from '../src/core/items';
 import { placeRoomFeatures } from '../src/core/roomFeatures';
 import { MESSAGES } from '../src/core/messages';
 import { createRun, enterFloor } from '../src/core/run';

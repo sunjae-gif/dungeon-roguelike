@@ -1,4 +1,5 @@
 // F004·F014 몬스터 행동 방식. 무작위 요소 없음
+import { updateActor } from './actors';
 import type { GameData, MonsterDef } from '../data/types';
 import { attack, type AttackOptions } from './combat';
 
@@ -7,7 +8,7 @@ import { getStat } from './effects';
 
 import { isClosedDoor, openDoor } from './doors';
 import { isPuzzleTile } from './puzzles';
-import { fireEvent, updateActor } from './events';
+import { fireEvent } from './events';
 import { canSee, DIRECTION_DELTAS, inBounds, isPassable, manhattanDistance, monsterAt, objectAt } from './movement';
 import { tileIndex, type Actor, type Direction, type FloorState, type MonsterAi, type RunState } from './state';
 import { trapAt, triggerTrap } from './traps';
