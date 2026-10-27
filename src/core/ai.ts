@@ -181,8 +181,10 @@ export function actRanged(state: RunState, data: GameData, monster: Actor, def: 
   const spots: Point[] = [];
   for (const dir of STEP_ORDER) {
     for (let k = 2, p = stepFrom(stepFrom(state.player, dir), dir); k <= range; k++, p = stepFrom(p, dir)) {
-      // F010 규칙 16: 함정 칸은 사격 위치에서 뺀다
-      if (walkable(state.floor, p.x, p.y) && !trapAt(state.floor, p.x, p.y) && lineOfFire(state, p, state.player, range, piercing, monster.id)) spots.push(p);
+      // F010 규칙 16: 함정 칸, F009 규칙 21: 퍼즐 칸은 사격 위치에서 뺀다
+      const tile = objectAt(state.floor, p.x, p.y);
+      if (!walkable(state.floor, p.x, p.y) || trapAt(state.floor, p.x, p.y) || isPuzzleTile(tile)) continue;
+      if (lineOfFire(state, p, state.player, range, piercing, monster.id)) spots.push(p);
     }
   }
   const dir = firstStepTo(state.floor, monster, spots) ?? firstStep(state.floor, monster, state.player);

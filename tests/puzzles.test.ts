@@ -241,3 +241,22 @@ describe('F009 퍼즐 규칙', () => {
     expect(hcur.floor.actors[0].x).toBe(5);
   });
 });
+
+describe('F009 규칙 21과 원거리 몬스터', () => {
+  it('원거리 몬스터는 사격 위치를 찾을 때도 퍼즐 발판에 들어가지 않는다', () => {
+    const { s, d } = puzzleState('crumble_ring');
+    // 판 (3,3)~(7,7). 플레이어 (4,1), 궁수는 판 왼쪽 둘레 (3,4).
+    // 플레이어와 같은 세로줄의 사격 위치 중 (4,4)는 바로 옆이지만 발판이라 들어가면 안 된다
+    const archer = {
+      id: 901, defId: 'goblin_archer', x: 3, y: 4, facing: 'down' as const, hp: 99,
+      buildItems: [], consumables: [], statuses: [], ai: {},
+    };
+    let cur: RunState = { ...at(s, 4, 1), floor: { ...s.floor, actors: [archer] } };
+    const plates = new Set(objs(cur, PLATE_OBJECT_TYPE).map(pointKey));
+    for (let i = 0; i < 6; i++) {
+      cur = playTurn(cur, { type: 'rest' }, d);
+      const a = cur.floor.actors.find((m) => m.id === 901)!;
+      expect(plates.has(pointKey(a)), `turn ${i}`).toBe(false);
+    }
+  });
+});
