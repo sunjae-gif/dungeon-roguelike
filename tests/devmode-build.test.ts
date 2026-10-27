@@ -1,4 +1,4 @@
-// F012: 배포 빌드에는 개발자 모드 코드가 포함되지 않는다.
+// F012, F017: 배포 빌드에는 개발자 모드와 밸런스 시뮬레이터 코드가 포함되지 않는다.
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -32,6 +32,10 @@ describe('F012 개발자 모드', () => {
     const output = files.map((f) => readFileSync(f, 'utf8')).join('\n');
     expect(output.includes('타이틀')).toBe(true);
     for (const marker of ['개발자 모드', 'installDevMode', 'dev-panel', '상태 내보내기']) {
+      expect(output.includes(marker), `빌드에 "${marker}"가 들어 있음`).toBe(false);
+    }
+    // F017: 보고서 문구, 목표치 파일
+    for (const marker of ['밸런스 시뮬레이션 보고서', '사망 원인 순위', '봇 기준 목표치', 'maxTurnsPerRun']) {
       expect(output.includes(marker), `빌드에 "${marker}"가 들어 있음`).toBe(false);
     }
   }, 60_000);

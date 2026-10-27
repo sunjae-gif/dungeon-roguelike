@@ -11,7 +11,7 @@ import { centerSpot, inRoom } from './rooms';
 import { type Actor, type FloorState, type MapObject, type MonsterAi, type Room, type RunState, tileIndex } from './state';
 
 export const SEALED_GATE_TYPE = 'sealedGate';
-const BOSS_ROOM_TYPE = 'boss';
+export const BOSS_ROOM_TYPE = 'boss';
 
 
 export function bossRoomAt(floor: FloorState, p: Point): Room | undefined {

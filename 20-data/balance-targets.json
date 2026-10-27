@@ -1,0 +1,9 @@
+{
+  "_note": "F017 봇 기준 목표치. 사람은 봇보다 잘한다고 보고 정한다. 실제로 몇 판 해 본 뒤 고친다. maxTurnsPerRun을 넘긴 판은 시간 초과로 끝낸다. 범위는 [최소, 최대].",
+  "botClearRate": [0.10, 0.30],
+  "medianTurnsCleared": [600, 1000],
+  "maxShareOfDeathsOnOneFloor": 0.25,
+  "bossWinRateWhenReached": [0.35, 0.65],
+  "itemClearRateGapWarn": 0.15,
+  "maxTurnsPerRun": 5000
+}

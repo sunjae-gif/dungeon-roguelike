@@ -2,6 +2,9 @@
 
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
+## 2026-10-27 (M5-b)
+- [F017] 밸런스 시뮬레이터 구현: `npm run sim -- --runs N --seed-start S [--out 폴더]`. 봇 규칙 1~9, 결과 JSON·요약 md(sim-results/, git 제외), 목표 밖 ⚠️. 20-data/balance-targets.json 추가(목표치 + maxTurnsPerRun 5000). 봇은 몬스터마다 마지막으로 본 자리를 기억하고, 도망치는 몬스터는 쫓지 않는다. vite의 모듈 실행기로 돌려 새 라이브러리 없음. 배포 빌드에 들어가지 않음을 테스트로 확인
+
 ## 2026-10-27 (M6 기획, 일러스트 미룸)
 - [F018] 공개 준비 신규: 조작 안내(타이틀 한 줄, ? 도움말, 첫 실행 자동 표시), keybindings.json, Cloudflare Pages 배포, 공개 전 확인 목록. status confirmed
 - [art-guide] 일러스트를 작업 순서 맨 뒤로. 픽셀은 콘셉트 글만 보고 그리고, 나중에 일러스트가 픽셀을 참고
