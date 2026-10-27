@@ -54,8 +54,8 @@ export function resolveAttack(
   let next = updateActor(fired.state, wake({ ...target, hp: target.hp - damage }));
   next = fireEvent(next, data, attackerId, 'onHit', { other: targetId, damage }).state;
   next = fireEvent(next, data, targetId, 'onDamaged', { other: attackerId, damage }).state;
-  // 9. 쓰러짐
-  next = attackDeath(next, data, attackerId, targetId);
+  // 9. 쓰러짐. 공격자가 가시 등으로 먼저 사라졌어도 사망 원인은 공격자 (game-state.md killedBy)
+  next = attackDeath(next, data, attackerId, attacker.defId, targetId);
   const after = findActor(next, targetId);
   return { state: next, damage, killed: !after || after.hp <= 0, cancelled: false };
 }
@@ -66,11 +66,11 @@ function wake(actor: Actor): Actor {
 }
 
 // 4절 9단계: 공격으로 쓰러짐. 몬스터면 onKill 후 제거, 플레이어가 쓰러뜨렸으면 처치 수 +1 (F003 규칙 3)
-function attackDeath(state: RunState, data: GameData, attackerId: number, targetId: number): RunState {
+function attackDeath(state: RunState, data: GameData, attackerId: number, attackerDefId: string, targetId: number): RunState {
   const target = findActor(state, targetId);
   // 대상이 이미 없으면 효과 피해(가시·충돌)로 먼저 쓰러져 처리가 끝났다
   if (!target || target.hp > 0) return state;
-  if (targetId === state.player.id) return recordPlayerDeath(state, findActor(state, attackerId)?.defId);
+  if (targetId === state.player.id) return recordPlayerDeath(state, attackerDefId);
   let next = fireEvent(state, data, attackerId, 'onKill', { other: targetId }).state;
   next = removeMonster(next, data, targetId);
   if (attackerId === next.player.id) next = { ...next, runStats: { ...next.runStats, kills: next.runStats.kills + 1 } };

@@ -83,6 +83,15 @@ describe('F015 전투 규칙 아이템', () => {
     expect(monster(after).hp).toBe(g.hp);
   });
 
+  it('가시 갑옷: 몬스터와 같이 쓰러져도 사망 원인은 그 몬스터다', () => {
+    const s = holding(stateFromMap(VS_GOBLIN, data), 'thorn_armor');
+    const both = withMonster({ ...s, player: { ...s.player, hp: 1 } }, { hp: 1 });
+    const after = resolveAttack(both, data, monster(s).id, s.player.id).state;
+    expect(after.floor.actors).toEqual([]);
+    expect(after.player.hp).toBeLessThanOrEqual(0);
+    expect(after.runStats.killedBy).toBe(monster(s).defId);
+  });
+
   it('전사의 문장: 공격으로 쓰러뜨리면 HP +3. 가시·중독으로 죽으면 발동하지 않는다', () => {
     const s = holding(stateFromMap(VS_GOBLIN, data), 'warrior_crest', 'thorn_armor');
     const hurt = { ...s, player: { ...s.player, hp: 10 } };
