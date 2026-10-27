@@ -2,6 +2,13 @@
 
 최신이 위. 형식: `날짜 [기능ID] 내용`
 
+## 2026-10-27 (M6 기획, 일러스트 미룸)
+- [F018] 공개 준비 신규: 조작 안내(타이틀 한 줄, ? 도움말, 첫 실행 자동 표시), keybindings.json, Cloudflare Pages 배포, 공개 전 확인 목록. status confirmed
+- [art-guide] 일러스트를 작업 순서 맨 뒤로. 픽셀은 콘셉트 글만 보고 그리고, 나중에 일러스트가 픽셀을 참고
+- [tech-stack] 배포 위치 결정(Cloudflare Pages). status → confirmed
+- [pillars, vision] status → confirmed. [turn-order] 해결된 미결정 정리
+- [roadmap] M6 공개 추가
+
 ## 2026-10-27 (M5 결정)
 - [F017] 밸런스 시뮬레이터 status → confirmed
 - [art-guide] 마스터 팔레트 고정 안 함(팔레트 파일을 쌓아 씀), 픽셀아트 직접 그리기(우선순위 3단계, CC0 타일 바탕 허용), 일러스트 Leonardo, 기준 프롬프트를 데포르메로 다시 씀. status → confirmed

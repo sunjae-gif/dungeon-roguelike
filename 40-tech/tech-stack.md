@@ -1,5 +1,5 @@
 ---
-status: draft
+status: confirmed
 ---
 # 기술 스택과 코드 구조
 
@@ -87,5 +87,9 @@ tests/               # core/ 단위 테스트
 ## 테마 규칙
 층마다 달라지는 값은 themes.json에서 읽는다. 코드에 `if (theme === 'theme_2')` 같은 분기를 쓰지 않는다(F011).
 
+## 배포
+Cloudflare Pages (무료). 빌드 명령 `npm run build`, 출력 폴더 `dist`, `main` push 시 자동 배포. 자세한 것은 F018.
+저장소가 비공개라 GitHub Pages는 무료 요금제로 쓸 수 없다(GitHub Pro 필요).
+
 ## 미결정 사항
-- [ ] 배포 위치 (GitHub Pages 등)
+없음.

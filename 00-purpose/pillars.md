@@ -1,5 +1,5 @@
 ---
-status: draft
+status: confirmed
 ---
 # 디자인 원칙
 
