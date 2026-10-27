@@ -28,6 +28,7 @@ export function validateGameData(raw: RawData): ValidationResult {
   const traps = checkTraps(c, file('traps.json'), spriteIds, effectRefs);
   checkUi(c, file('ui.json'));
   checkLoot(c, file('loot.json'), items);
+  const puzzles = checkPuzzles(c, file('puzzles.json'));
 
   // 테마: 다른 파일을 가리키는 id, 층 범위
   const refs = { monsters: idsOf(monsters), traps: idsOf(traps), sprites: spriteIds, roomTypes: idsOf(roomTypes) };
@@ -43,6 +44,7 @@ export function validateGameData(raw: RawData): ValidationResult {
     items,
     statuses,
     loot: raw['loot.json'],
+    puzzles,
     roomTypes,
     sprites: raw['sprites.json'],
     themes,
@@ -197,6 +199,35 @@ function checkItems(c: Checker, d: Obj, spriteIds: Set<string>, refs: EffectRefs
     checkModifiers(c, item, p);
     checkTriggers(c, item, p, refs, false);
     checkImmunities(c, item, p, refs);
+  });
+  return list;
+}
+
+// F009 puzzles.json: 문자 종류, 줄 길이, 레버·상자 1개씩, 바깥 한 줄은 . 과 L 만, 돌 ≥ 스위치, 발판 ≥ 3
+const PUZZLE_TYPES = ['crumble', 'boulder'];
+const PUZZLE_CHARS = '.#oBSCL';
+const MIN_CRUMBLE_PLATES = 3;
+
+function checkPuzzles(c: Checker, d: Obj): Obj[] {
+  const list = c.idList(d, 'puzzles', 'puzzles.json');
+  list.forEach((pz, i) => {
+    const p = `puzzles.json.puzzles[${i}]`;
+    c.oneOf(pz, 'type', p, PUZZLE_TYPES);
+    const rows = c.arr(pz, 'map', p);
+    if (!rows || rows.some((r) => typeof r !== 'string')) return c.fail(`${p}.map`, '문자열 줄 목록이어야 함');
+    const map = rows as string[];
+    if (new Set(map.map((r) => r.length)).size !== 1) return c.fail(`${p}.map`, '줄 길이가 모두 같아야 함');
+    const all = map.join('');
+    const bad = [...all].filter((ch) => !PUZZLE_CHARS.includes(ch));
+    if (bad.length > 0) c.fail(`${p}.map`, `알 수 없는 문자 ${JSON.stringify([...new Set(bad)].join(''))}`);
+    const countOf = (ch: string) => [...all].filter((x) => x === ch).length;
+    if (countOf('L') !== 1 || countOf('C') !== 1) c.fail(`${p}.map`, '레버(L)와 잠긴 상자(C)가 정확히 1개씩이어야 함');
+    const w = map[0].length;
+    const h = map.length;
+    const ring = map.flatMap((row, y) => [...row].filter((_, x) => x === 0 || y === 0 || x === w - 1 || y === h - 1));
+    if (ring.some((ch) => ch !== '.' && ch !== 'L')) c.fail(`${p}.map`, '바깥 한 줄은 . 과 L 만 둘 수 있음');
+    if (pz.type === 'boulder' && (countOf('S') < 1 || countOf('B') < countOf('S'))) c.fail(`${p}.map`, '돌 밀기 판은 스위치가 1개 이상, 돌이 스위치 이상');
+    if (pz.type === 'crumble' && countOf('o') < MIN_CRUMBLE_PLATES) c.fail(`${p}.map`, `무너지는 발판 판은 발판이 ${MIN_CRUMBLE_PLATES}개 이상`);
   });
   return list;
 }

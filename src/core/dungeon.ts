@@ -320,15 +320,28 @@ function findSecretEntrance(floor: FloorState, rects: Rect[], types: string[], i
 function findBranchEntrance(floor: FloorState, rects: Rect[], types: string[], index: number, rng: Rng): { wall: Point; corridor: Point[] } | null {
   const room = rects[index];
   const secretRects = rects.filter((_, j) => types[j] === SECRET_ROOM_TYPE);
-  const targets: Point[] = [];
+  // 모든 칸에서 가장 가까운 기존 바닥(비밀방 제외)을 한 번의 BFS로 구한다 (4방향 거리)
+  const nearestOf = new Array<Point | null>(floor.width * floor.height).fill(null);
+  const queue: Point[] = [];
   for (let y = 0; y < floor.height; y++) {
     for (let x = 0; x < floor.width; x++) {
-      if (isFloorTile(floor, { x, y }) && !secretRects.some((r) => inRect(r, { x, y }))) targets.push({ x, y });
+      if (isFloorTile(floor, { x, y }) && !secretRects.some((r) => inRect(r, { x, y }))) {
+        nearestOf[tileIndex(floor, x, y)] = { x, y };
+        queue.push({ x, y });
+      }
     }
   }
-  const nearestTarget = (p: Point) =>
-    targets.reduce((best, t) => (Math.abs(t.x - p.x) + Math.abs(t.y - p.y) < Math.abs(best.x - p.x) + Math.abs(best.y - p.y) ? t : best));
-  if (targets.length === 0) return null;
+  if (queue.length === 0) return null;
+  for (let head = 0; head < queue.length; head++) {
+    const p = queue[head];
+    for (const { d } of OUTWARD) {
+      const n = add(p, d);
+      if (n.x < 0 || n.y < 0 || n.x >= floor.width || n.y >= floor.height || nearestOf[tileIndex(floor, n.x, n.y)]) continue;
+      nearestOf[tileIndex(floor, n.x, n.y)] = nearestOf[tileIndex(floor, p.x, p.y)];
+      queue.push(n);
+    }
+  }
+  const nearestTarget = (p: Point) => nearestOf[tileIndex(floor, p.x, p.y)]!;
   const touchesRoom = (p: Point) => OUTWARD.some(({ d }) => inRect(room, add(p, d)));
   const options: { wall: Point; tip: Point; target: Point; cost: number }[] = [];
   for (let y = room.y; y < room.y + room.h; y++) {

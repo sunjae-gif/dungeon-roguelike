@@ -1,0 +1,52 @@
+{
+  "_note": "퍼즐 판(F009). 문자: . 바닥  # 벽  o 금 간 발판  B 돌  S 스위치  C 잠긴 상자  L 되돌림 레버(판 둘레 쪽 가장자리에). 바깥 한 줄은 둘레 통로라 . 과 L 만 둔다. 판을 추가하면 손으로 풀어 보고, tests/puzzles.test.ts의 자동 풀이로도 확인한다.",
+  "puzzles": [
+    { "id": "crumble_ring", "type": "crumble", "map": [
+      "L....",
+      ".ooo.",
+      ".oCo.",
+      ".ooo.",
+      "....."
+    ] },
+    { "id": "crumble_wide", "type": "crumble", "map": [
+      "L......",
+      ".ooooo.",
+      ".o#C#o.",
+      ".ooooo.",
+      "......."
+    ] },
+    { "id": "crumble_square", "type": "crumble", "map": [
+      "L.....",
+      ".oooo.",
+      ".oCoo.",
+      ".oooo.",
+      ".oooo.",
+      "......"
+    ] },
+    { "id": "boulder_basic", "type": "boulder", "map": [
+      "L.....",
+      ".B..S.",
+      "......",
+      ".#..C.",
+      "......"
+    ] },
+    { "id": "boulder_corner", "type": "boulder", "map": [
+      "L.....",
+      "......",
+      "..B...",
+      "......",
+      ".#..S.",
+      "...C..",
+      "......"
+    ] },
+    { "id": "boulder_pair", "type": "boulder", "map": [
+      "L......",
+      ".......",
+      ".B...S.",
+      "...#...",
+      ".S...B.",
+      "...C...",
+      "......."
+    ] }
+  ]
+}

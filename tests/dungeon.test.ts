@@ -10,6 +10,7 @@ const { maxFloor } = data.dungeon;
 
 // 시작 지점에서 4방향으로 닿는 바닥 칸
 function reachable(floor: FloorState, start: Point): Set<number> {
+  const hiddenWalls = new Set(floor.objects.filter((o) => o.type === 'hiddenWall').map((o) => tileIndex(floor, o.x, o.y)));
   const seen = new Set([tileIndex(floor, start.x, start.y)]);
   const queue = [start];
   while (queue.length > 0) {
@@ -21,7 +22,7 @@ function reachable(floor: FloorState, start: Point): Set<number> {
       const i = tileIndex(floor, x, y);
       if (floor.tiles[i] !== 'floor' || seen.has(i)) continue;
       // 숨은 벽은 찾기 전에는 벽과 같다
-      if (floor.objects.some((o) => o.type === 'hiddenWall' && o.x === x && o.y === y)) continue;
+      if (hiddenWalls.has(i)) continue;
       seen.add(i);
       queue.push({ x, y });
     }
@@ -61,11 +62,9 @@ function checkCommon(g: GeneratedFloor): Set<number> {
     return t === 'floor' && !hidden.has(i) && !secret.some((r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
   }).length;
   expect(reach.size).toBe(expected);
-  // 지도 테두리는 벽
-  for (let x = 0; x < floor.width; x++) {
-    expect(floor.tiles[tileIndex(floor, x, 0)]).toBe('wall');
-    expect(floor.tiles[tileIndex(floor, x, floor.height - 1)]).toBe('wall');
-  }
+  // 지도 테두리는 벽 (한 번에 비교)
+  const border = Array.from({ length: floor.width }, (_, x) => [floor.tiles[tileIndex(floor, x, 0)], floor.tiles[tileIndex(floor, x, floor.height - 1)]]).flat();
+  expect(border.every((t) => t === 'wall')).toBe(true);
   return reach;
 }
 

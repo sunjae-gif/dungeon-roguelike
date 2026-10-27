@@ -169,6 +169,13 @@ export interface TrapDef {
   sprite: string;
 }
 
+// F009 puzzles.json: 손으로 그린 퍼즐 판
+export interface PuzzleDef {
+  id: string;
+  type: 'crumble' | 'boulder';
+  map: string[];
+}
+
 // F005 loot.json
 export interface LootData {
   chestChoices: number;
@@ -201,6 +208,7 @@ export interface GameData {
   items: ItemDef[];
   statuses: StatusDef[];
   loot: LootData;
+  puzzles: PuzzleDef[];
   roomTypes: RoomTypeDef[];
   sprites: SpritesData;
   themes: ThemeDef[];
@@ -221,4 +229,5 @@ export type DataFileName =
   | 'traps.json'
   | 'statuses.json'
   | 'loot.json'
+  | 'puzzles.json'
   | 'ui.json';

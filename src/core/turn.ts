@@ -6,6 +6,7 @@ import { attack } from './combat';
 import { DOOR_OBJECT_TYPE, isClosedDoor, openDoor } from './doors';
 import { discoverHiddenWalls, drinkSpring, SPRING_OBJECT_TYPE, springNotice } from './roomFeatures';
 import { triggerTrap } from './traps';
+import { BOULDER_OBJECT_TYPE, canPushBoulder, checkPuzzles, LEVER_OBJECT_TYPE, leverWorks, pullLever, pushBoulder, stepPlates } from './puzzles';
 import { canUseConsumable, CHEST_OBJECT_TYPE, openChest, pickUp, useConsumable } from './items';
 import { STAIRS_OBJECT_TYPE } from './dungeon';
 import { getStat } from './effects';
@@ -81,6 +82,9 @@ function interactionWith(state: RunState, data: GameData, object: MapObject, dir
     const notice = springNotice(state, data, object);
     return notice ? { type: 'notice', text: notice } : interact;
   }
+  // F009 규칙 27: 밀 수 없는 돌은 무효(안내만). 규칙 19: 푼 뒤의 레버는 아무것도 하지 않는다
+  if (object.type === BOULDER_OBJECT_TYPE) return canPushBoulder(state, object, direction) ? interact : { type: 'notice', text: MESSAGES.boulderStuck() };
+  if (object.type === LEVER_OBJECT_TYPE) return leverWorks(state, object) ? interact : null;
   return null;
 }
 
@@ -128,6 +132,7 @@ export function playTurn(state: RunState, input: PlayerInput, data: GameData): R
   next = fireForAll(next, data, 'onTurnEnd'); // 6-1 재생·중독
   next = tickStatuses(next, data); // 6-2
   next = sweepDeadMonsters(next, data); // 6-3
+  next = checkPuzzles(next, data); // 6-3-1 (F009)
   next = sealBossRooms(next, data); // F008 규칙 6 (봉인 문은 시야를 막으므로 시야 계산 전에)
   next = noticeMonsters(updateSight(next, getStat(next.player, 'sightRadius', data)), data); // 6-4
   next = vanishFleeing(next, data); // 6-5
@@ -145,6 +150,8 @@ function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'des
       let moved = fireEvent({ ...state, player }, data, player.id, 'onMove', { from, to: { x: player.x, y: player.y } }).state;
       // 도착한 칸 처리: 아이템 자동 줍기(F005) → 함정 발동(F010)
       moved = triggerTrap(pickUp(moved, data), data, player.id);
+      // turn-order.md 4-1: 퍼즐 발판에서 나왔으면 무너진다 (F009)
+      moved = stepPlates(moved, from);
       // F013 규칙 7: 계단 칸에 올라서면 알려준다
       return isOnStairs(moved) ? addMessage(moved, MESSAGES.stairsHere(), data) : moved;
     }
@@ -160,6 +167,9 @@ function applyPlayerAction(state: RunState, action: Exclude<Action, { type: 'des
       if (object?.type === DOOR_OBJECT_TYPE) return openDoor(facing, data, state.player.id, action.objectId);
       // F009 규칙 31: 샘 마시기 (한 턴)
       if (object?.type === SPRING_OBJECT_TYPE) return drinkSpring(facing, data, action.objectId);
+      // F009 규칙 27: 돌 밀기, 규칙 19: 레버 (한 턴)
+      if (object?.type === BOULDER_OBJECT_TYPE) return pushBoulder(facing, action.objectId, action.direction);
+      if (object?.type === LEVER_OBJECT_TYPE) return pullLever(facing, data, action.objectId);
       // F005 규칙 8: 상자 열기 (한 턴). 고르기 화면은 턴이 끝난 뒤 (game-flow.md)
       return openChest(facing, data, action.objectId);
     }

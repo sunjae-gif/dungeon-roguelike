@@ -142,9 +142,11 @@ export function objectSprite(obj: MapObject, data: GameData, floorNumber: number
     const { tiles } = themeForFloor(data, floorNumber);
     return obj.state.discovered ? tiles.floor : tiles.wall;
   }
-  // 열린 상자 "{id}_open", 마른 샘 "{id}_used" 그림이 있으면 그것
+  // 상태별 그림: 열린 상자 "_open", 마른 샘 "_used", 무너진 발판 "_broken", 눌린 스위치 "_pressed" (있으면)
   const base = obj.defId ?? obj.type;
-  const variant = obj.state.opened ? `${base}_open` : obj.state.used ? `${base}_used` : base;
+  const flag = (['opened', 'used', 'broken', 'pressed'] as const).find((k) => obj.state[k]);
+  const suffix = { opened: '_open', used: '_used', broken: '_broken', pressed: '_pressed' } as const;
+  const variant = flag ? `${base}${suffix[flag]}` : base;
   return data.sprites.sprites.some((s) => s.id === variant) ? variant : base;
 }
 

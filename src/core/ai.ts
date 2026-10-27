@@ -4,6 +4,7 @@ import { attack, type AttackOptions } from './combat';
 import type { Point } from './dungeon';
 import { getStat } from './effects';
 import { isClosedDoor, openDoor } from './doors';
+import { isPuzzleTile } from './puzzles';
 import { fireEvent, updateActor } from './events';
 import { canSee, DIRECTION_DELTAS, inBounds, isPassable, manhattanDistance, monsterAt, objectAt } from './movement';
 import { tileIndex, type Actor, type Direction, type FloorState, type MonsterAi, type RunState } from './state';
@@ -25,6 +26,8 @@ function pathable(floor: FloorState, x: number, y: number, avoidTraps: boolean):
   if (!inBounds(floor, x, y) || floor.tiles[tileIndex(floor, x, y)] !== 'floor') return false;
   const object = objectAt(floor, x, y);
   if (!object || isClosedDoor(object)) return true;
+  // F009 규칙 21: 퍼즐 판의 칸에는 들어가지 않는다
+  if (isPuzzleTile(object)) return false;
   if (avoidTraps && trapAt(floor, x, y)) return false;
   return !object.blocksMove;
 }
@@ -102,7 +105,7 @@ function retreatStep(state: RunState, monster: Actor): Direction | null {
     const n = stepFrom(monster, dir);
     const d = manhattanDistance(n, state.player);
     // F010 규칙 16: 함정 칸은 후보에서 뺀다
-    if (d > bestDistance && isPassable(state, n.x, n.y) && !trapAt(state.floor, n.x, n.y)) {
+    if (d > bestDistance && isPassable(state, n.x, n.y) && !trapAt(state.floor, n.x, n.y) && !isPuzzleTile(objectAt(state.floor, n.x, n.y))) {
       best = dir;
       bestDistance = d;
     }

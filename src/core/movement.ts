@@ -18,8 +18,14 @@ export function inBounds(floor: FloorState, x: number, y: number): boolean {
   return x >= 0 && y >= 0 && x < floor.width && y < floor.height;
 }
 
+// 칸의 물체. 돌이 스위치 위에 있으면(game-state.md 예외) 막는 쪽(돌)을 돌려준다
 export function objectAt(floor: FloorState, x: number, y: number) {
-  return floor.objects.find((o) => o.x === x && o.y === y);
+  const here = floor.objects.filter((o) => o.x === x && o.y === y);
+  return here.find((o) => o.blocksMove) ?? here[0];
+}
+
+export function objectsAt(floor: FloorState, x: number, y: number) {
+  return floor.objects.filter((o) => o.x === x && o.y === y);
 }
 
 export function monsterAt(floor: FloorState, x: number, y: number) {

@@ -114,8 +114,9 @@ function drawMap(rc: RenderContext, state: RunState): void {
       // F007 규칙 11: 바닥·벽 그림은 현재 층 테마의 tiles
       drawSprite(theme.tiles[floor.tiles[y * floor.width + x]], x, y);
       // 물체는 탐색됨 칸에서도 그린다 (마지막으로 본 모습)
-      const obj = floor.objects.find((o) => o.x === x && o.y === y);
-      if (obj) drawSprite(objectSprite(obj, data, state.floorNumber), x, y);
+      // 물체 (돌이 스위치 위에 있으면 스위치 먼저, 막는 물체를 위에)
+      const objs = floor.objects.filter((o) => o.x === x && o.y === y).sort((a, b) => Number(a.blocksMove) - Number(b.blocksMove));
+      for (const obj of objs) drawSprite(objectSprite(obj, data, state.floorNumber), x, y);
       if (shade === 'explored') {
         // F007 규칙 7: 탐색됨 칸은 exploredBrightness 밝기로
         const p = toScreen(x, y);
