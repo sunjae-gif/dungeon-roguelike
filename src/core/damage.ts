@@ -1,16 +1,15 @@
 // 30-systems/effects.md 4. 공격과 피해 처리 순서, 6절 knockback·steal의 떨어뜨리기
-import { monsterDrop } from './loot';
-import { causeName, findActor, updateActor } from './actors';
 import { monsterDef } from '../data/query';
 import type { GameData } from '../data/types';
+import { causeName, findActor, updateActor } from './actors';
 import { getStat } from './effects';
-
-import { fireEvent, type AttackInfo } from './events';
-import { addMessage, MESSAGES } from './messages';
+import { type AttackInfo, fireEvent } from './events';
 import { dropItem } from './floorItems';
-import { triggerTrap } from './traps';
+import { monsterDrop } from './loot';
+import { addMessage, MESSAGES } from './messages';
 import { isPassable } from './movement';
 import type { Actor, RunState } from './state';
+import { triggerTrap } from './traps';
 
 // 피해의 출처. actorId는 상대(onDamaged의 other)가 될 개체, cause는 killedBy에 남길 원인 id
 export interface DamageSource {

@@ -5,7 +5,7 @@ import { formatSeed, parseSeed } from '../core/rng';
 import type { RunState } from '../core/state';
 import type { GameData } from '../data/types';
 import type { TextLine } from '../render/view';
-import { grantItem, jumpToFloor, loadState, revealMap, startWithSeed, type DevResult } from './commands';
+import { type DevResult, grantItem, jumpToFloor, loadState, revealMap, startWithSeed } from './commands';
 
 const TOGGLE_KEY = '`';
 

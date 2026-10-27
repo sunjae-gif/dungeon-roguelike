@@ -1,7 +1,8 @@
 // F004 몬스터
 import { describe, expect, it } from 'vitest';
 import { generateFloor } from '../src/core/dungeon';
-import { firstStep, spawnMonsters } from '../src/core/monsters';
+import { firstStep } from '../src/core/ai';
+import { spawnMonsters } from '../src/core/monsters';
 import { createRun, enterFloor } from '../src/core/run';
 import type { RunState } from '../src/core/state';
 import { playTurn } from '../src/core/turn';

@@ -3,7 +3,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  createRng, floorRng, formatSeed, hashSeed, initRunRng, nextFloat, nextInt, nextU32, parseSeed, useRunRng,
+  createRng, floorRng, formatSeed, hashSeed, initRunRng, nextFloat, nextInt, nextU32, parseSeed, useStoredRng,
 } from '../src/core/rng';
 import { createRun } from '../src/core/run';
 import { gameData } from './helpers';
@@ -50,13 +50,13 @@ describe('난수', () => {
 
   it('판 전체 흐름은 RunState.rng에 이어서 저장된다', () => {
     const start = initRunRng(42);
-    const a = useRunRng(start, 'combat', (rng) => nextU32(rng));
-    const b = useRunRng(a.rng, 'combat', (rng) => nextU32(rng));
+    const a = useStoredRng(start, 'combat', (rng) => nextU32(rng));
+    const b = useStoredRng(a.rng, 'combat', (rng) => nextU32(rng));
     expect(a.value).not.toBe(b.value);
     expect(a.rng.ai).toBe(start.ai);
     // JSON으로 저장했다 복원해도 이어지는 값이 같다
     const restored = JSON.parse(JSON.stringify(a.rng));
-    expect(useRunRng(restored, 'combat', (rng) => nextU32(rng)).value).toBe(b.value);
+    expect(useStoredRng(restored, 'combat', (rng) => nextU32(rng)).value).toBe(b.value);
   });
 
   it('시드는 8자리 16진수 대문자로 보여준다', () => {

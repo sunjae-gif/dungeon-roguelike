@@ -1,24 +1,21 @@
 // 한 턴 처리. 30-systems/turn-order.md
 import type { GameData } from '../data/types';
-import { transition } from './flow';
 import { bossRoomNeedingWarning, sealBossRooms, warnBossRoom } from './boss';
 import { attack } from './combat';
-
+import { sweepDeadMonsters } from './damage';
 import { DOOR_OBJECT_TYPE, isClosedDoor, openDoor } from './doors';
-import { discoverHiddenWalls, drinkSpring, SPRING_OBJECT_TYPE, springNotice } from './roomFeatures';
-import { triggerTrap } from './traps';
-import { BOULDER_OBJECT_TYPE, canPushBoulder, checkPuzzles, LEVER_OBJECT_TYPE, leverWorks, pullLever, pushBoulder, stepPlates } from './puzzles';
-import { canUseConsumable, CHEST_OBJECT_TYPE, openChest, pickUp, useConsumable } from './items';
 import { STAIRS_OBJECT_TYPE } from './dungeon';
 import { getStat } from './effects';
-
-import { sweepDeadMonsters } from './damage';
 import { fireEvent, fireForAll, tickStatuses } from './events';
+import { transition } from './flow';
+import { canUseConsumable, CHEST_OBJECT_TYPE, openChest, pickUp, useConsumable } from './items';
 import { addMessage, MESSAGES } from './messages';
 import { actMonsters, noticeMonsters, vanishFleeing } from './monsters';
 import { DIRECTION_DELTAS, inBounds, isPassable, monsterAt, objectAt, updateSight } from './movement';
-import { tileIndex, type MapObject } from './state';
-import type { Direction, RunState } from './state';
+import { BOULDER_OBJECT_TYPE, canPushBoulder, checkPuzzles, LEVER_OBJECT_TYPE, leverWorks, pullLever, pushBoulder, stepPlates } from './puzzles';
+import { discoverHiddenWalls, drinkSpring, SPRING_OBJECT_TYPE, springNotice } from './roomFeatures';
+import { type Direction, type MapObject, type RunState, tileIndex } from './state';
+import { triggerTrap } from './traps';
 
 // 플레이어 입력 (input/이 키를 이것으로 바꾼다)
 export type PlayerInput =

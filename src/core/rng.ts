@@ -99,7 +99,6 @@ export function useStoredRng<T>(
   return { value, rng: { ...rngState, [stream]: rng.state } };
 }
 
-export const useRunRng = useStoredRng;
 
 // 시드는 8자리 16진수 대문자로 보여준다. 예: 3FA2C910
 export function formatSeed(seed: number): string {

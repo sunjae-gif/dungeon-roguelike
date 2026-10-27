@@ -1,12 +1,11 @@
 // F005 아이템과 빌드: 바닥 소모품, 몬스터 드롭, 보물상자와 빌드 아이템 고르기
-import { withLoot } from './loot';
 import { itemDef, itemName, themeForFloor } from '../data/query';
 import type { GameData, ItemDef } from '../data/types';
 import type { Point } from './dungeon';
 import { getStat, immunitiesOf, statusImmunity } from './effects';
-
 import { applyEffect, fireEvent } from './events';
 import { dropItem } from './floorItems';
+import { withLoot } from './loot';
 import { addMessage, MESSAGES } from './messages';
 import { monsterAt, objectAt } from './movement';
 import { chance, floorRng, nextInt, pickWeighted } from './rng';

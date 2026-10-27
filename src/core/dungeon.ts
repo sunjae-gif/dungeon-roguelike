@@ -1,11 +1,11 @@
 // F001 던전 생성 (기본 지형): 방과 통로, 시작 지점, 계단 또는 보스방
 import { themeForFloor } from '../data/query';
 import type { GameData, ThemeDef } from '../data/types';
-import { floorRng, nextInt, pick, type Rng } from './rng';
 import { centerOf, corridorPath, lShape, nearest, type Rect } from './corridors';
+import { floorRng, nextInt, pick, type Rng } from './rng';
 import { assignRoomTypes, SECRET_ROOM_TYPE } from './roomTypes';
 import { carveSecretEntrances } from './secretRooms';
-import { tileIndex, type FloorState, type MapObject } from './state';
+import { type FloorState, type MapObject, tileIndex } from './state';
 
 export interface Point {
   x: number;

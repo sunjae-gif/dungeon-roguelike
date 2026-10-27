@@ -2,7 +2,7 @@
 import { monsterDef } from '../data/query';
 import type { GameData } from '../data/types';
 import { dropItem } from './floorItems';
-import { chance, hashSeed, useStoredRng, type Rng } from './rng';
+import { chance, hashSeed, type Rng, useStoredRng } from './rng';
 import type { Actor, RunState } from './state';
 
 // loot 흐름은 층 안에서 RunState.rng.loot에 이어 쓴다 (rng.md)

@@ -6,7 +6,7 @@ import { cameraFor } from './camera';
 import { fontCss } from './font';
 import type { Box, Layout } from './layout';
 import type { SpriteBook } from './sprites';
-import { bossBar, floorIntroLines, itemChoiceLines, objectSprite, telegraphTiles, victoryLines, drawableItems, drawableMonsters, gameOverLines, messageLines, statusLines, tileShade, type TextLine } from './view';
+import { bossBar, drawableItems, drawableMonsters, floorIntroLines, gameOverLines, itemChoiceLines, messageLines, objectSprite, statusLines, telegraphTiles, type TextLine, tileShade, victoryLines } from './view';
 
 export interface RenderContext {
   ctx: CanvasRenderingContext2D;

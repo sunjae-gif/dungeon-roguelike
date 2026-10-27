@@ -1,18 +1,15 @@
 // F004·F014 몬스터 행동 방식. 무작위 요소 없음
-import { updateActor } from './actors';
 import type { GameData, MonsterDef } from '../data/types';
+import { updateActor } from './actors';
 import { attack, type AttackOptions } from './combat';
-
+import { isClosedDoor, openDoor } from './doors';
 import type { Point } from './dungeon';
 import { getStat } from './effects';
-
-import { isClosedDoor, openDoor } from './doors';
-import { isPuzzleTile } from './puzzles';
 import { fireEvent } from './events';
-import { DIRECTIONS, canSee, inBounds, isPassable, manhattanDistance, monsterAt, objectAt, stepFrom } from './movement';
-import { tileIndex, type Actor, type Direction, type FloorState, type MonsterAi, type RunState } from './state';
+import { canSee, DIRECTIONS, inBounds, isPassable, manhattanDistance, monsterAt, objectAt, stepFrom } from './movement';
+import { isPuzzleTile } from './puzzles';
+import { type Actor, type Direction, type FloorState, type MonsterAi, type RunState, tileIndex } from './state';
 import { trapAt, triggerTrap } from './traps';
-
 
 // 바닥이고 막힌 물체가 없는 칸. 사격선·강타 범위가 쓴다 (닫힌 문은 막는다)
 export function walkable(floor: FloorState, x: number, y: number): boolean {

@@ -2,7 +2,7 @@
 // 이벤트와 피해 처리는 events.ts
 import { itemDef, monsterDef, statusDef } from '../data/query';
 import type { GameData, Modifier, Trigger } from '../data/types';
-import { PLAYER_DEF_ID, type Actor, type Status } from './state';
+import { type Actor, PLAYER_DEF_ID, type Status } from './state';
 
 // "능력치 목록" 표
 export const STAT_IDS = ['maxHp', 'attack', 'defense', 'attackRange', 'sightRadius'] as const;

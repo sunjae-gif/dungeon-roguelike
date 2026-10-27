@@ -1,7 +1,7 @@
 // F003 전투: 공격 실행과 전투 메시지
-import { findActor } from './actors';
 import { monsterDef, monsterName } from '../data/query';
 import type { GameData } from '../data/types';
+import { findActor } from './actors';
 import { resolveAttack } from './damage';
 import { type AttackInfo } from './events';
 import { addMessage, MESSAGES } from './messages';

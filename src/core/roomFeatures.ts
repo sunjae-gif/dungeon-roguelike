@@ -1,12 +1,11 @@
 // F009 방 종류별 물체: 보물상자방·비밀방의 상자, 샘방의 샘, 숨은 벽 찾기
 import type { GameData } from '../data/types';
-import { HIDDEN_WALL_OBJECT_TYPE } from './secretRooms';
 import { getStat } from './effects';
-
 import { CHEST_OBJECT_TYPE } from './items';
 import { addMessage, MESSAGES } from './messages';
 import { SECRET_ROOM_TYPE, SPRING_ROOM_TYPE, TREASURE_ROOM_TYPE } from './roomTypes';
 import { centerSpot } from './rooms';
+import { HIDDEN_WALL_OBJECT_TYPE } from './secretRooms';
 import type { FloorState, ItemChoice, MapObject, RunState } from './state';
 
 export const SPRING_OBJECT_TYPE = 'spring';

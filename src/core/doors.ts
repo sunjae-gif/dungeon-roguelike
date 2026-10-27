@@ -1,12 +1,12 @@
 // F010 문: 배치, 열기
-import { findActor } from './actors';
 import { monsterName, themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
+import { findActor } from './actors';
 import { addMessage, josa, MESSAGES } from './messages';
 import { objectAt } from './movement';
 import { chance, type Rng } from './rng';
 import { inRoom, outsideEntrances, pointKey } from './rooms';
-import { tileIndex, type FloorState, type MapObject, type RunState } from './state';
+import { type FloorState, type MapObject, type RunState, tileIndex } from './state';
 
 export const DOOR_OBJECT_TYPE = 'door';
 // 규칙 1: 보스방(봉인이 대신함), 비밀방(숨은 벽이 대신함) 입구에는 문을 두지 않는다

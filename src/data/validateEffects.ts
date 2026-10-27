@@ -1,7 +1,6 @@
 // 효과 형식 검사 (30-systems/effects.md 3절 확률 규칙, 6절 데이터 형식)
 // 아이템·몬스터 특성·일시 효과가 같이 쓴다.
-import { EFFECT_EVENTS, EFFECT_FIELDS, EFFECT_TARGETS, EFFECT_TYPES, EVENT_NAMES, MODIFIER_OPS, STAT_IDS, type EffectType } from '../core/effects';
-
+import { EFFECT_EVENTS, EFFECT_FIELDS, EFFECT_TARGETS, EFFECT_TYPES, type EffectType, EVENT_NAMES, MODIFIER_OPS, STAT_IDS } from '../core/effects';
 import type { Checker, Obj } from './check';
 
 export interface EffectRefs {

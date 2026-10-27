@@ -3,14 +3,13 @@
 // events ↔ damage ↔ traps는 서로를 부른다. 효과가 피해를 주고(damage), 피해가 이벤트를 일으키고(onDamaged),
 // 밀쳐내기가 함정을 밟게 하고(traps), 함정 효과가 다시 효과를 실행하는 규칙 자체의 재귀라서 의도한 순환이다.
 // 깊이는 MAX_EVENT_DEPTH로 막는다. 이 셋 밖의 모듈은 이 순환에 끼지 않게 한다.
-import { actorName, findActor, updateActor } from './actors';
 import { itemName, monsterName } from '../data/query';
 import type { EffectDef, GameData } from '../data/types';
-import { clampHp, getStat, immunitiesOf, sourcesOf, statusImmunity, type EventName } from './effects';
-
+import { actorName, findActor, updateActor } from './actors';
+import { applyDamage, type DamageSource, knockback } from './damage';
+import { clampHp, type EventName, getStat, immunitiesOf, sourcesOf, statusImmunity } from './effects';
 import { addMessage, MESSAGES } from './messages';
-import { applyDamage, knockback, type DamageSource } from './damage';
-import { chance, useRunRng } from './rng';
+import { chance, useStoredRng } from './rng';
 import type { Actor, RunState, Status } from './state';
 
 // 3절 처리 규칙 3: 효과가 일으킨 이벤트가 이어지는 깊이 상한
@@ -61,7 +60,7 @@ export function fireEvent(
       if (!findActor(current.state, ownerId)) return current; // 앞 효과로 쓰러졌다
       // 3절 규칙 5: chance가 1이 아니면 combat 흐름
       if (trigger.chance < 1) {
-        const roll = useRunRng(current.state.rng, 'combat', (rng) => chance(rng, trigger.chance));
+        const roll = useStoredRng(current.state.rng, 'combat', (rng) => chance(rng, trigger.chance));
         current = { ...current, state: { ...current.state, rng: roll.rng } };
         if (!roll.value) continue;
       }

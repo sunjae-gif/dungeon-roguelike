@@ -1,6 +1,6 @@
 // F014 몬스터 다양화
 import { describe, expect, it } from 'vitest';
-import { firstStep } from '../src/core/monsters';
+import { firstStep } from '../src/core/ai';
 import { applyDamage, resolveAttack } from '../src/core/damage';
 import { generateFloor } from '../src/core/dungeon';
 import { getStat } from '../src/core/effects';

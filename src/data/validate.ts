@@ -1,10 +1,9 @@
 // 20-data/ 전체 검사. 40-tech/tech-stack.md "데이터 검사"
 import { STAT_IDS, TRAP_EVENT } from '../core/effects';
-
 import { Checker, idsOf, type Obj } from './check';
+import type { GameData, RawData } from './types';
 import { checkEffects, checkImmunities, checkModifiers, checkTriggers, type EffectRefs } from './validateEffects';
 import { checkDungeon, checkFloorCoverage, checkPuzzles, checkRoomTypes, checkThemes } from './validateWorld';
-import type { GameData, RawData } from './types';
 
 export type ValidationResult = { ok: true; data: GameData } | { ok: false; errors: string[] };
 

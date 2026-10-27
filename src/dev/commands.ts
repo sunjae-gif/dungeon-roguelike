@@ -1,9 +1,9 @@
 // F012 개발자 모드 명령. 화면(devMode.ts)과 나눠서 테스트할 수 있게 한다.
 // 바뀐 상태도 game-state.md 구조를 그대로 따른다.
-import { itemDef } from '../data/query';
 import { addBuildItem } from '../core/items';
 import { createRun, enterFloor } from '../core/run';
-import { STATE_VERSION, type RunState } from '../core/state';
+import { type RunState, STATE_VERSION } from '../core/state';
+import { itemDef } from '../data/query';
 import type { GameData } from '../data/types';
 
 export type DevResult = { ok: true; state: RunState; note: string } | { ok: false; error: string };

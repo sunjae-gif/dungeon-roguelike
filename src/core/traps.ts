@@ -1,14 +1,14 @@
 // F010 함정: 배치, 발동
-import { findActor } from './actors';
 import { monsterName, themeForFloor, trapDef } from '../data/query';
 import type { GameData } from '../data/types';
+import { findActor } from './actors';
 import type { Point } from './dungeon';
 import { applyEffect, fireEvent } from './events';
 import { addMessage, josa, MESSAGES } from './messages';
 import { objectAt } from './movement';
 import { nextInt, pick, type Rng } from './rng';
 import { AROUND, inRoom, pointKey, roomEntrances, roomTiles } from './rooms';
-import { tileIndex, type FloorState, type MapObject, type Room, type RunState } from './state';
+import { type FloorState, type MapObject, type Room, type RunState, tileIndex } from './state';
 
 export const TRAP_OBJECT_TYPE = 'trap';
 // 규칙 8: 함정을 놓지 않는 방

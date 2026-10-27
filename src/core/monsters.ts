@@ -1,19 +1,16 @@
 // F004·F014 몬스터: 배치, 차례, 발견 메시지, 도망친 몬스터 사라짐
-import { findActor } from './actors';
 import { monsterDef, monsterName, themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
+import { findActor } from './actors';
 import { actAmbush, actChase, actFlee, actRanged } from './ai';
 import { actBoss } from './boss';
 import type { Point } from './dungeon';
 import { baseStat } from './effects';
-
 import { addMessage, MESSAGES } from './messages';
 import { monsterAt, objectAt } from './movement';
 import { floorRng, nextInt, pickWeighted } from './rng';
 import { AROUND, inRoom, pointKey, roomEntrances } from './rooms';
-import { tileIndex, type Actor, type FloorState, type MonsterAi, type Room, type RunState } from './state';
-
-export { firstStep } from './ai';
+import { type Actor, type FloorState, type MonsterAi, type Room, type RunState, tileIndex } from './state';
 
 // F004 규칙 3: 몬스터를 놓지 않는 방 (비밀방은 F009에서 생긴다)
 const NO_MONSTER_ROOMS = ['start', 'stairs', 'boss', 'secret'];

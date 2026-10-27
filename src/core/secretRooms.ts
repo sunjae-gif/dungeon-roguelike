@@ -2,9 +2,9 @@
 import { centerOf, corridorPath, nearest, type Rect } from './corridors';
 import type { Point } from './dungeon';
 import { nextInt, type Rng } from './rng';
-import { inRoom } from './rooms';
 import { NORMAL_ROOM_TYPE, SECRET_ROOM_TYPE } from './roomTypes';
-import { tileIndex, type FloorState } from './state';
+import { inRoom } from './rooms';
+import { type FloorState, tileIndex } from './state';
 
 export const HIDDEN_WALL_OBJECT_TYPE = 'hiddenWall';
 

@@ -1,7 +1,7 @@
 // 바닥 아이템 놓기 (game-state.md: 한 칸에 최대 1개, 물체가 있는 칸에는 놓지 않는다)
 import type { Point } from './dungeon';
 import { inBounds, objectAt } from './movement';
-import { tileIndex, type RunState } from './state';
+import { type RunState, tileIndex } from './state';
 
 // 아이템을 놓을 수 있는 가장 가까운 바닥 칸 (4방향 거리가 가까운 순, 같으면 위쪽·왼쪽 먼저)
 export function nearestFreeFloor(state: RunState, from: Point): Point | null {

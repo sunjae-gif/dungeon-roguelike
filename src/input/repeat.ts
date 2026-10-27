@@ -1,9 +1,9 @@
 // F002 키를 누르고 있을 때: 정해진 간격마다 같은 입력을 다시 넣는다. 규칙 코드는 반복 여부를 모른다.
 import { isClosedDoor } from '../core/doors';
 import { DIRECTION_DELTAS, objectAt } from '../core/movement';
-import { tileIndex, type RunState } from '../core/state';
-import type { PlayerInput } from '../core/turn';
+import { type RunState, tileIndex } from '../core/state';
 import { trapAt } from '../core/traps';
+import type { PlayerInput } from '../core/turn';
 
 interface Timers {
   setInterval(fn: () => void, ms: number): unknown;

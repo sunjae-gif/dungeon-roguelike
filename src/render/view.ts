@@ -1,13 +1,12 @@
 // F007 무엇을 그릴지 정하는 순수 함수들. 캔버스를 쓰지 않아 테스트할 수 있다.
 import { causeName } from '../core/actors';
-import { tileIndex, type Actor, type FloorState, type MapObject, type RunState } from '../core/state';
-import { MESSAGES } from '../core/messages';
 import { DOOR_OBJECT_TYPE } from '../core/doors';
-import { HIDDEN_WALL_OBJECT_TYPE } from '../core/secretRooms';
 import { getStat } from '../core/effects';
-
-import { TRAP_OBJECT_TYPE } from '../core/traps';
+import { MESSAGES } from '../core/messages';
 import { formatSeed } from '../core/rng';
+import { HIDDEN_WALL_OBJECT_TYPE } from '../core/secretRooms';
+import { type Actor, type FloorState, type MapObject, type RunState, tileIndex } from '../core/state';
+import { TRAP_OBJECT_TYPE } from '../core/traps';
 import { bossDef, isThemeStart, itemDef, itemName, monsterDef, statusDef, themeForFloor, trapDef } from '../data/query';
 import type { GameData } from '../data/types';
 

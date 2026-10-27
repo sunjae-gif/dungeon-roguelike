@@ -1,13 +1,13 @@
 // F009 퍼즐방: 판 찍기, 무너지는 발판, 돌 밀기, 되돌림 레버
 import type { GameData, PuzzleDef } from '../data/types';
-import { CHEST_OBJECT_TYPE } from './items';
 import type { Point } from './dungeon';
+import { CHEST_OBJECT_TYPE } from './items';
 import { addMessage, MESSAGES } from './messages';
 import { DIRECTION_DELTAS, inBounds, isPassable, monsterAt, objectAt } from './movement';
 import { nextInt, type Rng } from './rng';
-import { AROUND, inRoom, pointKey, roomEntrances } from './rooms';
 import { NORMAL_ROOM_TYPE, PUZZLE_ROOM_TYPE } from './roomTypes';
-import { tileIndex, type Direction, type FloorState, type MapObject, type Room, type RunState } from './state';
+import { AROUND, inRoom, pointKey, roomEntrances } from './rooms';
+import { type Direction, type FloorState, type MapObject, type Room, type RunState, tileIndex } from './state';
 
 export const PLATE_OBJECT_TYPE = 'plate';
 export const BOULDER_OBJECT_TYPE = 'boulder';

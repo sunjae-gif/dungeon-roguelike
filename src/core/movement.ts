@@ -1,6 +1,6 @@
 // F002 이동과 시야
 import type { Point } from './dungeon';
-import { tileIndex, type Direction, type FloorState, type RunState } from './state';
+import { type Direction, type FloorState, type RunState, tileIndex } from './state';
 
 // F002 좌표: x는 오른쪽, y는 아래쪽으로 커진다
 export const DIRECTION_DELTAS: Record<Direction, Point> = {

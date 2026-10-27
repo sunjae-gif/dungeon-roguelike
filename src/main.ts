@@ -1,15 +1,15 @@
 // 진입점. 데이터 검사 → 화면과 입력 연결.
-import { transition, createTitleState, type FlowEvent } from './core/flow';
+import { createTitleState, type FlowEvent, transition } from './core/flow';
 import type { RunState } from './core/state';
-import { playTurn, type PlayerInput } from './core/turn';
+import { type PlayerInput, playTurn } from './core/turn';
 import { loadGameData } from './data/load';
 import type { GameData } from './data/types';
 import type { DevMode } from './dev/devMode';
-import { keyToCommand, type Command } from './input/keys';
+import { type Command, keyToCommand } from './input/keys';
 import { blocksRepeatedStep, KeyRepeater, shouldStopRepeat } from './input/repeat';
 import { loadFont } from './render/font';
 import { computeLayout } from './render/layout';
-import { renderScreen, type RenderContext } from './render/screen';
+import { type RenderContext, renderScreen } from './render/screen';
 import { browserImageLoader, SpriteBook } from './render/sprites';
 
 // 판 시드를 새로 뽑는 유일한 곳 (30-systems/rng.md 규칙 3)

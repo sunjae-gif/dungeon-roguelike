@@ -1,21 +1,20 @@
 // 새 판과 새 층의 상태를 만든다. 30-systems/game-state.md
 import { isThemeStart, themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
-import { generateFloor } from './dungeon';
-import { getStat } from './effects';
-
-import { fireEvent } from './events';
 import { placeBoss } from './boss';
 import { placeDoors } from './doors';
-import { floorRng, initRunRng } from './rng';
-import { placeTraps } from './traps';
+import { generateFloor } from './dungeon';
+import { getStat } from './effects';
+import { fireEvent } from './events';
 import { placeFloorItems } from './items';
-import { placePuzzles } from './puzzles';
-import { placeRoomFeatures } from './roomFeatures';
 import { addMessage, MESSAGES } from './messages';
 import { noticeMonsters, spawnMonsters } from './monsters';
 import { updateSight } from './movement';
-import { PLAYER_DEF_ID, STATE_VERSION, type Actor, type Phase, type RunState } from './state';
+import { placePuzzles } from './puzzles';
+import { floorRng, initRunRng } from './rng';
+import { placeRoomFeatures } from './roomFeatures';
+import { type Actor, type Phase, PLAYER_DEF_ID, type RunState, STATE_VERSION } from './state';
+import { placeTraps } from './traps';
 
 export function createPlayer(data: GameData, id: number): Actor {
   return {
