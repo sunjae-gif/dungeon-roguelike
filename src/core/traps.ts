@@ -1,5 +1,5 @@
 // F010 함정: 배치, 발동
-import { themeForFloor } from '../data/query';
+import { monsterName, themeForFloor, trapDef } from '../data/query';
 import type { GameData } from '../data/types';
 import type { Point } from './dungeon';
 import { applyEffect, fireEvent, findActor } from './events';
@@ -77,14 +77,14 @@ export function triggerTrap(state: RunState, data: GameData, actorId: number): R
   const actor = findActor(state, actorId);
   if (!actor) return state;
   const trap = trapAt(state.floor, actor.x, actor.y);
-  const def = data.traps.find((t) => t.id === trap?.defId);
+  const def = trapDef(data, trap?.defId);
   if (!trap || !def) return state;
   let next = state;
   // 규칙 14: 플레이어면 항상, 몬스터면 플레이어 시야 안일 때만
   const trapName = josa(def.name, '을', '를');
   if (actorId === state.player.id) next = addMessage(next, MESSAGES.steppedOnTrap(trapName), data);
   else if (state.floor.visible[tileIndex(state.floor, actor.x, actor.y)]) {
-    const name = data.monsters.find((m) => m.id === actor.defId)?.name ?? '';
+    const name = monsterName(data, actor.defId);
     next = addMessage(next, MESSAGES.monsterSteppedOnTrap(josa(name, '이', '가'), trapName), data);
   }
   // 규칙 12: once 함정은 사라진다

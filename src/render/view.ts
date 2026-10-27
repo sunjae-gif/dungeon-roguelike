@@ -2,13 +2,13 @@
 import { tileIndex, type Actor, type FloorState, type MapObject, type RunState } from '../core/state';
 import { causeName } from '../core/events';
 import { MESSAGES } from '../core/messages';
-import { statusDef } from '../core/effects';
 import { DOOR_OBJECT_TYPE } from '../core/doors';
 import { HIDDEN_WALL_OBJECT_TYPE } from '../core/dungeon';
 import { getStat } from '../core/effects';
+
 import { TRAP_OBJECT_TYPE } from '../core/traps';
 import { formatSeed } from '../core/rng';
-import { isThemeStart, themeForFloor } from '../data/query';
+import { bossDef, isThemeStart, itemDef, itemName, monsterDef, statusDef, themeForFloor, trapDef } from '../data/query';
 import type { GameData } from '../data/types';
 
 export type TileShade = 'visible' | 'explored' | 'unexplored';
@@ -38,7 +38,6 @@ export interface TextLine {
 export function statusLines(state: RunState, data: GameData): TextLine[] {
   const { colors, lowHpRatio } = data.ui;
   const text = (t: string): TextLine => ({ text: t, color: colors.text });
-  const itemName = (id: string) => data.items.find((it) => it.id === id)?.name ?? id;
   const { hp } = state.player;
   const [maxHp, attack, defense] = (['maxHp', 'attack', 'defense'] as const).map((s) => getStat(state.player, s, data));
   const theme = themeForFloor(data, state.floorNumber);
@@ -49,13 +48,13 @@ export function statusLines(state: RunState, data: GameData): TextLine[] {
     text(`방어 ${defense}`),
     text(''),
     text('소모품'),
-    ...state.player.consumables.map((id, i) => text(`${i + 1}. ${itemName(id)}`)),
+    ...state.player.consumables.map((id, i) => text(`${i + 1}. ${itemName(data, id)}`)),
     text(''),
     // F014 화면: 걸린 일시 효과 (빌드 아이템 목록 위)
     ...state.player.statuses.map((s) => text(`${statusDef(data, s.id)?.name ?? s.id} (${s.turnsLeft}턴)`)),
     ...(state.player.statuses.length > 0 ? [text('')] : []),
     text('빌드 아이템'),
-    ...state.player.buildItems.map((id) => text(`- ${itemName(id)}`)),
+    ...state.player.buildItems.map((id) => text(`- ${itemName(data, id)}`)),
   ];
   return lines;
 }
@@ -83,13 +82,13 @@ export function gameOverLines(state: RunState, data: GameData): string[] {
 
 // F008 규칙 16: 클리어 화면
 export function victoryLines(state: RunState, data: GameData): string[] {
-  const boss = data.monsters.find((m) => m.isBoss);
+  const boss = bossDef(data);
   return [MESSAGES.bossDefeated(boss?.name ?? ''), ...resultLines(state, data)];
 }
 
 // F006 결과 정보 + F008 규칙 16, 17: 이번 판의 빌드 아이템(얻은 순서)
 function resultLines(state: RunState, data: GameData): string[] {
-  const names = state.player.buildItems.map((id) => data.items.find((it) => it.id === id)?.name ?? id);
+  const names = state.player.buildItems.map((id) => itemName(data, id));
   return [
     '',
     `도달한 층  ${state.runStats.floorsReached}층`,
@@ -118,7 +117,7 @@ export function telegraphTiles(state: RunState): { x: number; y: number }[] {
 
 // F008 규칙 14: 시야에 있는 보스의 HP
 export function bossBar(state: RunState, data: GameData): { name: string; hp: number; maxHp: number } | null {
-  const boss = drawableMonsters(state).find((a) => data.monsters.find((m) => m.id === a.defId)?.isBoss);
+  const boss = drawableMonsters(state).find((a) => monsterDef(data, a.defId)?.isBoss);
   if (!boss) return null;
   return { name: causeName(data, boss.defId), hp: Math.max(0, boss.hp), maxHp: getStat(boss, 'maxHp', data) };
 }
@@ -136,7 +135,7 @@ export function objectSprite(obj: MapObject, data: GameData, floorNumber: number
     const { tiles } = themeForFloor(data, floorNumber);
     return obj.state.open ? tiles.doorOpen : tiles.door;
   }
-  if (obj.type === TRAP_OBJECT_TYPE) return data.traps.find((t) => t.id === obj.defId)?.sprite ?? obj.type;
+  if (obj.type === TRAP_OBJECT_TYPE) return trapDef(data, obj.defId)?.sprite ?? obj.type;
   // F009 규칙 11, 12: 숨은 벽은 찾기 전에는 벽, 찾은 뒤에는 통로(바닥)
   if (obj.type === HIDDEN_WALL_OBJECT_TYPE) {
     const { tiles } = themeForFloor(data, floorNumber);
@@ -160,7 +159,7 @@ export function itemChoiceLines(state: RunState, data: GameData): TextLine[] {
     { text: '빌드 아이템을 하나 고른다 (숫자키)', color: colors.text },
     { text: '', color: colors.text },
     ...options.map((id, i) => {
-      const def = data.items.find((it) => it.id === id);
+      const def = itemDef(data, id);
       const rarity = def?.rarity ?? 'common';
       return {
         text: `${i + 1}. ${def?.name ?? id} (${RARITY_LABEL[rarity] ?? rarity}) — ${def?.description ?? ''}`,

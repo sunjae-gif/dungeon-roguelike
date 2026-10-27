@@ -1,9 +1,10 @@
 // F008 최종보스: 배치, 보스방 경고·봉인, 행동 패턴. 무작위 요소 없음
-import { themeForFloor } from '../data/query';
+import { monsterName, themeForFloor } from '../data/query';
 import type { GameData, MonsterDef } from '../data/types';
 import { firstStep, isAdjacent, moveOrWait, seesPlayer, stepFrom, strike, walkable } from './ai';
 import type { Point } from './dungeon';
 import { baseStat, getStat } from './effects';
+
 import { updateActor } from './events';
 import { addMessage, MESSAGES } from './messages';
 import { monsterAt, objectAt } from './movement';
@@ -22,7 +23,7 @@ export function bossRoomAt(floor: FloorState, p: Point): Room | undefined {
 
 function bossName(data: GameData, floorNumber: number): string {
   const id = themeForFloor(data, floorNumber).boss;
-  return data.monsters.find((m) => m.id === id)?.name ?? id ?? '';
+  return id ? monsterName(data, id) : '';
 }
 
 // 규칙 1, 2: 테마의 boss를 보스방 가운데에 가장 가까운 빈 바닥 칸에 1마리

@@ -1,6 +1,8 @@
 // 30-systems/effects.md 4. 공격과 피해 처리 순서, 6절 knockback·steal의 떨어뜨리기
+import { monsterDef } from '../data/query';
 import type { GameData } from '../data/types';
 import { getStat } from './effects';
+
 import { causeName, fireEvent, findActor, updateActor, type AttackInfo } from './events';
 import { addMessage, MESSAGES } from './messages';
 import { dropItem } from './floorItems';
@@ -122,7 +124,7 @@ function removeMonster(state: RunState, data: GameData, id: number): RunState {
   const monster = state.floor.actors.find((a) => a.id === id);
   if (!monster) return state;
   let next: RunState = { ...state, floor: { ...state.floor, actors: state.floor.actors.filter((a) => a.id !== id) } };
-  if (data.monsters.find((m) => m.id === monster.defId)?.isBoss) {
+  if (monsterDef(data, monster.defId)?.isBoss) {
     next = { ...next, runStats: { ...next.runStats, bossKilled: true } };
   }
   // effects.md 6절 steal 규칙 5: 훔친 물건을 떨어뜨린다

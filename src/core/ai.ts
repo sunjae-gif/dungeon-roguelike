@@ -1,8 +1,10 @@
 // F004·F014 몬스터 행동 방식. 무작위 요소 없음
 import type { GameData, MonsterDef } from '../data/types';
 import { attack, type AttackOptions } from './combat';
+
 import type { Point } from './dungeon';
 import { getStat } from './effects';
+
 import { isClosedDoor, openDoor } from './doors';
 import { isPuzzleTile } from './puzzles';
 import { fireEvent, updateActor } from './events';

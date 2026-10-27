@@ -1,10 +1,11 @@
 // F004·F014 몬스터: 배치, 차례, 발견 메시지, 도망친 몬스터 사라짐
-import { themeForFloor } from '../data/query';
+import { monsterDef, monsterName, themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
 import { actAmbush, actChase, actFlee, actRanged } from './ai';
 import { actBoss } from './boss';
 import type { Point } from './dungeon';
 import { baseStat } from './effects';
+
 import { findActor } from './events';
 import { addMessage, MESSAGES } from './messages';
 import { monsterAt, objectAt } from './movement';
@@ -62,7 +63,7 @@ export function spawnMonsters(
   // F004 규칙 6: 자리가 모자라면 놓을 수 있는 만큼만
   for (let i = 0; i < count && free.length > 0 && weights.length > 0; i++) {
     const defId = pickWeighted(rng, weights);
-    const def = data.monsters.find((m) => m.id === defId);
+    const def = monsterDef(data, defId);
     const preferred = def?.placement === 'chokepoint' ? free.filter((p) => chokepoints.has(pointKey(p))) : [];
     const pool = preferred.length > 0 ? preferred : free;
     const spot = pool[nextInt(rng, 0, pool.length - 1)];
@@ -85,7 +86,7 @@ export function spawnMonsters(
 
 // 몬스터 한 마리의 차례. behavior별로 (F004, F014, F008)
 function actMonster(state: RunState, data: GameData, monster: Actor): RunState {
-  const def = data.monsters.find((m) => m.id === monster.defId);
+  const def = monsterDef(data, monster.defId);
   if (!def) return state;
   const ai: MonsterAi = { ...monster.ai };
   switch (def.behavior) {
@@ -115,7 +116,6 @@ export function actMonsters(state: RunState, data: GameData): RunState {
   return next;
 }
 
-const nameOf = (data: GameData, defId: string) => data.monsters.find((m) => m.id === defId)?.name ?? defId;
 const isVisible = (floor: FloorState, a: Actor) => floor.visible[tileIndex(floor, a.x, a.y)];
 
 // F014 공통 규칙 3: 플레이어 시야에 처음 들어온 몬스터마다 한 번 "{이름}이(가) 보인다."
@@ -124,8 +124,8 @@ export function noticeMonsters(state: RunState, data: GameData): RunState {
   for (const m of [...state.floor.actors].sort((a, b) => a.id - b.id)) {
     if (m.ai?.noticed || !isVisible(state.floor, m)) continue;
     // F008: noticeMessage가 있으면 그것을 쓴다
-    const custom = data.monsters.find((d) => d.id === m.defId)?.noticeMessage;
-    next = addMessage(next, custom ?? MESSAGES.noticed(nameOf(data, m.defId)), data);
+    const custom = monsterDef(data, m.defId)?.noticeMessage;
+    next = addMessage(next, custom ?? MESSAGES.noticed(monsterName(data, m.defId)), data);
     const actors = next.floor.actors.map((a) => (a.id === m.id ? { ...a, ai: { ...a.ai, noticed: true } } : a));
     next = { ...next, floor: { ...next.floor, actors } };
   }
@@ -136,7 +136,7 @@ export function noticeMonsters(state: RunState, data: GameData): RunState {
 export function vanishFleeing(state: RunState, data: GameData): RunState {
   let next = state;
   for (const m of state.floor.actors) {
-    const limit = data.monsters.find((d) => d.id === m.defId)?.vanishWhenUnseen;
+    const limit = monsterDef(data, m.defId)?.vanishWhenUnseen;
     if (!m.ai?.fleeing || limit === undefined) continue;
     const unseenTurns = isVisible(state.floor, m) ? 0 : (m.ai.unseenTurns ?? 0) + 1;
     if (unseenTurns < limit) {
@@ -145,7 +145,7 @@ export function vanishFleeing(state: RunState, data: GameData): RunState {
       continue;
     }
     // 갖고 있던 carried도 함께 사라진다
-    const name = nameOf(data, m.defId);
+    const name = monsterName(data, m.defId);
     next = { ...next, floor: { ...next.floor, actors: next.floor.actors.filter((a) => a.id !== m.id) } };
     next = addMessage(next, (m.carried?.length ?? 0) > 0 ? MESSAGES.fledWith(name) : MESSAGES.fled(name), data);
   }

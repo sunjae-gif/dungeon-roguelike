@@ -1,7 +1,9 @@
 // 30-systems/effects.md 3. 이벤트, 5. 일시 효과, 6. 효과 실행
 // 공격과 피해 처리(4절)는 damage.ts
+import { itemName, monsterDef, monsterName, statusDef, trapDef } from '../data/query';
 import type { EffectDef, GameData } from '../data/types';
-import { clampHp, getStat, immunitiesOf, itemDef, sourcesOf, statusDef, statusImmunity, type EventName } from './effects';
+import { clampHp, getStat, immunitiesOf, sourcesOf, statusImmunity, type EventName } from './effects';
+
 import { addMessage, MESSAGES } from './messages';
 import { applyDamage, knockback, type DamageSource } from './damage';
 import { chance, useRunRng } from './rng';
@@ -144,7 +146,7 @@ function immunityFor(effect: EffectDef): string | undefined {
 
 export function actorName(state: RunState, data: GameData, actor: Actor): string {
   if (actor.id === state.player.id) return MESSAGES.playerName;
-  return data.monsters.find((m) => m.id === actor.defId)?.name ?? actor.defId;
+  return monsterName(data, actor.defId);
 }
 
 // 5절 규칙 1, 2: 일시 효과 걸기. 이미 걸려 있으면 남은 턴을 max로
@@ -176,8 +178,8 @@ function steal(state: RunState, data: GameData, thiefId: number, targetId: numbe
   const itemId = target.consumables[target.consumables.length - 1];
   let next = updateActor(state, { ...target, consumables: target.consumables.slice(0, -1) });
   next = updateActor(next, { ...thief, carried: [...(thief.carried ?? []), itemId], ai: { ...thief.ai, fleeing: true } });
-  const thiefName = data.monsters.find((m) => m.id === thief.defId)?.name ?? thief.defId;
-  return addMessage(next, MESSAGES.stole(thiefName, itemDef(data, itemId)?.name ?? itemId), data);
+  const thiefName = monsterName(data, thief.defId);
+  return addMessage(next, MESSAGES.stole(thiefName, itemName(data, itemId)), data);
 }
 
 // 모든 개체에 같은 이벤트. 플레이어 먼저, 몬스터는 id 순서 (3절 onTurnEnd)
@@ -205,6 +207,6 @@ export function tickStatuses(state: RunState, data: GameData): RunState {
 // 피해 원인 이름: 몬스터, 일시 효과, 함정(F010)
 export function causeName(data: GameData, cause: string): string {
   return (
-    data.monsters.find((m) => m.id === cause)?.name ?? statusDef(data, cause)?.name ?? data.traps.find((t) => t.id === cause)?.name ?? cause
+    monsterDef(data, cause)?.name ?? statusDef(data, cause)?.name ?? trapDef(data, cause)?.name ?? cause
   );
 }

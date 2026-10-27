@@ -1,6 +1,7 @@
 // 30-systems/effects.md 1. 능력치, 2. 효과의 출처, 표들
 // 이벤트와 피해 처리는 events.ts
-import type { GameData, ItemDef, Modifier, StatusDef, Trigger } from '../data/types';
+import { itemDef, monsterDef, statusDef } from '../data/query';
+import type { GameData, Modifier, Trigger } from '../data/types';
 import { PLAYER_DEF_ID, type Actor, type Status } from './state';
 
 // "능력치 목록" 표
@@ -58,18 +59,10 @@ export const EFFECT_TARGETS = ['self', 'other'] as const;
 // "능력치 목록"의 최솟값
 const STAT_MIN: Record<StatId, number> = { maxHp: 1, attack: 0, defense: 0, attackRange: 1, sightRadius: 1 };
 
-export function itemDef(data: GameData, id: string): ItemDef | undefined {
-  return data.items.find((it) => it.id === id);
-}
-
-export function statusDef(data: GameData, id: string): StatusDef | undefined {
-  return data.statuses.find((s) => s.id === id);
-}
-
 // 기본값: 플레이어는 player.json, 몬스터는 monsters.json
 export function baseStat(actor: Actor, stat: StatId, data: GameData): number {
   if (actor.defId === PLAYER_DEF_ID) return data.player[stat];
-  const def = data.monsters.find((m) => m.id === actor.defId);
+  const def = monsterDef(data, actor.defId);
   if (!def) throw new Error(`monsters.json에 없는 몬스터 "${actor.defId}"`);
   // F004 규칙 9: 몬스터는 개별 시야 능력치가 없다. 몬스터 시야는 monsters.json monsterSightRadius 고정값이다.
   if (stat === 'sightRadius') throw new Error('몬스터 시야는 getStat이 아니라 monsters.json monsterSightRadius를 쓴다 (F004 규칙 7)');
@@ -88,7 +81,7 @@ export interface EffectSource {
 // 2절: 개체 정의 → 빌드 아이템(얻은 순서) → 일시 효과(걸린 순서)
 export function sourcesOf(actor: Actor, data: GameData): EffectSource[] {
   const sources: EffectSource[] = [];
-  const def = data.monsters.find((m) => m.id === actor.defId);
+  const def = monsterDef(data, actor.defId);
   if (def) {
     // F008: 보스 2단계 보정은 개체 정의 보정에 더한다
     const enraged = def.boss && actor.ai?.enraged ? def.boss.enrage.modifiers : [];
@@ -107,7 +100,7 @@ export function sourcesOf(actor: Actor, data: GameData): EffectSource[] {
 
 // 7절 면역: 개체 정의와 가진 빌드 아이템의 immunities를 모두 갖는다
 export function immunitiesOf(actor: Actor, data: GameData): string[] {
-  const def = data.monsters.find((m) => m.id === actor.defId);
+  const def = monsterDef(data, actor.defId);
   return [...(def?.immunities ?? []), ...actor.buildItems.flatMap((id) => itemDef(data, id)?.immunities ?? [])];
 }
 

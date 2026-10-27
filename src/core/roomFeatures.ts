@@ -2,6 +2,7 @@
 import type { GameData } from '../data/types';
 import { HIDDEN_WALL_OBJECT_TYPE } from './dungeon';
 import { getStat } from './effects';
+
 import { CHEST_OBJECT_TYPE } from './items';
 import { addMessage, MESSAGES } from './messages';
 import { SECRET_ROOM_TYPE, SPRING_ROOM_TYPE, TREASURE_ROOM_TYPE } from './roomTypes';

@@ -1,5 +1,6 @@
 // 20-data/ 전체 검사. 40-tech/tech-stack.md "데이터 검사"
 import { STAT_IDS, TRAP_EVENT } from '../core/effects';
+
 import { Checker, idsOf, type Obj } from './check';
 import { checkEffects, checkImmunities, checkModifiers, checkTriggers, type EffectRefs } from './validateEffects';
 import type { GameData, RawData } from './types';

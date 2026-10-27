@@ -1,8 +1,9 @@
 // F005 아이템과 빌드: 바닥 소모품, 몬스터 드롭, 보물상자와 빌드 아이템 고르기
-import { themeForFloor } from '../data/query';
+import { itemDef, itemName, monsterDef, themeForFloor } from '../data/query';
 import type { GameData, ItemDef } from '../data/types';
 import type { Point } from './dungeon';
-import { getStat, immunitiesOf, itemDef, statusImmunity } from './effects';
+import { getStat, immunitiesOf, statusImmunity } from './effects';
+
 import { applyEffect, fireEvent } from './events';
 import { dropItem } from './floorItems';
 import { addMessage, MESSAGES } from './messages';
@@ -26,7 +27,6 @@ function withLoot<T>(state: RunState, fn: (rng: Rng) => T): { value: T; state: R
   const used = useStoredRng(rngState, 'loot', fn);
   return { value: used.value, state: { ...state, rng: used.rng } };
 }
-
 
 
 // F005 규칙 5: 바닥 소모품. 테마 itemCount만큼, weight 비율로, 방 안 빈 바닥 칸에 (loot 흐름)
@@ -60,7 +60,7 @@ export function placeFloorItems(
 
 // F005 규칙 6: 보스가 아니면 monsterDrop.chance 확률로 그 칸에 떨어뜨린다
 export function monsterDrop(state: RunState, data: GameData, monster: Actor): RunState {
-  if (data.monsters.find((m) => m.id === monster.defId)?.isBoss) return state;
+  if (monsterDef(data, monster.defId)?.isBoss) return state;
   const { item, chance: p } = data.loot.monsterDrop;
   const roll = withLoot(state, (rng) => chance(rng, p));
   return roll.value ? dropItem(roll.state, item, monster) : roll.state;
@@ -80,7 +80,7 @@ export function pickUp(state: RunState, data: GameData): RunState {
   };
   next = fireEvent(next, data, player.id, 'onPickup', { itemId: item.defId }).state;
   // F005 규칙 3-1
-  return addMessage(next, MESSAGES.pickedUp(itemDef(data, item.defId)?.name ?? item.defId), data);
+  return addMessage(next, MESSAGES.pickedUp(itemName(data, item.defId)), data);
 }
 
 // F005 규칙 2, 4: 소모품을 쓸 수 있는가. HP가 최대일 때 회복 물약은 쓰이지 않는다
@@ -173,5 +173,5 @@ export function chooseItem(state: RunState, data: GameData, index: number): RunS
   let next = addBuildItem({ ...state, pendingChoice: undefined }, data, itemId);
   next = { ...next, runStats: { ...next.runStats, itemsFound: next.runStats.itemsFound + 1 } };
   next = fireEvent(next, data, next.player.id, 'onPickup', { itemId }).state;
-  return addMessage(next, MESSAGES.gotItem(itemDef(data, itemId)?.name ?? itemId), data);
+  return addMessage(next, MESSAGES.gotItem(itemName(data, itemId)), data);
 }

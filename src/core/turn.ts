@@ -3,6 +3,7 @@ import type { GameData } from '../data/types';
 import { transition } from './flow';
 import { bossRoomNeedingWarning, sealBossRooms, warnBossRoom } from './boss';
 import { attack } from './combat';
+
 import { DOOR_OBJECT_TYPE, isClosedDoor, openDoor } from './doors';
 import { discoverHiddenWalls, drinkSpring, SPRING_OBJECT_TYPE, springNotice } from './roomFeatures';
 import { triggerTrap } from './traps';
@@ -10,6 +11,7 @@ import { BOULDER_OBJECT_TYPE, canPushBoulder, checkPuzzles, LEVER_OBJECT_TYPE, l
 import { canUseConsumable, CHEST_OBJECT_TYPE, openChest, pickUp, useConsumable } from './items';
 import { STAIRS_OBJECT_TYPE } from './dungeon';
 import { getStat } from './effects';
+
 import { sweepDeadMonsters } from './damage';
 import { fireEvent, fireForAll, tickStatuses } from './events';
 import { addMessage, MESSAGES } from './messages';

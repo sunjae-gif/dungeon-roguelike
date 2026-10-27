@@ -1,5 +1,5 @@
 // F010 문: 배치, 열기
-import { themeForFloor } from '../data/query';
+import { monsterName, themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
 import { findActor } from './events';
 import { addMessage, josa, MESSAGES } from './messages';
@@ -47,6 +47,6 @@ export function openDoor(state: RunState, data: GameData, actorId: number, doorI
   // 몬스터가 연 문은 플레이어 시야에 있을 때만 알린다
   if (!state.floor.visible[tileIndex(state.floor, door!.x, door!.y)]) return next;
   const monster = findActor(state, actorId);
-  const name = data.monsters.find((m) => m.id === monster?.defId)?.name ?? '';
+  const name = monster ? monsterName(data, monster.defId) : '';
   return addMessage(next, MESSAGES.monsterOpenedDoor(josa(name, '이', '가')), data);
 }

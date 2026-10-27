@@ -1,13 +1,10 @@
 // F003 전투: 공격 실행과 전투 메시지
+import { monsterDef, monsterName } from '../data/query';
 import type { GameData } from '../data/types';
 import { resolveAttack } from './damage';
 import { findActor, type AttackInfo } from './events';
 import { addMessage, MESSAGES } from './messages';
 import type { RunState } from './state';
-
-export function monsterName(data: GameData, defId: string): string {
-  return data.monsters.find((m) => m.id === defId)?.name ?? defId;
-}
 
 // F003 규칙 2~5: 피해 처리(effects.md)를 하고 결과를 메시지 로그에 남긴다
 export interface AttackOptions {
@@ -30,7 +27,7 @@ export function attack(state: RunState, data: GameData, attackerId: number, targ
     next = addMessage(next, MESSAGES.playerHit(name, result.damage), data);
     if (result.killed) next = addMessage(next, MESSAGES.monsterKilled(name), data);
   } else if (targetId === playerId) {
-    const def = data.monsters.find((m) => m.id === attacker.defId);
+    const def = monsterDef(data, attacker.defId);
     const name = monsterName(data, attacker.defId);
     const text = ranged
       ? MESSAGES.monsterShot(name, def?.attackVerb ?? MESSAGES.defaultAttackVerb, result.damage)
