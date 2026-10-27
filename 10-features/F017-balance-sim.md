@@ -2,7 +2,7 @@
 id: F017
 name: 밸런스 시뮬레이터
 serves: [P1, P3, P4]
-status: confirmed
+status: implemented
 depends_on: [F012]
 data: [20-data/balance-targets.json]
 systems: [rng, turn-order]
