@@ -2,7 +2,7 @@
 id: F016
 name: 화면 연출과 다듬기
 serves: [P2, P4, P1]
-status: confirmed
+status: implemented
 depends_on: [F007, F008, F006, F011]
 data: [20-data/ui.json, 20-data/sprites.json]
 systems: [game-flow]
