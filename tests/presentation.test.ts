@@ -2,7 +2,11 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import type { RunState } from '../src/core/state';
+import { playTurn } from '../src/core/turn';
+import { Animator, deriveAnims } from '../src/render/anim';
 import { computeScale } from '../src/render/scale';
+import { stateFromMap } from './parseMap';
 import { gameData } from './helpers';
 
 const data = gameData();
@@ -45,5 +49,98 @@ describe('F016 원칙', () => {
     };
     walk(join(__dirname, '../src/core'));
     for (const f of files) expect(readFileSync(f, 'utf8'), f).not.toMatch(/\banim\b|requestAnimationFrame|performance\.now/);
+  });
+});
+
+describe('F016 움직임 연출', () => {
+  const anim = data.ui.anim;
+  const go = (st: RunState, direction: 'up' | 'down' | 'left' | 'right') => playTurn(st, { type: 'direction', direction }, data);
+  const kinds = (prev: RunState, next: RunState) => deriveAnims(prev, next, anim, 0).map((a) => a.kind).sort();
+
+  it('가장 긴 이동 연출도 키 반복 간격보다 짧다 (키를 누르고 있을 때 느려지지 않는다)', () => {
+    expect(anim.moveMs).toBeLessThan(data.ui.input.keyRepeatIntervalMs);
+    expect(anim.attackBumpMs).toBeLessThanOrEqual(data.ui.input.keyRepeatIntervalMs);
+  });
+
+  it('이동하면 이전 칸에서 미끄러지고, 끝나면 제자리', () => {
+    const s = stateFromMap(`
+      #####
+      #@..#
+      #####`, data);
+    const moved = go(s, 'right');
+    const animator = new Animator();
+    animator.begin(s, moved, anim, 1000);
+    expect(animator.frame(1000).offset(moved.player)).toEqual({ x: -1, y: 0 });
+    expect(animator.frame(1000 + anim.moveMs / 2).offset(moved.player).x).toBeCloseTo(-0.5);
+    expect(animator.frame(1000 + anim.moveMs).offset(moved.player)).toEqual({ x: 0, y: 0 });
+    expect(animator.active(1000 + anim.moveMs)).toBe(false);
+  });
+
+  it('근접 공격: 공격자가 내밀고, 맞은 쪽은 깜빡이고 피해 숫자가 뜬다', () => {
+    const s = stateFromMap(`
+      #####
+      #@o.#
+      #####`, data);
+    const hit = go(s, 'right');
+    const list = deriveAnims(s, hit, anim, 0);
+    expect(list.some((a) => a.kind === 'bump' && a.actorId === s.player.id)).toBe(true);
+    expect(list.some((a) => a.kind === 'flash' && a.actorId === s.floor.actors[0].id)).toBe(true);
+    const orc = s.floor.actors[0];
+    const number = list.find((a) => a.kind === 'number' && !a.heal && a.at.x === orc.x && a.at.y === orc.y);
+    expect(number && number.kind === 'number' && number.value).toBe(data.player.attack - 2);
+  });
+
+  it('원거리 공격은 날아가는 점, 회복은 초록 숫자', () => {
+    const s = stateFromMap(`
+      ########
+      #@..a..#
+      ########`, data);
+    expect(kinds(s, playTurn(s, { type: 'rest' }, data))).toContain('projectile');
+    const hurt = { ...s, player: { ...s.player, hp: 10, consumables: ['potion_heal'] } };
+    const drank = playTurn(hurt, { type: 'useItem', index: 0 }, data);
+    expect(deriveAnims(hurt, drank, anim, 0).some((a) => a.kind === 'number' && a.heal)).toBe(true);
+  });
+
+  it('함정 칸에 들어가면 함정이 번쩍인다', () => {
+    const s = stateFromMap(`
+      #####
+      #@^.#
+      #####`, data);
+    expect(kinds(s, go(s, 'right'))).toContain('trapFlash');
+  });
+
+  it('연출 도중 새 입력이 오면 이전 연출은 바로 끝 상태가 된다', () => {
+    const s = stateFromMap(`
+      ######
+      #@...#
+      ######`, data);
+    const one = go(s, 'right');
+    const two = go(one, 'right');
+    const animator = new Animator();
+    animator.begin(s, one, anim, 0);
+    animator.begin(one, two, anim, 10);
+    // 두 번째 이동만 남는다: 한 칸 뒤(2,1)에서 지금 칸(3,1)으로
+    expect(animator.frame(10).offset(two.player)).toEqual({ x: -1, y: 0 });
+  });
+
+  it('ui.json에서 모든 연출 시간을 0으로 하면 연출이 없다', () => {
+    const zero = Object.fromEntries(Object.keys(anim).map((k) => [k, 0])) as typeof anim;
+    const s = stateFromMap(`
+      #####
+      #@o^#
+      #####`, data);
+    expect(deriveAnims(s, go(s, 'right'), zero, 0)).toEqual([]);
+    const animator = new Animator();
+    animator.begin(s, go(s, 'right'), zero, 0);
+    expect(animator.active(0)).toBe(false);
+  });
+
+  it('층이 바뀌거나 playing이 아니던 상태에서는 연출하지 않는다', () => {
+    const s = stateFromMap(`
+      #####
+      #@..#
+      #####`, data);
+    expect(deriveAnims({ ...s, phase: 'itemChoice' }, go(s, 'right'), anim, 0)).toEqual([]);
+    expect(deriveAnims(s, { ...go(s, 'right'), floorNumber: s.floorNumber + 1 }, anim, 0)).toEqual([]);
   });
 });

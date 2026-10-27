@@ -225,7 +225,7 @@ function checkUi(c: Checker, d: Obj): void {
   group('layout', ['padding', 'statusPanelWidth', 'messageLogLines', 'messageLineHeight']);
   group('fov', ['exploredBrightness'], ['unexploredColor']);
   group('font', ['size'], ['family', 'file', 'fallback']);
-  group('colors', [], ['background', 'text', 'hpNormal', 'hpLow', 'missingSprite', 'rare', 'telegraph', 'bossHp']);
+  group('colors', [], ['background', 'text', 'hpNormal', 'hpLow', 'missingSprite', 'rare', 'telegraph', 'bossHp', 'hitFlash', 'damageNumber', 'healNumber', 'projectile', 'trapFlash']);
   group('input', ['keyRepeatIntervalMs']);
   c.num(d, 'lowHpRatio', p, { min: 0, max: 1 });
   c.num(d, 'floorIntroMs', p, { min: 0 });

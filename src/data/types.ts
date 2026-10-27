@@ -192,7 +192,7 @@ export interface UiData {
   layout: { padding: number; statusPanelWidth: number; messageLogLines: number; messageLineHeight: number };
   fov: { exploredBrightness: number; unexploredColor: string };
   font: { family: string; file: string; size: number; fallback: string };
-  colors: { background: string; text: string; hpNormal: string; hpLow: string; missingSprite: string; rare: string; telegraph: string; bossHp: string };
+  colors: { background: string; text: string; hpNormal: string; hpLow: string; missingSprite: string; rare: string; telegraph: string; bossHp: string; hitFlash: string; damageNumber: string; healNumber: string; projectile: string; trapFlash: string };
   lowHpRatio: number;
   input: { keyRepeatIntervalMs: number };
   floorIntroMs: number;

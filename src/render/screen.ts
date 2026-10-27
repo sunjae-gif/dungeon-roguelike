@@ -4,6 +4,7 @@ import { themeForFloor } from '../data/query';
 import type { GameData } from '../data/types';
 import { cameraFor } from './camera';
 import { fontCss } from './font';
+import type { AnimFrame } from './anim';
 import type { Box, Layout } from './layout';
 import type { SpriteBook } from './sprites';
 import { bossBar, drawableItems, drawableMonsters, floorIntroLines, gameOverLines, itemChoiceLines, messageLines, objectSprite, statusLines, telegraphTiles, type TextLine, tileShade, victoryLines } from './view';
@@ -15,7 +16,13 @@ export interface RenderContext {
   sprites: SpriteBook;
   // 상태창 맨 아래에 붙일 줄 (F012 개발자 모드의 시드 등)
   extraStatus: TextLine[];
+  // F016 연출: 지금 순간의 모습과 시각(밀리초). 없으면 연출 없이 그린다
+  anim?: AnimFrame;
+  now?: number;
 }
+
+// 연출이 없을 때의 모습
+const STILL: AnimFrame = { offset: () => ({ x: 0, y: 0 }), flashing: () => 0, numbers: [], projectiles: [], trapFlashes: [] };
 
 function centerLines(state: RunState, data: GameData): string[] | null {
   switch (state.phase) {
@@ -87,6 +94,14 @@ function drawMap(rc: RenderContext, state: RunState): void {
   const theme = themeForFloor(data, state.floorNumber);
   const cam = cameraFor(floor, player, viewport);
   const toScreen = (x: number, y: number) => ({ x: map.x + (x - cam.x) * tileSize, y: map.y + (y - cam.y) * tileSize });
+  const frame = rc.anim ?? STILL;
+  const { colors, anim } = data.ui;
+  const fillTile = (p: { x: number; y: number }, color: string, alpha: number) => {
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = color;
+    ctx.fillRect(p.x, p.y, tileSize, tileSize);
+    ctx.globalAlpha = 1;
+  };
   const drawSprite = (id: string, x: number, y: number, facing?: typeof player.facing) => {
     const p = toScreen(x, y);
     const s = sprites.get(id, facing);
@@ -127,17 +142,45 @@ function drawMap(rc: RenderContext, state: RunState): void {
       }
     }
   }
-  // F008 규칙 13: 강타할 칸
-  ctx.fillStyle = data.ui.colors.telegraph;
-  for (const t of telegraphTiles(state)) {
-    const p = toScreen(t.x, t.y);
-    ctx.fillRect(p.x, p.y, tileSize, tileSize);
-  }
+  // F008 규칙 13: 강타할 칸. F016: 천천히 깜빡인다 (telegraphPulseMs가 0이면 그대로)
+  const pulse = anim.telegraphPulseMs > 0 && rc.now !== undefined ? PULSE_LOW + (1 - PULSE_LOW) * (0.5 + 0.5 * Math.sin((2 * Math.PI * rc.now) / anim.telegraphPulseMs)) : 1;
+  for (const t of telegraphTiles(state)) fillTile(toScreen(t.x, t.y), colors.telegraph, pulse);
+  // F016: 함정 번쩍임
+  for (const f of frame.trapFlashes) fillTile(toScreen(f.at.x, f.at.y), colors.trapFlash, f.alpha);
   for (const item of drawableItems(state)) drawSprite(item.defId, item.x, item.y);
-  for (const monster of drawableMonsters(state)) drawSprite(monster.defId, monster.x, monster.y, monster.facing);
-  drawSprite(player.defId, player.x, player.y, player.facing);
+  // F016: 개체는 연출 위치에, 맞으면 흰색으로 깜빡인다
+  const drawActor = (a: typeof player) => {
+    const off = frame.offset(a);
+    drawSprite(a.defId, a.x + off.x, a.y + off.y, a.facing);
+    const flash = frame.flashing(a.id);
+    if (flash > 0) fillTile(toScreen(a.x + off.x, a.y + off.y), colors.hitFlash, flash);
+  };
+  for (const monster of drawableMonsters(state)) drawActor(monster);
+  drawActor(player);
+  // F016: 원거리 공격의 날아가는 점, 피해 숫자
+  const dot = tileSize / PROJECTILE_FRACTION;
+  ctx.fillStyle = colors.projectile;
+  for (const p of frame.projectiles) {
+    const s = toScreen(p.x, p.y);
+    ctx.fillRect(s.x + (tileSize - dot) / 2, s.y + (tileSize - dot) / 2, dot, dot);
+  }
+  ctx.textAlign = 'center';
+  for (const n of frame.numbers) {
+    const s = toScreen(n.at.x, n.at.y);
+    const lineHeight = data.ui.layout.messageLineHeight;
+    ctx.globalAlpha = n.alpha;
+    ctx.fillStyle = n.heal ? colors.healNumber : colors.damageNumber;
+    // 겹치면 위로 한 줄씩 비켜 그린다
+    ctx.fillText(String(n.value), s.x + tileSize / 2, s.y - n.rise * tileSize - n.slot * lineHeight);
+    ctx.globalAlpha = 1;
+  }
+  ctx.textAlign = 'left';
   ctx.restore();
 }
+
+// 강타 칸 깜빡임의 가장 옅은 세기, 날아가는 점 크기(칸의 몇 분의 1)
+const PULSE_LOW = 0.35;
+const PROJECTILE_FRACTION = 4;
 
 function drawTextLines(rc: RenderContext, box: Box, lines: TextLine[], fromBottom = false): void {
   const { ctx } = rc;

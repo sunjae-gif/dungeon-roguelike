@@ -7,11 +7,13 @@ import type { GameData } from './data/types';
 import type { DevMode } from './dev/devMode';
 import { type Command, keyToCommand } from './input/keys';
 import { blocksRepeatedStep, KeyRepeater, shouldStopRepeat } from './input/repeat';
+import { Animator } from './render/anim';
 import { loadFont } from './render/font';
 import { computeLayout } from './render/layout';
 import { computeScale } from './render/scale';
 import { type RenderContext, renderScreen } from './render/screen';
 import { browserImageLoader, SpriteBook } from './render/sprites';
+import { telegraphTiles } from './render/view';
 
 // 판 시드를 새로 뽑는 유일한 곳 (30-systems/rng.md 규칙 3)
 function newRunSeed(): number {
@@ -67,9 +69,23 @@ function start(data: GameData): void {
     sprites: new SpriteBook(data.sprites, data.ui.colors.missingSprite, browserImageLoader(baseUrl, () => draw())),
     extraStatus: [],
   };
+  // F016 움직임 연출: 그리는 쪽에만 있다. 연출이나 강타 예고 깜빡임이 있는 동안만 매 프레임 다시 그린다
+  const animator = new Animator();
+  let frameRequested = false;
   const draw = () => {
+    const now = performance.now();
     rc.extraStatus = dev?.statusLines(state) ?? [];
+    rc.anim = animator.frame(now);
+    rc.now = now;
     renderScreen(rc, state);
+    const pulsing = data.ui.anim.telegraphPulseMs > 0 && telegraphTiles(state).length > 0;
+    if ((animator.active(now) || pulsing) && !frameRequested) {
+      frameRequested = true;
+      requestAnimationFrame(() => {
+        frameRequested = false;
+        draw();
+      });
+    }
   };
   loadFont(data.ui, baseUrl, () => draw());
 
@@ -83,6 +99,8 @@ function start(data: GameData): void {
   const play = (input: PlayerInput) => {
     const next = playTurn(state, input, data);
     if (next !== state) {
+      // 새 입력이 오면 진행 중인 연출은 끝 상태로 가고 새 연출이 시작된다 (F016 원칙 2)
+      animator.begin(state, next, data.ui.anim, performance.now());
       state = next;
       onStateChange();
     }

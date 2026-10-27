@@ -26,7 +26,12 @@
     "missingSprite": "#ff00ff",
     "rare": "#7fb8ff",
     "telegraph": "rgba(255, 40, 40, 0.35)",
-    "bossHp": "#c02030"
+    "bossHp": "#c02030",
+    "hitFlash": "#ffffff",
+    "damageNumber": "#ffe060",
+    "healNumber": "#60e070",
+    "projectile": "#f0f0d0",
+    "trapFlash": "#ffffff"
   },
   "lowHpRatio": 0.3,
   "input": {
