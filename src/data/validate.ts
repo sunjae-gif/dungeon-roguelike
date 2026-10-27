@@ -230,4 +230,7 @@ function checkUi(c: Checker, d: Obj): void {
   c.num(d, 'lowHpRatio', p, { min: 0, max: 1 });
   c.num(d, 'floorIntroMs', p, { min: 0 });
   c.num(d, 'messageLogMaxStored', p, { integer: true, min: 1 });
+  group('anim', ['moveMs', 'attackBumpMs', 'hitFlashMs', 'damageNumberMs', 'projectileMs', 'telegraphPulseMs', 'trapFlashMs']);
+  const scaling = c.objField(d, 'scaling', p);
+  if (scaling) c.bool(scaling, 'preferInteger', `${p}.scaling`);
 }

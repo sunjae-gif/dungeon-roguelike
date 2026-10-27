@@ -197,6 +197,17 @@ export interface UiData {
   input: { keyRepeatIntervalMs: number };
   floorIntroMs: number;
   messageLogMaxStored: number;
+  // F016 연출 시간(밀리초)과 확대
+  anim: {
+    moveMs: number;
+    attackBumpMs: number;
+    hitFlashMs: number;
+    damageNumberMs: number;
+    projectileMs: number;
+    telegraphPulseMs: number;
+    trapFlashMs: number;
+  };
+  scaling: { preferInteger: boolean };
 }
 
 export interface GameData {

@@ -9,6 +9,7 @@ import { type Command, keyToCommand } from './input/keys';
 import { blocksRepeatedStep, KeyRepeater, shouldStopRepeat } from './input/repeat';
 import { loadFont } from './render/font';
 import { computeLayout } from './render/layout';
+import { computeScale } from './render/scale';
 import { type RenderContext, renderScreen } from './render/screen';
 import { browserImageLoader, SpriteBook } from './render/sprites';
 
@@ -36,12 +37,23 @@ function showDataErrors(errors: string[]): void {
 }
 
 function start(data: GameData): void {
-  // F007 규칙 1: 캔버스는 기준 해상도로 고정
+  // F007 규칙 1: 캔버스는 기준 해상도로 그린다. F016: 창에 맞춰 CSS로 확대·축소
   const layout = computeLayout(data);
+  const stage = document.createElement('div');
+  stage.id = 'stage';
   const canvas = document.createElement('canvas');
+  canvas.className = 'pixel';
   canvas.width = layout.canvas.width;
   canvas.height = layout.canvas.height;
-  document.body.append(canvas);
+  stage.append(canvas);
+  document.body.append(stage);
+  const fitToWindow = () => {
+    const scale = computeScale({ width: window.innerWidth, height: window.innerHeight }, layout.canvas, data.ui.scaling.preferInteger);
+    stage.style.width = `${layout.canvas.width * scale}px`;
+    stage.style.height = `${layout.canvas.height * scale}px`;
+  };
+  window.addEventListener('resize', fitToWindow);
+  fitToWindow();
 
   let state: RunState = createTitleState(data);
   let dev: DevMode | null = null;

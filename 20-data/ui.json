@@ -1,5 +1,5 @@
 {
-  "_note": "화면 배치와 조작감 수치(F007, F002). 픽셀 단위. 수치는 조정 가능.",
+  "_note": "화면 배치와 조작감 수치(F007, F002), 연출(F016). 픽셀·밀리초 단위. 수치는 조정 가능.",
   "baseResolution": { "width": 1280, "height": 720 },
   "viewportTiles": { "width": 25, "height": 17 },
   "layout": {
@@ -33,5 +33,8 @@
     "keyRepeatIntervalMs": 120
   },
   "floorIntroMs": 1500,
-  "messageLogMaxStored": 100
+  "messageLogMaxStored": 100,
+  "anim": { "moveMs": 80, "attackBumpMs": 100, "hitFlashMs": 80, "damageNumberMs": 500,
+            "projectileMs": 100, "telegraphPulseMs": 600, "trapFlashMs": 150 },
+  "scaling": { "preferInteger": true }
 }

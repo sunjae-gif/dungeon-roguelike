@@ -3,10 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>던전</title>
+    <title>무너진 왕국의 지하</title>
     <style>
-      html, body { margin: 0; height: 100%; background: #000; color: #ddd; overflow: auto; }
-      canvas { display: block; margin: 0 auto; }
+      html, body { margin: 0; height: 100%; background: #000; color: #ddd; overflow: hidden; }
+      /* F016: 게임 화면은 창 가운데, 남는 부분은 검은 여백 */
+      body { display: flex; align-items: center; justify-content: center; }
+      #stage { position: relative; flex: none; }
+      #stage canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+      /* 픽셀아트는 흐리지 않게, 일러스트 층은 매끄럽게 (F016 규칙 7) */
+      #stage canvas.pixel { image-rendering: pixelated; }
+      #stage canvas.smooth { image-rendering: auto; pointer-events: none; }
       #data-errors { padding: 16px; font-family: monospace; white-space: pre-wrap; color: #ff8080; }
     </style>
   </head>
