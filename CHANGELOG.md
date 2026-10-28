@@ -7,6 +7,10 @@
 - [F017] status → implemented. 첫 보고서(봇 500판) 결과를 progress.md에 정리
 - [F017] 밸런스 시뮬레이터 구현: `npm run sim -- --runs N --seed-start S [--out 폴더]`. 봇 규칙 1~9, 결과 JSON·요약 md(sim-results/, git 제외), 목표 밖 ⚠️. 20-data/balance-targets.json 추가(목표치 + maxTurnsPerRun 5000). 봇은 몬스터마다 마지막으로 본 자리를 기억하고, 도망치는 몬스터는 쫓지 않는다. vite의 모듈 실행기로 돌려 새 라이브러리 없음. 배포 빌드에 들어가지 않음을 테스트로 확인
 
+## 2026-10-28 (직접 플레이 피드백)
+- [F019] 글자 타일과 보기 정보 신규: 그림이 없을 때 몬스터는 한글 첫 글자·물체는 기호로 표시, 바닥 점, 마우스 올리면 이름·설명(능력치 숫자 없음), 상태창 "보이는 것" 목록, labels.json, traps.json description, 받침 조사 정리, 피해 숫자 색을 흰색으로. status confirmed
+- [roadmap] M5+ 추가 (M6보다 먼저)
+
 ## 2026-10-27 (M6 기획, 일러스트 미룸)
 - [F018] 공개 준비 신규: 조작 안내(타이틀 한 줄, ? 도움말, 첫 실행 자동 표시), keybindings.json, Cloudflare Pages 배포, 공개 전 확인 목록. status confirmed
 - [art-guide] 일러스트를 작업 순서 맨 뒤로. 픽셀은 콘셉트 글만 보고 그리고, 나중에 일러스트가 픽셀을 참고
